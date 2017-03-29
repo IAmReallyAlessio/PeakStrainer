@@ -9,6 +9,8 @@ import sys
 import os
 import time
 import logging
+from bokeh.charts.stats import bins
+from timeit import itertools
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -73,7 +75,7 @@ def filterScanBy_samples(scans, step_size = 10):
             yield row
 
 '''
-merge peaks 
+merge peaks and coarse grained filtering 
 '''
 def mergePeaksOnFilterline(scans):
     log.info('Merging %d scans' , len(scans))
@@ -94,6 +96,31 @@ def mergePeaksOnFilterline(scans):
         mergedPeaks[filterLine][2].extend(resols)
     
     return mergedPeaks
+
+
+def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionRate = 0.5):
+    log.debug('preliminaryFilter rounding to decimal_places %d, minCount = %d, minRepetitionRate %f',  decimal_places, minCount, minRepetitionRate)
+    masses = peakData[0]
+    log.debug('initial peak count %d',len(masses))
+    
+    bins = dict()
+    for mass in masses:
+        rounded = round(mass, decimal_places)
+        bins[rounded] = bins.get(rounded, 0) + 1
+    
+    log.debug('Prelimianry groups count %d', len(bins))
+    minCount_bin = {bin:count for bin,count in bins.iteritems() if count >+ minCount}
+    log.debug('groups with minCount %d: %d', minCount,len(minCount_bin))
+    minCount_bin_max = float(max(minCount_bin.values()))
+    minRepetitionRate_bin = {bin:count for bin,count in minCount_bin.iteritems() if (count/minCount_bin_max) > minRepetitionRate }
+    log.debug('groups with minRepetitionRate %f: %d', minRepetitionRate,len(minRepetitionRate_bin))
+    
+    preFilterPass = [mass in minRepetitionRate_bin.keys() for mass in masses]
+    
+    compressedPeakData = list(itertools.compress(peakData, preFilterPass))
+
+    return compressedPeakData    
+
 
 '''
 generate bins
@@ -168,7 +195,17 @@ def aggregateBinData(peakData):
     resols = peakData[2]
     bins_low = peakData[3]
     bins_high = peakData[4] 
-    log.debug('generateBins_theoreticalResolution, peak count %d', len(masses))
+    
+    #Note: itertools has many useful functions
+    
+    bins = dict()
+    
+    newRow = 0,0.0,0.0 #  count, sumZmass, sumAbund
+    for mass, abund, resol, bin_low, bin_high in zip(*peakData):
+        bins[(bin_low, bin_high)] = bins.get((bin_low, bin_high), 0) +1
+        
+    
+    print bins
 
 
 if __name__ == '__main__':
@@ -190,6 +227,8 @@ if __name__ == '__main__':
     
     #Note: mergePeaksOnFilterline_withRandom to generate testing data
     filterLines = mergePeaksOnFilterline(scans)
+    
+    preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
     
     ''' create bins for peaks
     #filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
