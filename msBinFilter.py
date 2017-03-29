@@ -49,9 +49,7 @@ if __name__ == '__main__':
         print("A filename must be provided")
         raise SystemExit
     
-    scans = ThermoRawfile2Scans(" ".join(sys.argv[1:]))\
-    
-    #
+    scans = ThermoRawfile2Scans(" ".join(sys.argv[1:]))
     
     log.debug('finish %f',  time.clock())
     
