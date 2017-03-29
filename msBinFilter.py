@@ -98,8 +98,6 @@ def mergePeaksOnFilterline(scans):
 '''
 generate bins
 '''
-
-
 def generateBins_decimalPlaces(peakData, decimal_places = 4):
     log.debug('generateBins_decimalPlaces, decimal_places %d',  decimal_places)
     masses = peakData[0]
@@ -146,8 +144,8 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
     
     select_masses, select_resols = zip(*sort_mass)
     log.debug('Selecting only middle of distribution, as per Kai S.')
-    slack = len(select_masses) / 15
-    popt, pconv = curve_fit(func, select_masses[slack:-slack], select_resols[slack:-slack])
+    side_len = len(select_masses) / 15
+    popt, pconv = curve_fit(func, select_masses[side_len:-side_len], select_resols[side_len:-side_len])
         
     theoResols = [func(mass, *popt) for mass in masses]
     
@@ -159,6 +157,18 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
     
     peakData = zip(*zip(peakData[0], peakData[1], peakData[2], bins_low, bins_high))
     return peakData
+
+'''
+aggregate bins
+'''
+def aggregateBinData(peakData):
+    log.debug('aggregateBinData, count')
+    masses = peakData[0]
+    abunds = peakData[1]
+    resols = peakData[2]
+    bins_low = peakData[3]
+    bins_high = peakData[4] 
+    log.debug('generateBins_theoreticalResolution, peak count %d', len(masses))
 
 
 if __name__ == '__main__':
@@ -174,18 +184,20 @@ if __name__ == '__main__':
     
     ''' filtering by scan
     scans = filterScanBy_retentionTime(scans)
-    
     scans = filterScanBy_filterline(scans)
-    
     scans = filterScanBy_samples(scans, step_size = 3)
     '''
     
+    #Note: mergePeaksOnFilterline_withRandom to generate testing data
     filterLines = mergePeaksOnFilterline(scans)
     
+    ''' create bins for peaks
     #filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
     #filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
+    '''
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in filterLines.iteritems()}
-
+    
+    binData = {k: aggregateBinData(v) for k, v in filterlines_withBins.iteritems()}
     
     log.debug('finish %f',  time.clock())
     
