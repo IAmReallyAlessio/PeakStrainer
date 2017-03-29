@@ -8,6 +8,7 @@ import array
 import sys
 import os
 import logging
+import random
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -45,6 +46,35 @@ def ThermoRawfile2Scans_sample(file_path):
     
     logging.info('Scan Count is {}'.format(len(MSrawscans)))
     return MSrawscans
+
+def mergePeaksOnFilterline_withRandom(scans):
+    log.info('Merging %d scans' , len(scans))
+    
+    filterLines = set([filterLine for scanNo, filterLine, peakData, retTime in scans])
+    log.info('found %d uniqe filterlines', len(filterLines))
+    
+    # create dict
+    mergedPeaks = {}
+    for filterLine in filterLines:
+        mergedPeaks[filterLine]=([],[],[])
+        
+#     populate dict
+    for scanNo, filterLine, peakData, retTime in scans:
+        (zmass, abunds, resols, baseline , noise, charge) = peakData
+        
+        logging.warn('Altering content for testing:')
+        logging.warn('masses with an odd M/Z will be have random resolution')
+    
+        for idx, val  in enumerate(zmass):
+            massInt  = int(val)
+            if massInt % 2 == 1:
+                zmass[idx] = massInt + random.random()
+                
+        mergedPeaks[filterLine][0].extend(zmass)
+        mergedPeaks[filterLine][1].extend(abunds)
+        mergedPeaks[filterLine][2].extend(resols)
+    
+    return mergedPeaks
 
 def setLogger(LOG_FILENAME = 'log.log'):
     
