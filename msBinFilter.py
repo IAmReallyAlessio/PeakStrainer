@@ -40,6 +40,40 @@ def ThermoRawfile2Scans(file_path):
     
     return MSrawscans
 
+'''
+Start Filtering out scans
+'''
+
+
+def filterScanBy_retentionTime(scans, lowSeconds=0.5, highSeconds=float("inf")):
+    log.info('filterScanBy_retentionTime %f to %f', lowSeconds, highSeconds)
+    
+    for row in scans:
+        scanNum, filterLine, peak_datas, retTime = row 
+        if retTime >+ lowSeconds and  retTime <= highSeconds:
+            yield row
+    
+
+def filterScanBy_filterline(scans, subtext = ' ms ', keep=False):
+    log.info('filterScanBy_filterline %s filter keep: %s', subtext, keep)
+    
+    for row in scans:
+        scanNum, filterLine, peak_datas, retTime = row 
+        if keep:
+            if (subtext in filterLine):
+                yield row
+        else: #not keep
+            if (subtext not in filterLine):
+                yield row
+
+def filterScanBy_samples(scans, step_size = 10):
+    log.info('filterScanBy_samples step_size %d', step_size)
+    
+    for idx, row in enumerate(scans):
+        if idx %  step_size == 0:
+            yield row
+
+
 if __name__ == '__main__':
     log.addHandler(logging.StreamHandler()) # log to console
     log.setLevel(logging.DEBUG)
@@ -50,6 +84,16 @@ if __name__ == '__main__':
         raise SystemExit
     
     scans = ThermoRawfile2Scans(" ".join(sys.argv[1:]))
+    
+    ''' filtering by scan
+    scans = filterScanBy_retentionTime(scans)
+    
+    scans = filterScanBy_filterline(scans)
+    
+    scans = filterScanBy_samples(scans, step_size = 3)
+    '''
+    
+    
     
     log.debug('finish %f',  time.clock())
     
