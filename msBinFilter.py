@@ -41,9 +41,8 @@ def ThermoRawfile2Scans(file_path):
     return MSrawscans
 
 '''
-Start Filtering out scans
+Filter on scans
 '''
-
 
 def filterScanBy_retentionTime(scans, lowSeconds=0.5, highSeconds=float("inf")):
     log.info('filterScanBy_retentionTime %f to %f', lowSeconds, highSeconds)
@@ -73,6 +72,9 @@ def filterScanBy_samples(scans, step_size = 10):
         if idx %  step_size == 0:
             yield row
 
+'''
+merge peaks 
+'''
 def mergePeaksOnFilterline(scans):
     log.info('Merging %d scans' , len(scans))
     
@@ -92,6 +94,72 @@ def mergePeaksOnFilterline(scans):
         mergedPeaks[filterLine][2].extend(resols)
     
     return mergedPeaks
+
+'''
+generate bins
+'''
+
+
+def generateBins_decimalPlaces(peakData, decimal_places = 4):
+    log.debug('generateBins_decimalPlaces, decimal_places %d',  decimal_places)
+    masses = peakData[0]
+    abunds = peakData[1]
+    resols = peakData[2]
+    log.debug('generateBins_decimalPlaces, peak count %d', len(masses))
+    
+    halfWidth= (10**-decimal_places)/2
+    bins_low = [ round(mass-halfWidth,decimal_places) for mass in masses]
+    bins_high = [ round(mass+halfWidth,decimal_places) for mass in masses] 
+    
+    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], bins_low, bins_high))
+    return peakData
+
+def generateBins_resolution(peakData, decimal_places = 4):
+    log.debug('generateBins_resolution, decimal_places %d',  decimal_places)
+    masses = peakData[0]
+    abunds = peakData[1]
+    resols = peakData[2]
+    log.debug('generateBins_resolution, peak count %d', len(masses))
+    
+    bins_high = [mass + ((mass/resol)/2) for mass, resol in zip(masses,resols)] 
+    bins_low =  [mass - ((mass/resol)/2) for mass, resol in zip(masses,resols)]
+    # rounding to make bins larger
+    bins_low = [round(low,decimal_places ) for low in bins_low]
+    bins_high = [round(low,decimal_places ) for low in bins_high]
+    
+    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], bins_low, bins_high))
+    return peakData
+
+def generateBins_theoreticalResolution(peakData, decimal_places = 4):
+    log.debug('generateBins_theoreticalResolution, decimal_places %d',  decimal_places)
+    masses = peakData[0]
+    abunds = peakData[1]
+    resols = peakData[2]
+    log.debug('generateBins_theoreticalResolution, peak count %d', len(masses))
+    
+    log.info('curve fitting to generate theoreticalResolution')
+    from scipy.optimize import curve_fit
+    def func(x, a, b):
+        return  a*(x**-b)
+    
+    sort_mass = sorted(zip(masses, resols))
+    
+    select_masses, select_resols = zip(*sort_mass)
+    log.debug('Selecting only middle of distribution, as per Kai S.')
+    slack = len(select_masses) / 15
+    popt, pconv = curve_fit(func, select_masses[slack:-slack], select_resols[slack:-slack])
+        
+    theoResols = [func(mass, *popt) for mass in masses]
+    
+    bins_high = [mass + ((mass/resol)/2) for mass, resol in zip(masses,theoResols)] 
+    bins_low =  [mass - ((mass/resol)/2) for mass, resol in zip(masses,theoResols)]
+    # rounding to make bins larger
+    bins_low = [round(low,decimal_places ) for low in bins_low]
+    bins_high = [round(low,decimal_places ) for low in bins_high]
+    
+    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], bins_low, bins_high))
+    return peakData
+
 
 if __name__ == '__main__':
     log.addHandler(logging.StreamHandler()) # log to console
@@ -114,6 +182,10 @@ if __name__ == '__main__':
     
     filterLines = mergePeaksOnFilterline(scans)
     
+    #filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
+    #filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in filterLines.iteritems()}
+
     
     log.debug('finish %f',  time.clock())
     
