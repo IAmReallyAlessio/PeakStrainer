@@ -73,6 +73,25 @@ def filterScanBy_samples(scans, step_size = 10):
         if idx %  step_size == 0:
             yield row
 
+def mergePeaksOnFilterline(scans):
+    log.info('Merging %d scans' , len(scans))
+    
+    filterLines = set([filterLine for scanNo, filterLine, peakData, retTime in scans])
+    log.info('found %d uniqe filterlines', len(filterLines))
+    
+    # create dict
+    mergedPeaks = {}
+    for filterLine in filterLines:
+        mergedPeaks[filterLine]=([],[],[])
+        
+#     populate dict
+    for scanNo, filterLine, peakData, retTime in scans:
+        (zmass, abunds, resols, baseline , noise, charge) = peakData
+        mergedPeaks[filterLine][0].extend(zmass)
+        mergedPeaks[filterLine][1].extend(abunds)
+        mergedPeaks[filterLine][2].extend(resols)
+    
+    return mergedPeaks
 
 if __name__ == '__main__':
     log.addHandler(logging.StreamHandler()) # log to console
@@ -93,6 +112,7 @@ if __name__ == '__main__':
     scans = filterScanBy_samples(scans, step_size = 3)
     '''
     
+    filterLines = mergePeaksOnFilterline(scans)
     
     
     log.debug('finish %f',  time.clock())
