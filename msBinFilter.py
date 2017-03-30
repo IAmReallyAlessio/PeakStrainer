@@ -236,7 +236,7 @@ def sortMassIn_FirstBin(peakData):
     uniqBins = set(zip(bins_low,bins_high))
     log.debug('Mass count %d, available bins %d', len(masses), len(uniqBins))
     if (len(masses) * len(uniqBins) > 1000000):
-        log.warn('this operation may take a long time, use sortMassIn_sortWindow instead')
+        log.debug('this operation may take a long time, use sortMassIn_sortWindow instead')
         return sortMassIn_sortWindow(peakData, len(uniqBins)/100)
     bins = []
     for mass in masses:
@@ -269,7 +269,7 @@ def sortMassIn_NarrowestBin(peakData):
     uniqBins = set(zip(bins_low,bins_high))
     log.debug('Mass count %d, available bins %d', len(masses), len(uniqBins))
     if (len(masses) * len(uniqBins) > 1000000):
-        log.warn('this operation may take a long time, use sortMassIn_sortNarrowWindow instead')
+        log.debug('this operation may take a long time, use sortMassIn_sortNarrowWindow instead')
         return sortMassIn_sortNarrowWindow(peakData, len(uniqBins)/100)
     
     
@@ -398,7 +398,7 @@ def filterlineBins_csv(filterlineBins, filename = 'filterlineBins.csv'):
                 binsdata = filterlineBins[filterline]
                 for bin in binsdata:
                     row = binsdata[bin]
-                    line = (filterline,)+ bin + row
+                    line = (filterline,)+ (bin,) + row
                     writer.writerow(line)
                     
 def filterBins(binData, minRepetitionRate = 0.75):
@@ -433,7 +433,7 @@ def formatPeaks(binData):
 
 if __name__ == '__main__':
     log.addHandler(logging.StreamHandler()) # log to console
-    log.setLevel(logging.DEBUG)
+    log.setLevel(logging.INFO)
     
     log.debug('Start %f', time.clock())
     if len(sys.argv) == 1:
@@ -478,9 +478,9 @@ if __name__ == '__main__':
     if log.level == logging.DEBUG: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
     
     filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
+    if log.level == logging.DEBUG: filterlineBins_csv(filterlines_filtered,'filterBins.csv')
     
     filtered_peaks = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
-    
     newfilename = filename[:-4]+ '.mzXML'
     log.info('Writing results to %s', newfilename)
     write2templateMzXML(newfilename, filtered_peaks)

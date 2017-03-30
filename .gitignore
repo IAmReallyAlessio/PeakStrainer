@@ -4,3 +4,7 @@
 /ThermoRawfile2Scans.csv
 /mergePeaksOnFilterline.csv
 /preliminaryFilter.csv
+/sortMassIn_FirstBin.csv
+/generateBins_decimalPlaces.csv
+/aggregateBinData.csv
+/filterBins.csv
