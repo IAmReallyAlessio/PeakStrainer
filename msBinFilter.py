@@ -9,8 +9,9 @@ import sys
 import os
 import time
 import logging
-from timeit import itertools
+import csv
 from msBinFilter_util import encodePeaks, write2templateMzXML
+import itertools
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -41,6 +42,15 @@ def ThermoRawfile2Scans(file_path):
     # peak_data.mass
     
     return MSrawscans
+
+def ThermoRawfile2Scans_csv(scans):
+    with open('ThermoRawfile2Scans.csv', "wb") as csv_file:
+        writer = csv.writer(csv_file, delimiter=',')
+        for scan in scans:
+            (scanNum, filterLine, peak_datas, retTime) = scan
+            for row in zip(*peak_datas):
+                line = (scanNum, filterLine, retTime) + row
+                writer.writerow(line)
 
 '''
 Filter on scans
@@ -97,6 +107,14 @@ def mergePeaksOnFilterline(scans):
     
     return mergedPeaks
 
+def mergePeaksOnFilterline_csv(mergedPeaks):
+    with open('mergePeaksOnFilterline.csv', "wb") as csv_file:
+            writer = csv.writer(csv_file, delimiter=',')
+            for scan in mergedPeaks:
+                peak_data = mergedPeaks[scan]
+                for row in zip(*peak_data):
+                    line = (scan,) + row
+                    writer.writerow(line)
 
 def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionRate = 0.5):
     log.debug('preliminaryFilter rounding to decimal_places %d, minCount = %d, minRepetitionRate %f',  decimal_places, minCount, minRepetitionRate)
@@ -120,6 +138,15 @@ def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionR
     compressedPeakData = zip(*compressedPeakData)
     log.debug('final peak count %d',len(compressedPeakData))
     return compressedPeakData    
+
+def preliminaryFilter_csv(mergedPeaks):
+    with open('preliminaryFilter.csv', "wb") as csv_file:
+            writer = csv.writer(csv_file, delimiter=',')
+            for scan in mergedPeaks:
+                peak_data = mergedPeaks[scan]
+                for row in zip(*peak_data):
+                    line = (scan,) + row
+                    writer.writerow(line)
 
 
 def preliminaryReductionFilter(peakData, reduction = 0.10, minPeaks = 10):
@@ -403,6 +430,7 @@ def formatPeaks(binData):
     
     return (masses, intens)
 
+
 if __name__ == '__main__':
     log.addHandler(logging.StreamHandler()) # log to console
     log.setLevel(logging.DEBUG)
@@ -414,6 +442,7 @@ if __name__ == '__main__':
     
     filename = " ".join(sys.argv[1:])
     scans = ThermoRawfile2Scans(filename)
+    if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
     
     ''' filtering by scan
     scans = filterScanBy_retentionTime(scans)
@@ -423,10 +452,12 @@ if __name__ == '__main__':
     
     #Note: mergePeaksOnFilterline_withRandom to generate testing data
     filterLines = mergePeaksOnFilterline(scans)
-     
+    if log.level == logging.DEBUG: mergePeaksOnFilterline_csv(filterLines)
+    
     preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
     #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
-        
+    if log.level == logging.DEBUG: preliminaryFilter_csv(filterLines)    
+    
     ''' create bins for peaks
     filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
     filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
@@ -450,8 +481,6 @@ if __name__ == '__main__':
     newfilename = filename[:-4]+ '.mzXML'
     log.info('Writing results to %s', newfilename)
     write2templateMzXML(newfilename, filtered_peaks)
-    
-   # generateCSVreport(scans,filterlines_filtered)
     
     log.debug('finish %f',  time.clock())
     

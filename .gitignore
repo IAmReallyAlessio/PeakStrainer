@@ -1,3 +1,6 @@
 /.pydevproject
 /.project
 /msBinFilter_util.pyc
+/ThermoRawfile2Scans.csv
+/mergePeaksOnFilterline.csv
+/preliminaryFilter.csv
