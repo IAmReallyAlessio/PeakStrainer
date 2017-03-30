@@ -103,9 +103,9 @@ def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionR
     masses = peakData[0]
     log.debug('initial peak count %d',len(masses))
     
+    roundeds = [round(mass, decimal_places) for mass in masses]
     bins = dict()
-    for mass in masses:
-        rounded = round(mass, decimal_places)
+    for rounded in roundeds:
         bins[rounded] = bins.get(rounded, 0) + 1
     
     log.debug('Prelimianry groups count %d', len(bins))
@@ -115,12 +115,11 @@ def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionR
     minRepetitionRate_bin = {bin:count for bin,count in minCount_bin.iteritems() if (count/minCount_bin_max) > minRepetitionRate }
     log.debug('groups with minRepetitionRate %f: %d', minRepetitionRate,len(minRepetitionRate_bin))
     
-    preFilterPass = [mass in minRepetitionRate_bin.keys() for mass in masses]
-    
-    compressedPeakData = list(itertools.compress(peakData, preFilterPass))
-
+    preFilterPass = [rounded in minRepetitionRate_bin.keys() for rounded in roundeds]
+    compressedPeakData = list(itertools.compress(zip(*peakData), preFilterPass))
+    compressedPeakData = zip(*compressedPeakData)
+    log.debug('final peak count %d',len(compressedPeakData))
     return compressedPeakData    
-
 
 '''
 generate bins
@@ -173,6 +172,8 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
     log.debug('Selecting only middle of distribution, as per Kai S.')
     side_len = len(select_masses) / 15
     popt, pconv = curve_fit(func, select_masses[side_len:-side_len], select_resols[side_len:-side_len])
+    
+    log.info('function a*(x**-b) uses values: mass, %f, %f ', popt[0], popt[1])
         
     theoResols = [func(mass, *popt) for mass in masses]
     
@@ -186,6 +187,29 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
     return peakData
 
 '''
+sort each mass in a bin
+'''
+def sortMassIn_FirstBin(peakData):
+    log.debug('sortMassIn_FirstBin, no sorting , just the firts bin that matches')
+    masses = peakData[0]
+    abunds = peakData[1]
+    resols = peakData[2]
+    bins_low = peakData[3]
+    bins_high = peakData[4]
+    
+    bin = []
+    for mass in masses:
+        for bin_low, bin_high in zip(bins_low,bins_high):
+            if mass >= bin_low and mass <= bin_high:
+                bin.append((bin_low,bin_high))
+                break
+    
+    if(len(bins) != len(masses)):
+        log.error('There was a problem setting masses in bins, please verify bins where created correctly')
+
+        
+
+'''
 aggregate bins
 '''
 def aggregateBinData(peakData):
@@ -196,16 +220,20 @@ def aggregateBinData(peakData):
     bins_low = peakData[3]
     bins_high = peakData[4] 
     
-    #Note: itertools has many useful functions
-    
     bins = dict()
     
     newRow = 0,0.0,0.0 #  count, sumZmass, sumAbund
     for mass, abund, resol, bin_low, bin_high in zip(*peakData):
-        bins[(bin_low, bin_high)] = bins.get((bin_low, bin_high), 0) +1
-        
+        count, sumZmass, sumAbund = bins.get((bin_low, bin_high), newRow) 
+        count +=1
+        sumZmass += mass
+        sumAbund += abund
+        bins[(bin_low, bin_high)] = count, sumZmass, sumAbund 
     
     print bins
+
+
+
 
 
 if __name__ == '__main__':
@@ -234,9 +262,22 @@ if __name__ == '__main__':
     #filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
     #filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
     '''
-    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
     
-    binData = {k: aggregateBinData(v) for k, v in filterlines_withBins.iteritems()}
+    ''' put each mass in a bin
+    
+    filterlines_inBins = {k: sortMassIn_LowesBin(v) for k, v in filterlines_withBins.iteritems()}
+    filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
+    '''
+    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+    
+    binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
+    
+    filterlines_filtered = {k: filterBins(v, binData[k]) for k, v in filterlines_inBins.iteritems()}
+    
+    writeMzXML(" ".join(sys.argv[1:]), filterlines_filtered)
+    
+    generateCSVreport(scans,filterlines_filtered)
     
     log.debug('finish %f',  time.clock())
     
