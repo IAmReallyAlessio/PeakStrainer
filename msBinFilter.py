@@ -403,7 +403,6 @@ def formatPeaks(binData):
     
     return (masses, intens)
 
-
 if __name__ == '__main__':
     log.addHandler(logging.StreamHandler()) # log to console
     log.setLevel(logging.DEBUG)
@@ -451,7 +450,7 @@ if __name__ == '__main__':
     encoded_peaks = {k: encodePeaks(*v) for k, v in filtered_peaks.iteritems()}
     
     newfilename = filename[:-4]+ '.mzXML'
-    writeMzXML(newfilename, filterlines_filtered)
+    write2templateMzXML(newfilename, encoded_peaks)
     
     generateCSVreport(scans,filterlines_filtered)
     
