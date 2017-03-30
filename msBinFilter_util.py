@@ -3,7 +3,7 @@ Created on 29.03.2017
 msBinFilter_util contains functions that are useful but not used
 @author: mirandaa
 '''
-from base64 import b64decode
+from base64 import b64decode, b64encode
 import array
 import sys
 import os
@@ -11,6 +11,20 @@ import logging
 import random
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
+
+def encodePeaks(masses, intens):
+    peak_list = []
+    for mass, intens in sorted(zip(mass, intens)):
+        peak_list.append(mass)
+        peak_list.append(intens)
+    
+    peaks = array('f',binsDataArray)
+    if sys.byteorder != 'big':
+        peaks.byteswap()
+        
+    encoded = b64encode(peaks)
+    return encoded
+    
 
 def decode_mzXML_Peaks(encodedPeaks):
         '''
