@@ -29,8 +29,7 @@ def encodePeaks(masses, intens):
 def decode_mzXML_Peaks(encodedPeaks):
         '''
         Note zmass and intensity are together
-        mass = peaks[::2]
-        intens = peaks[1::2]
+       
         '''
         
         decoded = b64decode(encodedPeaks)
@@ -39,7 +38,9 @@ def decode_mzXML_Peaks(encodedPeaks):
         if sys.byteorder != 'big':
             peaks.byteswap()
         
-        return peaks
+        mass = peaks[::2]
+        intens = peaks[1::2]
+        return mass, intens
     
 def ThermoRawfile2Scans_sample(file_path):
     log.info('file: %s', file_path)
