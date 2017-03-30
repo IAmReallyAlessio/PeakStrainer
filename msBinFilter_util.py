@@ -14,11 +14,11 @@ from lib import MSFileReader
 
 def encodePeaks(masses, intens):
     peak_list = []
-    for mass, intens in sorted(zip(mass, intens)):
+    for mass, intens in sorted(zip(masses, intens)):
         peak_list.append(mass)
         peak_list.append(intens)
     
-    peaks = array('f',binsDataArray)
+    peaks = array('f',peak_list)
     if sys.byteorder != 'big':
         peaks.byteswap()
         
