@@ -4,11 +4,13 @@ msBinFilter_util contains functions that are useful but not used
 @author: mirandaa
 '''
 from base64 import b64decode, b64encode
-import array
+from array import array
 import sys
 import os
 import logging
 import random
+import xml.etree.ElementTree as ET
+import re
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -100,6 +102,29 @@ def setLogger(LOG_FILENAME = 'log.log'):
                         level=logging.DEBUG)
     # log to console
     logging.getLogger().addHandler(logging.StreamHandler())
+
+def namespace(element):
+    m = re.match('\{.*\}', element.tag)
+    return m.group(0) if m else ''
+
+def getMZXMLEncondedScans(filePath):
+    #     TODO:handle different namespaces of mzxml 
+    namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}
+    ET.register_namespace('', 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0')
+    tree = ET.parse(filePath)
+ 
+    scanElems = tree.findall('.//xmlns:scan', namespaces)
+    
+    rawscans = []
+    for scan in scanElems:
+        encodedPeaks = scan.find('.//xmlns:peaks', namespaces).text
+        scanNo = int(scan.attrib['num'])
+        filterLine = scan.attrib['filterLine']
+        retTime =  scan.attrib['retentionTime']
+        object = (scanNo, filterLine, encodedPeaks, retTime)
+        rawscans.append(object)
+
+    return zip(*rawscans)
 
 
 if __name__ == '__main__':
