@@ -11,6 +11,7 @@ import logging
 import random
 import xml.etree.ElementTree as ET
 import re
+import copy
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -126,6 +127,24 @@ def getMZXMLEncondedScans(filePath):
 
     return zip(*rawscans)
 
+def write2templateMzXML(newfilename, scanPeaks):
+    namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}
+    ET.register_namespace('', 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0')
+    tree = ET.parse('template.mzXML')
+    
+    msRunElement = tree.find('.//xmlns:msRun', namespaces)
+    scanTemplete = msRunElement.find('.//xmlns:scan', namespaces)
+    
+    for scan in scanPeaks:
+        (masses, intens) = scanPeaks[scan]
+        newScan = copy.deepcopy(scanTemplete)
+        newScan.attrib['filterLine'] = scan
+        newScan.attrib['peaksCount'] = str(len(masses))
+        encodedPeaks = encodePeaks(masses, intens)
+        newScan.find('.//xmlns:peaks', namespaces).text = encodedPeaks
+        msRunElement.append(newScan)
+    
+    tree.write(newfilename, encoding='ISO-8859-1', xml_declaration=True)
 
 if __name__ == '__main__':
     pass
