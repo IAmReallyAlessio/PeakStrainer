@@ -190,24 +190,61 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
 sort each mass in a bin
 '''
 def sortMassIn_FirstBin(peakData):
-    log.debug('sortMassIn_FirstBin, no sorting , just the firts bin that matches')
+    log.debug('sortMassIn_FirstBin, no sorting , just the first bins that matches')
     masses = peakData[0]
     abunds = peakData[1]
     resols = peakData[2]
     bins_low = peakData[3]
     bins_high = peakData[4]
     
-    bin = []
+    uniqBins = set(zip(bins_low,bins_high))
+    log.debug('Mass count %d, available bins %d', len(masses), len(uniqBins))
+    if (len(masses) * len(uniqBins) > 1000000):
+        log.warn('this operation may take a long time, use sortandChunk instead')
+        return sortMassIn_sortWindow(peakData, len(uniqBins)/100)
+    bins = []
     for mass in masses:
-        for bin_low, bin_high in zip(bins_low,bins_high):
+        for bin_low, bin_high in uniqBins:
             if mass >= bin_low and mass <= bin_high:
-                bin.append((bin_low,bin_high))
+                bins.append((bin_low,bin_high))
                 break
     
     if(len(bins) != len(masses)):
         log.error('There was a problem setting masses in bins, please verify bins where created correctly')
+    
+    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins))
+    return peakData
 
-        
+def sortMassIn_sortWindow(peakData, window = 200):
+    log.debug('sortMassIn_sortWindow, window size %d', window)
+    
+    peakData_sorted = zip(*sorted(zip(*peakData)))
+    
+    masses = peakData_sorted[0]
+    abunds = peakData_sorted[1]
+    resols = peakData_sorted[2]
+    bins_low = peakData_sorted[3]
+    bins_high = peakData_sorted[4]
+    
+    bins = []
+    for idx, mass in enumerate(masses):
+        found = False
+        lowidx = 0 if idx < (window / 2) else idx - (window / 2)
+        highidx = window + lowidx
+        if idx % window == 0: log.debug('at %d of %d', idx, len(masses))
+        for bin_low, bin_high in zip(bins_low[lowidx:highidx], bins_high[lowidx:highidx]):
+            if mass >= bin_low and mass <= bin_high:
+                found = True
+                bins.append((bin_low,bin_high))
+                break
+        if not found:
+            log.error('the mass at index %d did not find a bin', idx)
+    
+    if(len(bins) != len(masses)):
+        log.error('There was a problem setting masses in bins, please verify bins where created correctly')
+    
+    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins))
+    return peakData
 
 '''
 aggregate bins
@@ -231,10 +268,6 @@ def aggregateBinData(peakData):
         bins[(bin_low, bin_high)] = count, sumZmass, sumAbund 
     
     print bins
-
-
-
-
 
 if __name__ == '__main__':
     log.addHandler(logging.StreamHandler()) # log to console
