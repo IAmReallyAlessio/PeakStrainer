@@ -9,8 +9,8 @@ import sys
 import os
 import time
 import logging
-from bokeh.charts.stats import bins
 from timeit import itertools
+from msBinFilter_util import encodePeaks
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -392,6 +392,18 @@ def filterBins(binData, minRepetitionRate = 0.75):
     return binData_filtered
     
 
+def formatPeaks(binData):
+    log.debug('formatPeaks into simple list pair, mass and intentisty')
+    masses = []
+    intens = []
+    for bin in binData:
+        (count, sumZmass, sumAbund) = binData[bin]
+        masses.append(sumZmass/count)
+        intens.append(sumAbund/count)
+    
+    return (masses, intens)
+
+
 if __name__ == '__main__':
     log.addHandler(logging.StreamHandler()) # log to console
     log.setLevel(logging.DEBUG)
@@ -412,7 +424,7 @@ if __name__ == '__main__':
     
     #Note: mergePeaksOnFilterline_withRandom to generate testing data
     filterLines = mergePeaksOnFilterline(scans)
-    
+     
     preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
     #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
         
@@ -434,8 +446,12 @@ if __name__ == '__main__':
     
     filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
     
-    newfilename = filename[:-6]+
-    writeMzXML(filename[:-4]+, filterlines_filtered)
+    filtered_peaks = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
+    
+    encoded_peaks = {k: encodePeaks(*v) for k, v in filtered_peaks.iteritems()}
+    
+    newfilename = filename[:-4]+ '.mzXML'
+    writeMzXML(newfilename, filterlines_filtered)
     
     generateCSVreport(scans,filterlines_filtered)
     
