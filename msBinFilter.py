@@ -10,7 +10,7 @@ import os
 import time
 import logging
 from timeit import itertools
-from msBinFilter_util import encodePeaks
+from msBinFilter_util import encodePeaks, write2templateMzXML
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -447,12 +447,11 @@ if __name__ == '__main__':
     
     filtered_peaks = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
     
-    encoded_peaks = {k: encodePeaks(*v) for k, v in filtered_peaks.iteritems()}
-    
     newfilename = filename[:-4]+ '.mzXML'
-    write2templateMzXML(newfilename, encoded_peaks)
+    log.info('Writing results to %s', newfilename)
+    write2templateMzXML(newfilename, filtered_peaks)
     
-    generateCSVreport(scans,filterlines_filtered)
+   # generateCSVreport(scans,filterlines_filtered)
     
     log.debug('finish %f',  time.clock())
     
