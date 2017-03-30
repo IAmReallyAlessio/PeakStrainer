@@ -353,7 +353,7 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
 aggregate bins
 '''
 def aggregateBinData(peakData):
-    log.debug('aggregateBinData, count')
+    log.debug('aggregateBinData count &d, count, sumZmass, sumAbund', len(peakData))
     masses = peakData[0]
     abunds = peakData[1]
     resols = peakData[2]
@@ -369,16 +369,28 @@ def aggregateBinData(peakData):
         sumZmass += mass
         sumAbund += abund
         bins[bin] = count, sumZmass, sumAbund 
-    
+
+    log.debug('bin count &d ', len(bins))
     return bins
 
 
-def filterBins(binData, minRepetitionRate = 0.7):
+def filterBins(binData, minRepetitionRate = 0.75):
+    log.debug('filterBins count %d ,minRepetitionRate %f',len(binData),minRepetitionRate)
     maxCount = 0
+    maxAbunds = 0
+    for bin in binData:
+        (count, sumZmass, sumAbund) = binData[bin]
+        if maxCount < count: maxCount = count
+        if maxAbunds <  (sumAbund/count) : maxAbunds = (sumAbund/count)
     
-    sample = {(bin_low, bin_high): max(count) for (bin_low, bin_high), (count, sumZmass, sumAbund) in binData}
-    print sample
-
+    binData_filtered = {}
+    for bin in binData:
+        (count, sumZmass, sumAbund) = binData[bin]
+        if count >= (maxCount * minRepetitionRate):
+            binData_filtered[bin]=(count, sumZmass, sumAbund)
+    log.debug('Filter rate %f', len(binData_filtered)/len(binData))
+    return binData_filtered
+    
 
 if __name__ == '__main__':
     log.addHandler(logging.StreamHandler()) # log to console
@@ -389,7 +401,8 @@ if __name__ == '__main__':
         print("A filename must be provided")
         raise SystemExit
     
-    scans = ThermoRawfile2Scans(" ".join(sys.argv[1:]))
+    filename = " ".join(sys.argv[1:])
+    scans = ThermoRawfile2Scans(filename)
     
     ''' filtering by scan
     scans = filterScanBy_retentionTime(scans)
@@ -404,24 +417,25 @@ if __name__ == '__main__':
     #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
         
     ''' create bins for peaks
-    #filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
-    #filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
     '''
-    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
+    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
     
     ''' put each mass in a bin
     filterlines_inBins = {k: sortMassIn_sortWindow(v) for k, v in filterlines_withBins.iteritems()}
     filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
     filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
     '''
-    filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
+    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
     
     filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
     
     filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
     
-    writeMzXML(" ".join(sys.argv[1:]), filterlines_filtered)
+    newfilename = filename[:-6]+
+    writeMzXML(filename[:-4]+, filterlines_filtered)
     
     generateCSVreport(scans,filterlines_filtered)
     
