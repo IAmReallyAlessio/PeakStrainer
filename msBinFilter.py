@@ -107,8 +107,8 @@ def mergePeaksOnFilterline(scans):
     
     return mergedPeaks
 
-def mergePeaksOnFilterline_csv(mergedPeaks):
-    with open('mergePeaksOnFilterline.csv', "wb") as csv_file:
+def filterlinePeaks_csv(mergedPeaks, filename = 'filterlinePeaks.csv'):
+    with open(filename, "wb") as csv_file:
             writer = csv.writer(csv_file, delimiter=',')
             for scan in mergedPeaks:
                 peak_data = mergedPeaks[scan]
@@ -138,15 +138,6 @@ def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionR
     compressedPeakData = zip(*compressedPeakData)
     log.debug('final peak count %d',len(compressedPeakData))
     return compressedPeakData    
-
-def preliminaryFilter_csv(mergedPeaks):
-    with open('preliminaryFilter.csv', "wb") as csv_file:
-            writer = csv.writer(csv_file, delimiter=',')
-            for scan in mergedPeaks:
-                peak_data = mergedPeaks[scan]
-                for row in zip(*peak_data):
-                    line = (scan,) + row
-                    writer.writerow(line)
 
 
 def preliminaryReductionFilter(peakData, reduction = 0.10, minPeaks = 10):
@@ -387,20 +378,29 @@ def aggregateBinData(peakData):
     bins_low = peakData[3]
     bins_high = peakData[4] 
     bins = peakData[5]
-    bins = dict()
+    binsData = dict()
     
     newRow = 0,0.0,0.0 #  count, sumZmass, sumAbund
     for mass, abund, resol, bin_low, bin_high, bin in zip(*peakData):
-        count, sumZmass, sumAbund = bins.get(bin, newRow) 
+        count, sumZmass, sumAbund = binsData.get(bin, newRow) 
         count +=1
         sumZmass += mass
         sumAbund += abund
-        bins[bin] = count, sumZmass, sumAbund 
+        binsData[bin] = count, sumZmass, sumAbund 
 
-    log.debug('bin count &d ', len(bins))
-    return bins
+    log.debug('bin count &d ', len(binsData))
+    return binsData
 
-
+def filterlineBins_csv(filterlineBins, filename = 'filterlineBins.csv'):
+    with open(filename, "wb") as csv_file:
+            writer = csv.writer(csv_file, delimiter=',')
+            for filterline in filterlineBins:
+                binsdata = filterlineBins[filterline]
+                for bin in binsdata:
+                    row = binsdata[bin]
+                    line = (filterline,)+ bin + row
+                    writer.writerow(line)
+                    
 def filterBins(binData, minRepetitionRate = 0.75):
     log.debug('filterBins count %d ,minRepetitionRate %f',len(binData),minRepetitionRate)
     maxCount = 0
@@ -452,11 +452,11 @@ if __name__ == '__main__':
     
     #Note: mergePeaksOnFilterline_withRandom to generate testing data
     filterLines = mergePeaksOnFilterline(scans)
-    if log.level == logging.DEBUG: mergePeaksOnFilterline_csv(filterLines)
+    if log.level == logging.DEBUG: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
     
     preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
     #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
-    if log.level == logging.DEBUG: preliminaryFilter_csv(filterLines)    
+    if log.level == logging.DEBUG: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')    
     
     ''' create bins for peaks
     filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
@@ -464,6 +464,7 @@ if __name__ == '__main__':
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
     '''
     filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
+    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins_decimalPlaces.csv')
     
     ''' put each mass in a bin
     filterlines_inBins = {k: sortMassIn_sortWindow(v) for k, v in filterlines_withBins.iteritems()}
@@ -471,8 +472,10 @@ if __name__ == '__main__':
     filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
     '''
     filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_inBins,'sortMassIn_FirstBin.csv')
     
     filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
+    if log.level == logging.DEBUG: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
     
     filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
     
