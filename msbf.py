@@ -6,6 +6,7 @@ Created on 31.03.2017
 
 import argparse
 import logging
+from msBinFilter import *
 
 def loglevel(v_count):
     if v_count is None: return logging.CRITICAL
@@ -56,10 +57,63 @@ def main():
                     help='Path for the output.mzxml file')
 
     args = parser.parse_args()
-    print 'file is {} and csv is {}, logging {}'.format(args.filename, 
-                                                        args.generateCSV,
-                                                        loglevel(args.verbose))
-    print ' Prefilter {}'.format(args.prefilter)
+    
+    '''
+    start application, copy pasta from main in msBinFilter
+    '''
+    log.setLevel(loglevel(args.verbose))
+    if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
+    
+    log.debug('Start %f', time.clock())
+    
+    filename = args.filename[0]
+    scans = ThermoRawfile2Scans(filename)
+    if args.generateCSV: ThermoRawfile2Scans_csv(scans)
+    
+    ''' filtering by scan
+    scans = filterScanBy_retentionTime(scans)
+    scans = filterScanBy_filterline(scans)
+    scans = filterScanBy_samples(scans, step_size = 3)
+    '''
+    
+    #Note: mergePeaksOnFilterline_withRandom to generate testing data
+    filterLines = mergePeaksOnFilterline(scans)
+    if args.generateCSV: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
+    
+    preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
+    #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
+    if args.generateCSV: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')    
+    
+    ''' create bins for peaks
+    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
+    '''
+    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
+    if args.generateCSV: filterlinePeaks_csv(filterlines_withBins,'generateBins_decimalPlaces.csv')
+    
+    ''' put each mass in a bin
+    filterlines_inBins = {k: sortMassIn_sortWindow(v) for k, v in filterlines_withBins.iteritems()}
+    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+    filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
+    '''
+    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+    if args.generateCSV: filterlinePeaks_csv(filterlines_inBins,'sortMassIn_FirstBin.csv')
+    
+    filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
+    if args.generateCSV: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
+    
+    filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
+    if args.generateCSV: filterlineBins_csv(filterlines_filtered,'filterBins.csv')
+    
+    filtered_peaks = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
+    
+    newfilename = os.path.abspath(args.output_path) + os.path.basename(filename)[:-4]+ '.mzXML'
+    log.info('Writing results to %s', newfilename)
+    write2templateMzXML(newfilename, filtered_peaks)
+    
+    log.debug('finish %f',  time.clock())
+
 
 if __name__ == '__main__':
     #NOTE: alter the main method in msBinFilter.py instead of setting everything in the command line
