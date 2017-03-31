@@ -23,12 +23,12 @@ def main():
                         help='(set the logging level 1-5 (up to -vvvvv)')
     
     scanfiltergroup = parser.add_mutually_exclusive_group()
-    scanfiltergroup.add_argument('--scanfilter', '-sr',nargs=2, required=False, 
-                        help='filterScanBy_retentionTime: -sr 0.0 10000.0 ;lowSeconds=0.5, highSeconds=float("inf")')
-    scanfiltergroup.add_argument('--scanfilter', '-sf',nargs=2, required=False, 
-                        help='filterScanBy_filterline text: -sf ms False ;subtext =  ms , keep=False')
-    scanfiltergroup.add_argument('--scanfilter', '-ss',nargs=1, required=False, 
-                        help='filterScanBy_samples eg. 1 out of every 10: -ss 10 ;step_size = 10')
+    scanfiltergroup.add_argument('--filterRetentionTime', '-fr',nargs=2, required=False, 
+                        help='filterScanBy_retentionTime: -fr 0.0 10000.0 ;lowSeconds=0.5, highSeconds=float("inf")')
+    scanfiltergroup.add_argument('--filterText', '-ft',nargs=2, required=False, 
+                        help='filterScanBy_filterline text: -ft ms False ;subtext =  ms , keep=False')
+    scanfiltergroup.add_argument('--filterSamples', '-fs',nargs=1, required=False, 
+                        help='filterScanBy_samples eg. 1 out of every 10: -fs 10 ;step_size = 10')
     
     prefiltergroup = parser.add_mutually_exclusive_group()
     prefiltergroup.add_argument('--prefilter', '-p',nargs=3, required=False, 
@@ -48,11 +48,11 @@ def main():
     sortBinsgroup.add_argument('--inFirstBin', '-i', required=False, 
                         help='sortMassIn_FirstBin')
     sortBinsgroup.add_argument('--inWindowBin', '-iw',nargs=1, required=False, 
-                        help='sortMassIn_first bin in Window width 200: -iw 200  window = 200')
+                        help='sortMassIn_first bin in Window width 200: -iw 200 ;window = 200')
     sortBinsgroup.add_argument('--inNarrowBin', '-in', required=False, 
                         help='sortMassIn_NarrowestBin ')
     
-    parser.add_argument('output_path', metavar='output_path', type=str, nargs='?', default='.', required=False,
+    parser.add_argument('output_path', metavar='output_path', type=str, nargs='?', default='.', 
                     help='Path for the output.mzxml file')
 
     args = parser.parse_args()
