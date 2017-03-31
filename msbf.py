@@ -7,7 +7,6 @@ Created on 31.03.2017
 import argparse
 import logging
 from msBinFilter import *
-from __builtin__ import int
 
 def loglevel(v_count):
     if v_count is None: return logging.CRITICAL
