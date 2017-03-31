@@ -145,6 +145,3 @@ def write2templateMzXML(newfilename, scanPeaks):
         msRunElement.append(newScan)
     
     tree.write(newfilename, encoding='ISO-8859-1', xml_declaration=True)
-
-if __name__ == '__main__':
-    pass
