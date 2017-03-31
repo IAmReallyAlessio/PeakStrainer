@@ -19,8 +19,8 @@ from lib import MSFileReader
 __version__ = "17.03.29.0"
 
 def main():
-    log.addHandler(logging.StreamHandler()) # log to console
     log.setLevel(logging.INFO)
+    if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
     
     log.debug('Start %f', time.clock())
     if len(sys.argv) == 1:
