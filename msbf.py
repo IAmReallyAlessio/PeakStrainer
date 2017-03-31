@@ -45,11 +45,11 @@ def main():
                         help='generateBins by theoretical Resolution  -bt 4  resolutions decimal_places = 4')
     
     sortBinsgroup = parser.add_mutually_exclusive_group()
-    sortBinsgroup.add_argument('--inFirstBin', '-i', required=False, 
+    sortBinsgroup.add_argument('--inFirstBin', '-i', action='store_true', required=False, 
                         help='sortMassIn_FirstBin')
     sortBinsgroup.add_argument('--inWindowBin', '-iw',nargs=1, required=False, 
                         help='sortMassIn_first bin in Window width 200: -iw 200 ;window = 200')
-    sortBinsgroup.add_argument('--inNarrowBin', '-in', required=False, 
+    sortBinsgroup.add_argument('--inNarrowBin', '-in', action='store_true', required=False, 
                         help='sortMassIn_NarrowestBin ')
     
     parser.add_argument('output_path', metavar='output_path', type=str, nargs='?', default='.', 
@@ -62,4 +62,5 @@ def main():
     print ' Prefilter {}'.format(args.prefilter)
 
 if __name__ == '__main__':
+    #NOTE: alter the main method in msBinFilter.py instead of setting everything in the command line
     main()
