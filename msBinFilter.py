@@ -2,7 +2,8 @@
 # encoding: utf-8
 '''
 Created on 29.03.2017
-msBinFilter is a tool to reduce the size of an MS spectra
+msBinFilter is a tool to reduce the size of an MS spectra,
+usage: msBinFilter spectra_file.raw
 @author: mirandaa
 '''
 import sys
@@ -16,6 +17,63 @@ log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
 __version__ = "17.03.29.0"
+
+def main():
+    log.addHandler(logging.StreamHandler()) # log to console
+    log.setLevel(logging.INFO)
+    
+    log.debug('Start %f', time.clock())
+    if len(sys.argv) == 1:
+        print("A filename must be provided")
+        raise SystemExit
+    
+    filename = " ".join(sys.argv[1:])
+    scans = ThermoRawfile2Scans(filename)
+    if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
+    
+    ''' filtering by scan
+    scans = filterScanBy_retentionTime(scans)
+    scans = filterScanBy_filterline(scans)
+    scans = filterScanBy_samples(scans, step_size = 3)
+    '''
+    
+    #Note: mergePeaksOnFilterline_withRandom to generate testing data
+    filterLines = mergePeaksOnFilterline(scans)
+    if log.level == logging.DEBUG: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
+    
+    preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
+    #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
+    if log.level == logging.DEBUG: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')    
+    
+    ''' create bins for peaks
+    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
+    '''
+    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
+    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins_decimalPlaces.csv')
+    
+    ''' put each mass in a bin
+    filterlines_inBins = {k: sortMassIn_sortWindow(v) for k, v in filterlines_withBins.iteritems()}
+    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+    filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
+    '''
+    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_inBins,'sortMassIn_FirstBin.csv')
+    
+    filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
+    if log.level == logging.DEBUG: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
+    
+    filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
+    if log.level == logging.DEBUG: filterlineBins_csv(filterlines_filtered,'filterBins.csv')
+    
+    filtered_peaks = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
+    newfilename = filename[:-4]+ '.mzXML'
+    log.info('Writing results to %s', newfilename)
+    write2templateMzXML(newfilename, filtered_peaks)
+    
+    log.debug('finish %f',  time.clock())
+    
 
 def ThermoRawfile2Scans(file_path):
     # NOTE: for testing use ThermoRawfile2Scans_sample instead
@@ -432,58 +490,4 @@ def formatPeaks(binData):
 
 
 if __name__ == '__main__':
-    log.addHandler(logging.StreamHandler()) # log to console
-    log.setLevel(logging.INFO)
-    
-    log.debug('Start %f', time.clock())
-    if len(sys.argv) == 1:
-        print("A filename must be provided")
-        raise SystemExit
-    
-    filename = " ".join(sys.argv[1:])
-    scans = ThermoRawfile2Scans(filename)
-    if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
-    
-    ''' filtering by scan
-    scans = filterScanBy_retentionTime(scans)
-    scans = filterScanBy_filterline(scans)
-    scans = filterScanBy_samples(scans, step_size = 3)
-    '''
-    
-    #Note: mergePeaksOnFilterline_withRandom to generate testing data
-    filterLines = mergePeaksOnFilterline(scans)
-    if log.level == logging.DEBUG: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
-    
-    preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
-    #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
-    if log.level == logging.DEBUG: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')    
-    
-    ''' create bins for peaks
-    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
-    filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
-    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
-    '''
-    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
-    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins_decimalPlaces.csv')
-    
-    ''' put each mass in a bin
-    filterlines_inBins = {k: sortMassIn_sortWindow(v) for k, v in filterlines_withBins.iteritems()}
-    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
-    filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
-    '''
-    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
-    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_inBins,'sortMassIn_FirstBin.csv')
-    
-    filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
-    if log.level == logging.DEBUG: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
-    
-    filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
-    if log.level == logging.DEBUG: filterlineBins_csv(filterlines_filtered,'filterBins.csv')
-    
-    filtered_peaks = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
-    newfilename = filename[:-4]+ '.mzXML'
-    log.info('Writing results to %s', newfilename)
-    write2templateMzXML(newfilename, filtered_peaks)
-    
-    log.debug('finish %f',  time.clock())
-    
+    main()
