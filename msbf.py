@@ -21,7 +21,7 @@ def main():
     
     parser.add_argument('--csv', dest='generateCSV', action='store_true', required=False,
                     help='generate csv report files (default: do not generate)')
-    parser.add_argument('--verbose', '-v', action='count', required=False,
+    parser.add_argument('--verbose', '-v', action='count', required=False, default =1,
                         help='(set the logging level 1-5 (up to -vvvvv)')
     
     scanfiltergroup = parser.add_mutually_exclusive_group()
@@ -77,6 +77,7 @@ def main():
     if args.filterText: scans = filterScanBy_filterline(scans, args.filterText[0], args.filterText[1]!='False')
     if args.filterSamples: scans = filterScanBy_samples(scans, int(args.filterSamples[0]))
     
+    scans = list(scans)
     #Note: mergePeaksOnFilterline_withRandom to generate testing data
     filterLines = mergePeaksOnFilterline(scans)
     if args.generateCSV: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
@@ -88,6 +89,8 @@ def main():
     if  args.preliminaryReductionFilter: preFiltered_filterlines = {k: preliminaryReductionFilter(v,
                                                                                                   float(args.preliminaryReductionFilter[0]),
                                                                                                   int(args.preliminaryReductionFilter[1])) for k, v in filterLines.iteritems()}
+    if not args.prefilter and not args.preliminaryReductionFilter: 
+        preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
     if args.generateCSV: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')    
     
     ''' create bins for peaks '''
@@ -97,6 +100,8 @@ def main():
                                                                               int(args.binsResolution[0])) for k, v in filterLines.iteritems()}
     if args.binsTheoResolution:filterlines_withBins = {k: generateBins_theoreticalResolution(v,
                                                                                              int(args.binsTheoResolution[0])) for k, v in preFiltered_filterlines.iteritems()}
+    if not args.binsDecimal and not args.binsResolution and not args.binsTheoResolution:
+        filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
     if args.generateCSV: filterlinePeaks_csv(filterlines_withBins,'generateBins_decimalPlaces.csv')
     
     ''' put each mass in a bin '''
@@ -105,6 +110,8 @@ def main():
     if args.inFirstBin:filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
     if args.inNarrowBin:filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
     if args.generateCSV: filterlinePeaks_csv(filterlines_inBins,'sortMassIn_FirstBin.csv')
+    if not args.inWindowBin and not args.inFirstBin and not args.inNarrowBin:
+        filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
     
     filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
     if args.generateCSV: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
@@ -119,7 +126,6 @@ def main():
     write2templateMzXML(newfilename, filtered_peaks)
     
     log.debug('finish %f',  time.clock())
-
 
 if __name__ == '__main__':
     #NOTE: alter the main method in msBinFilter.py instead of setting everything in the command line
