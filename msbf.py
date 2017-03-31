@@ -7,6 +7,7 @@ Created on 31.03.2017
 import argparse
 import logging
 from msBinFilter import *
+from __builtin__ import int
 
 def loglevel(v_count):
     if v_count is None: return logging.CRITICAL
@@ -70,34 +71,39 @@ def main():
     scans = ThermoRawfile2Scans(filename)
     if args.generateCSV: ThermoRawfile2Scans_csv(scans)
     
-    ''' filtering by scan
-    scans = filterScanBy_retentionTime(scans)
-    scans = filterScanBy_filterline(scans)
-    scans = filterScanBy_samples(scans, step_size = 3)
-    '''
+    ''' filtering by scan '''
+    if args.filterRetentionTime: scans = filterScanBy_retentionTime(scans, float(args.filterRetentionTime[0]), 
+                                                                   float(args.filterRetentionTime[1]))
+    if args.filterText: scans = filterScanBy_filterline(scans, args.filterText[0], args.filterText[1]!='False')
+    if args.filterSamples: scans = filterScanBy_samples(scans, int(args.filterSamples[0]))
     
     #Note: mergePeaksOnFilterline_withRandom to generate testing data
     filterLines = mergePeaksOnFilterline(scans)
     if args.generateCSV: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
     
-    preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
-    #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
+    if args.prefilter: preFiltered_filterlines = {k: preliminaryFilter(v,
+                                                                       int(args.prefilter[0]),
+                                                                       int(args.prefilter[1]),
+                                                                       float(args.prefilter[2])) for k, v in filterLines.iteritems()}
+    if  args.preliminaryReductionFilter: preFiltered_filterlines = {k: preliminaryReductionFilter(v,
+                                                                                                  float(args.preliminaryReductionFilter[0]),
+                                                                                                  int(args.preliminaryReductionFilter[1])) for k, v in filterLines.iteritems()}
     if args.generateCSV: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')    
     
-    ''' create bins for peaks
-    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
-    filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
-    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
-    '''
-    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
+    ''' create bins for peaks '''
+    if args.binsDecimal:filterlines_withBins = {k: generateBins_decimalPlaces(v,
+                                                                              int(args.binsDecimal[0])) for k, v in filterLines.iteritems()}
+    if args.binsResolution:filterlines_withBins = {k: generateBins_resolution(v,
+                                                                              int(args.binsResolution[0])) for k, v in filterLines.iteritems()}
+    if args.binsTheoResolution:filterlines_withBins = {k: generateBins_theoreticalResolution(v,
+                                                                                             int(args.binsTheoResolution[0])) for k, v in preFiltered_filterlines.iteritems()}
     if args.generateCSV: filterlinePeaks_csv(filterlines_withBins,'generateBins_decimalPlaces.csv')
     
-    ''' put each mass in a bin
-    filterlines_inBins = {k: sortMassIn_sortWindow(v) for k, v in filterlines_withBins.iteritems()}
-    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
-    filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
-    '''
-    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+    ''' put each mass in a bin '''
+    if args.inWindowBin:filterlines_inBins = {k: sortMassIn_sortWindow(v,
+                                                                       int(args.inWindowBin[0])) for k, v in filterlines_withBins.iteritems()}
+    if args.inFirstBin:filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+    if args.inNarrowBin:filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
     if args.generateCSV: filterlinePeaks_csv(filterlines_inBins,'sortMassIn_FirstBin.csv')
     
     filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
