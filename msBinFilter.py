@@ -19,7 +19,7 @@ from lib import MSFileReader
 __version__ = "17.03.29.0"
 
 def main():
-    log.setLevel(logging.INFO)
+    log.setLevel(logging.DEBUG)
     if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
     
     log.debug('Start %f', time.clock())
@@ -261,6 +261,38 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
         return  a*(x**-b)
     
     sort_mass = sorted(zip(masses, resols))
+    
+    select_masses, select_resols = zip(*sort_mass)
+    log.debug('Selecting only middle of distribution, as per Kai S.')
+    side_len = len(select_masses) / 15
+    popt, pconv = curve_fit(func, select_masses[side_len:-side_len], select_resols[side_len:-side_len])
+    
+    log.info('function a*(x**-b) uses values: mass, %f, %f ', popt[0], popt[1])
+        
+    theoResols = [func(mass, *popt) for mass in masses]
+    
+    bins_high = [mass + ((mass/resol)/2) for mass, resol in zip(masses,theoResols)] 
+    bins_low =  [mass - ((mass/resol)/2) for mass, resol in zip(masses,theoResols)]
+    # rounding to make bins larger
+    bins_low = [round(low,decimal_places ) for low in bins_low]
+    bins_high = [round(low,decimal_places ) for low in bins_high]
+    
+    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], bins_low, bins_high))
+    return peakData
+
+def generateBins_theoreticalIntensity(peakData, decimal_places = 4):
+    log.debug('generateBins_theoreticalIntensity, decimal_places %d',  decimal_places)
+    masses = peakData[0]
+    abunds = peakData[1]
+    resols = peakData[2]
+    log.debug('generateBins_theoreticalResolution, peak count %d', len(masses))
+    
+    log.info('curve fitting to generate theoreticalResolution')
+    from scipy.optimize import curve_fit
+    def func(x, a, b):
+        return  a*(x**-b)
+    
+    sort_mass = sorted(zip(masses, abunds))
     
     select_masses, select_resols = zip(*sort_mass)
     log.debug('Selecting only middle of distribution, as per Kai S.')
