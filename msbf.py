@@ -14,7 +14,8 @@ def loglevel(v_count):
     return [logging.CRITICAL,logging.ERROR,logging.WARN, logging.INFO,logging.DEBUG][v_count] 
 
 def main():
-    parser = configargparse.ArgParser(default_config_files=['./.ini'], description='Combine and filter spectra signals to remove random signals')
+    parser = configargparse.ArgParser(default_config_files=['./.ini'], description='Combine and filter spectra signals to remove random signals',
+                                      args_for_writing_out_config_file=["-w", "--write-out-config-file"])
     parser.add('-c', '--my-config', is_config_file=True, help='config file path')
     
     parser.add_argument('filename', metavar='filename', type=str, nargs=1,
@@ -59,7 +60,7 @@ def main():
                     help='Path for the output.mzxml file')
 
     args = parser.parse_args()
-    
+        
     '''
     start application, copy pasta from main in msBinFilter
     '''
