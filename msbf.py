@@ -4,9 +4,9 @@ Created on 31.03.2017
 @author: mirandaa
 '''
 
-import argparse
 import logging
 from msBinFilter import *
+import configargparse
 
 def loglevel(v_count):
     if v_count is None: return logging.CRITICAL
@@ -14,7 +14,9 @@ def loglevel(v_count):
     return [logging.CRITICAL,logging.ERROR,logging.WARN, logging.INFO,logging.DEBUG][v_count] 
 
 def main():
-    parser = argparse.ArgumentParser(description='Combine and filter spectra signals to remove random signals')
+    parser = configargparse.ArgParser(default_config_files=['./.ini'], description='Combine and filter spectra signals to remove random signals')
+    parser.add('-c', '--my-config', is_config_file=True, help='config file path')
+    
     parser.add_argument('filename', metavar='filename', type=str, nargs=1,
                     help='The thermal-raw file')
     
@@ -108,9 +110,9 @@ def main():
                                                                        int(args.inWindowBin[0])) for k, v in filterlines_withBins.iteritems()}
     if args.inFirstBin:filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
     if args.inNarrowBin:filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
-    if args.generateCSV: filterlinePeaks_csv(filterlines_inBins,'sortMassIn_FirstBin.csv')
     if not args.inWindowBin and not args.inFirstBin and not args.inNarrowBin:
         filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+    if args.generateCSV: filterlinePeaks_csv(filterlines_inBins,'sortMassIn_FirstBin.csv')
     
     filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
     if args.generateCSV: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
