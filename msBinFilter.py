@@ -50,7 +50,7 @@ def main():
     filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
     '''
-    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins_decimalPlaces.csv')
     
     ''' put each mass in a bin
@@ -260,12 +260,12 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
     def func(x, a, b):
         return  a*(x**-b)
     
-    sort_mass = sorted(zip(masses, resols))
-    
-    select_masses, select_resols = zip(*sort_mass)
-    log.debug('Selecting only middle of distribution, as per Kai S.')
-    side_len = len(select_masses) / 15
-    popt, pconv = curve_fit(func, select_masses[side_len:-side_len], select_resols[side_len:-side_len])
+    sort_mass = sorted(zip(abunds, masses, resols))#filter on intensity
+        
+    select_abunds, select_masses, select_resols = zip(*sort_mass)
+    log.debug('Selecting only 90% highest intensity, as per Kai S.')
+    side_len = len(select_masses) / 10
+    popt, pconv = curve_fit(func, select_masses[side_len:], select_resols[side_len:])
     
     log.info('function a*(x**-b) uses values: mass, %f, %f ', popt[0], popt[1])
         
