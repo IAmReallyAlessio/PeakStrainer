@@ -1,6 +1,6 @@
 '''
 Created on 31.03.2017
-
+command line access to msBinFilter
 @author: mirandaa
 '''
 
