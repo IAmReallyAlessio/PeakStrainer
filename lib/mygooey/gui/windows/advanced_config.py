@@ -45,10 +45,12 @@ class WidgetContainer(wx.Panel):
       self.container.AddSpacer(10)
 
   def populate(self, widgets):
+    reorder = [0,1,6,2,7,3,8,4,9,5,10]
     for index, widget in enumerate(widgets):
-      widget_class = getattr(components, widget.type)
-      widget_instance = widget_class(self, widget.title, widget.help, widget.choices)
-      self.widgets.append(widget_instance)
+        rwidget = widgets[reorder[index]]
+        widget_class = getattr(components, rwidget.type)
+        widget_instance = widget_class(self, rwidget.title, rwidget.help, rwidget.choices)
+        self.widgets.append(widget_instance)
     self.layout()
 
   def get_values(self):
@@ -58,7 +60,7 @@ class WidgetContainer(wx.Panel):
     self.container.Clear(True)
     self.widgets = []
 
-  def create_component_grid(self, parent_sizer, components, cols=2):
+  def create_component_grid(self, parent_sizer, components, cols=1):
     for row in self.chunk(components, cols):
       hsizer = wx.BoxSizer(wx.HORIZONTAL)
       for widget in filter(None, row):
