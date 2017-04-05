@@ -13,6 +13,7 @@ import logging
 import csv
 from msBinFilter_util import encodePeaks, write2templateMzXML
 import itertools
+from math import floor
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -174,18 +175,36 @@ def filterlinePeaks_csv(mergedPeaks, filename = 'filterlinePeaks.csv'):
                     line = (scan,) + row
                     writer.writerow(line)
 
-def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionRate = 0.5):
+def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionRate = 0.0):
     log.debug('preliminaryFilter rounding to decimal_places %d, minCount = %d, minRepetitionRate %f',  decimal_places, minCount, minRepetitionRate)
     masses = peakData[0]
     log.debug('initial peak count %d',len(masses))
     
+    halfdec = (10 ** -decimal_places)/2
+    
+    # bins plus round up and round down to catch the edge cases of close to top or close to bottom of bin
+    # eg  123.104 round = 123.10 up=123.11 down= 123.10
+    #     123.106 round = 123.11 up=123.11 down= 123.10
+    #     by counting the bins from round up and down we get a bin count
+    #     123.10 : 3 and 123.11 : 3 
+    # for peaks with no adjacent bins the peak count is 2
+    
+    rounddown = [round(mass-halfdec, decimal_places) for mass in masses]
     roundeds = [round(mass, decimal_places) for mass in masses]
+    roundup = [round(mass+halfdec, decimal_places) for mass in masses]
+    
     bins = dict()
     for rounded in roundeds:
         bins[rounded] = bins.get(rounded, 0) + 1
     
+    for rounded in roundup:
+        bins[rounded] = bins.get(rounded, 0) + 1
+    
+    for rounded in rounddown:
+        bins[rounded] = bins.get(rounded, 0) + 1
+    
     log.debug('Prelimianry groups count %d', len(bins))
-    minCount_bin = {bin:count for bin,count in bins.iteritems() if count >+ minCount}
+    minCount_bin = {bin:(count/3)+1 for bin,count in bins.iteritems() if (count/3)+1 > minCount}
     log.debug('groups with minCount %d: %d', minCount,len(minCount_bin))
     minCount_bin_max = float(max(minCount_bin.values()))
     minRepetitionRate_bin = {bin:count for bin,count in minCount_bin.iteritems() if (count/minCount_bin_max) > minRepetitionRate }
