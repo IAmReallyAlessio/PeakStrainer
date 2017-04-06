@@ -299,6 +299,29 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
     peakData = zip(*zip(peakData[0], peakData[1], peakData[2], bins_low, bins_high))
     return peakData
 
+def generateBins_resolutionPowerFunc(peakData, a = 1.0, minus_b = 1.0, decimal_places = 4):
+    log.debug('generateBins_resolutionPowerFunc, mass +- res_func, res_func = a*(mass**-b), a= %d, b = %d',a, minus_b  )
+    masses = peakData[0]
+    log.debug('generateBins_resolutionPowerFunc, peak count %d', len(masses))
+    
+    def func(x, a, b):
+        return  a*(x**-b)
+    
+    popt = (a, minus_b) 
+    
+    log.info('function a*(x**-b) uses values: mass, %f, %f ', popt[0], popt[1])
+        
+    theoResols = [func(mass, *popt) for mass in masses]
+    
+    bins_high = [mass + ((mass/resol)/2) for mass, resol in zip(masses,theoResols)] 
+    bins_low =  [mass - ((mass/resol)/2) for mass, resol in zip(masses,theoResols)]
+    # rounding to make bins larger
+    bins_low = [round(low,decimal_places ) for low in bins_low]
+    bins_high = [round(low,decimal_places ) for low in bins_high]
+    
+    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], bins_low, bins_high))
+    return peakData
+
 def generateBins_theoreticalIntensity(peakData, decimal_places = 4):
     log.debug('generateBins_theoreticalIntensity, decimal_places %d',  decimal_places)
     masses = peakData[0]
