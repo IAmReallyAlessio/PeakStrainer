@@ -19,7 +19,7 @@ def main():
     parser.add('-c', '--my-config', is_config_file=True, help='config file path')
     
     parser.add_argument('filename', metavar='filename', type=str, nargs=1,
-                    help='The thermal-raw file')
+                    help='The thermo-raw file')
     
     parser.add_argument('--csv', dest='generateCSV', action='store_true', required=False,
                     help='generate csv report files (default: do not generate)')

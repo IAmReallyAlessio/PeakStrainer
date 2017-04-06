@@ -17,14 +17,14 @@ def loglevel(v_count):
 @Gooey(program_name="MS Bin Filter",
        dump_build_config=False,   # Dump the JSON Gooey uses to configure itself
        load_build_config=None,    # Loads a JSON Gooey-generated configuration
-       default_size=(1610, 1000),
+       default_size=(1080, 1000),
        )
 def main():
     parser = GooeyParser(description='MS Bin Filter')
     parser.add_argument('-c', '--my-config', is_config_file=True, help='config file path', widget='FileChooser')
     
     parser.add_argument('filename', metavar='filename', type=str, nargs=1,
-                    help='The thermal-raw file',widget='FileChooser')
+                    help='The thermo-raw file',widget='FileChooser')
     
     
     parser.add_argument('--csv', dest='generateCSV', action='store_true', required=False,
