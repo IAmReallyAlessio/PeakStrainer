@@ -19,16 +19,16 @@ from lib import MSFileReader
 
 __version__ = "17.03.29.0"
 
-def main():
+def main(file):
     log.setLevel(logging.DEBUG)
     if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
     
     log.debug('Start %f', time.clock())
-    if len(sys.argv) == 1:
-        print("A filename must be provided")
-        raise SystemExit
+#     if len(sys.argv) == 1:
+#         print("A filename must be provided")
+#         raise SystemExit
     
-    filename = " ".join(sys.argv[1:])
+    filename = file #" ".join(sys.argv[1:])
     scans = ThermoRawfile2Scans(filename)
     if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
     
@@ -564,4 +564,11 @@ def formatPeaks(binData):
 
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) == 1:
+        print("A filename must be provided")
+        raise SystemExit
+    
+    filename = " ".join(sys.argv[1:])
+    
+    for file in sys.argv[1:]:
+        main(file)
