@@ -52,7 +52,7 @@ def main():
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
     '''
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in filterLines.iteritems()}
-    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins_decimalPlaces.csv')
+    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
     ''' put each mass in a bin
     filterlines_inBins = {k: sortMassIn_sortWindow(v) for k, v in filterlines_withBins.iteritems()}
@@ -60,13 +60,13 @@ def main():
     filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
     '''
     filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
-    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_inBins,'sortMassIn_FirstBin.csv')
+    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_inBins,'sortMassIn.csv')
     
     filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
     if log.level == logging.DEBUG: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
     
     filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
-    if log.level == logging.DEBUG: filterlineBins_csv(filterlines_filtered,'filterBins.csv')
+    if log.level == logging.DEBUG: filterlineBins_csv(filterlines_filtered,'filteredBins.csv')
     
     filtered_peaks = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
     newfilename = filename[:-4]+ '.mzXML'
