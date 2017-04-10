@@ -12,6 +12,9 @@ import wx
 import wx.wizard
 import time
 from wx import MessageDialog
+import sys
+import subprocess
+from _ast import If
 
 ###########################################################################
 ## Class MyWizard1
@@ -58,10 +61,6 @@ class MyWizard1 ( wx.wizard.Wizard ):
         self.m_checkBox9 = wx.CheckBox( self.m_wizPage2, wx.ID_ANY, u"Custom Settings", wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer3.Add( self.m_checkBox9, 0, wx.ALL, 5 )
         
-        self.m_filePicker3configfile = wx.FilePickerCtrl( self.m_wizPage2, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.DefaultSize, wx.FLP_DEFAULT_STYLE )
-        self.m_filePicker3configfile.Enable( False )
-        
-        bSizer3.Add( self.m_filePicker3configfile, 0, wx.ALL|wx.EXPAND, 5 )
         
         
         self.m_wizPage2.SetSizer( bSizer3 )
@@ -146,7 +145,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer21.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_checkBox41 = wx.CheckBox( self.m_wizPage4, wx.ID_ANY, u"use defaults", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox41 = wx.CheckBox( self.m_wizPage4, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
         self.m_checkBox41.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer21.Add( self.m_checkBox41, 0, wx.ALL, 5 )
@@ -185,7 +184,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer211.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_checkBox411 = wx.CheckBox( self.m_wizPage4, wx.ID_ANY, u"use defaults", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox411 = wx.CheckBox( self.m_wizPage4, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
         self.m_checkBox411.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer211.Add( self.m_checkBox411, 0, wx.ALL, 5 )
@@ -216,7 +215,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer2111.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_checkBox4111 = wx.CheckBox( self.m_wizPage4, wx.ID_ANY, u"use defaults", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox4111 = wx.CheckBox( self.m_wizPage4, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
         self.m_checkBox4111.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer2111.Add( self.m_checkBox4111, 0, wx.ALL, 5 )
@@ -270,7 +269,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer21111.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_checkBox41111 = wx.CheckBox( self.m_wizPage5, wx.ID_ANY, u"use defaults", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox41111 = wx.CheckBox( self.m_wizPage5, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
         self.m_checkBox41111.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer21111.Add( self.m_checkBox41111, 0, wx.ALL, 5 )
@@ -309,7 +308,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer21112.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_checkBox41112 = wx.CheckBox( self.m_wizPage5, wx.ID_ANY, u"use defaults", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox41112 = wx.CheckBox( self.m_wizPage5, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
         self.m_checkBox41112.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer21112.Add( self.m_checkBox41112, 0, wx.ALL, 5 )
@@ -379,7 +378,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer211121.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_checkBox411121 = wx.CheckBox( self.m_wizPage6, wx.ID_ANY, u"use defaults", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox411121 = wx.CheckBox( self.m_wizPage6, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
         self.m_checkBox411121.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer211121.Add( self.m_checkBox411121, 0, wx.ALL, 5 )
@@ -415,7 +414,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer211122.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_checkBox411122 = wx.CheckBox( self.m_wizPage6, wx.ID_ANY, u"use defaults", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox411122 = wx.CheckBox( self.m_wizPage6, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
         self.m_checkBox411122.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer211122.Add( self.m_checkBox411122, 0, wx.ALL, 5 )
@@ -447,7 +446,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer211123.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_checkBox411123 = wx.CheckBox( self.m_wizPage6, wx.ID_ANY, u"use defaults", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox411123 = wx.CheckBox( self.m_wizPage6, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
         self.m_checkBox411123.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer211123.Add( self.m_checkBox411123, 0, wx.ALL, 5 )
@@ -497,7 +496,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer2111211.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_checkBox4111211 = wx.CheckBox( self.m_wizPage7, wx.ID_ANY, u"use defaults", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox4111211 = wx.CheckBox( self.m_wizPage7, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
         self.m_checkBox4111211.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer2111211.Add( self.m_checkBox4111211, 0, wx.ALL, 5 )
@@ -533,7 +532,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer2111212.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_checkBox4111212 = wx.CheckBox( self.m_wizPage7, wx.ID_ANY, u"use defaults", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox4111212 = wx.CheckBox( self.m_wizPage7, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
         self.m_checkBox4111212.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer2111212.Add( self.m_checkBox4111212, 0, wx.ALL, 5 )
@@ -565,7 +564,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer2111213.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_checkBox4111213 = wx.CheckBox( self.m_wizPage7, wx.ID_ANY, u"use defaults", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox4111213 = wx.CheckBox( self.m_wizPage7, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
         self.m_checkBox4111213.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer2111213.Add( self.m_checkBox4111213, 0, wx.ALL, 5 )
@@ -656,23 +655,101 @@ class MyWizard1 ( wx.wizard.Wizard ):
     
     # Virtual event handlers, overide them in your derived class
     def wizardFinished( self, event ):
-        print ' run command'
-        for i in range(100):
-            time.sleep(1)
-            self.m_gauge1_progress.SetValue(i)
-        event.Skip()
+        if self.m_checkBox22_open_dir.IsChecked():
+            if self.m_dirPicker1.GetTextCtrlValue():
+                subprocess.call("explorer /select,'"+self.m_dirPicker1.GetTextCtrlValue()+"'", shell=True)
+            else:
+                subprocess.call("explorer .", shell=True)
+    
+
+    def buildComand(self):
+        command = []
+        command.append(sys.executable) # not sure why, but it works
+        command.append("msbf.py")
+        command.append(self.m_filePicker1.TextCtrlValue)
+        
+        if self.m_checkBox2.IsChecked():
+            command.append('--csv')
+        
+        if self.m_filePicker2.TextCtrlValue:
+            command.append('-c')
+            command.append(self.m_filePicker2.TextCtrlValue)
+        
+        vees = '-'
+        for i in range(self.m_slider1.Value): vees = vees + 'v' 
+        command.append(vees)
+        
+        #Filter out Scans
+#         if not(not self.m_checkBox41 and not self.m_checkBox411 and not self.m_checkBox4111):
+#             d = MessageDialog(self, 'please go back and correct the entries', 'THERE WAS AN ERROR' , wx.OK | wx.ICON_INFORMATION)
+#             d.ShowModal()
+#             d.Destroy()
+#                     
+        if self.m_checkBox41 or self.m_textCtrl4.GetValue():
+            command.append('--filterRetentionTime')
+            command.append(self.m_textCtrl4.GetValue())
+            command.append(self.m_textCtrl5.GetValue())
+            
+        if  self.m_checkBox411 or self.m_textCtrl6.GetValue():
+            command.append('--filterText')
+            command.append(self.m_textCtrl6.GetValue())
+            if self.m_checkBox4.IsChecked() and self.m_textCtrl6.GetValue():
+                command.append('True')
+            if not self.m_checkBox4.IsChecked() and self.m_textCtrl6.GetValue():
+                command.append('False')
+        
+        if self.m_checkBox4111 or self.m_textCtrl7.GetValue():
+            command.append('--filterSamples')
+            command.append(self.m_textCtrl7.GetValue())
+        
+        #Prefilter Peaks
+        
+        #Generate Bins
+        
+        #Peak Sorting
+        
+        
+#         this one must be last because its positional
+        if self.m_dirPicker1.TextCtrlValue:
+            command.append(self.m_dirPicker1.TextCtrlValue)
+        
+            
+        
+        return command
+    
+    def streamTopage6_OK(self):
+        self.m_textCtrl18_sysout.AppendText("Staring command..."+ "\n")
+        self.m_textCtrl18_sysout.AppendText("Please wait this may take some time"+ "\n")
+        command = self.buildComand()
+        for c in  command:
+            print c
+        sys.exit()
+        theproc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = theproc.communicate()
+        self.m_textCtrl18_sysout.AppendText(out)
+        self.m_textCtrl18_sysout.AppendText('------------------------\n')
+        
+        if theproc.returncode != 0:
+            d = MessageDialog(self, 'please go back and correct the entries', 'THERE WAS AN ERROR' , wx.OK | wx.ICON_INFORMATION)
+            d.ShowModal()
+            d.Destroy()
+        
+        return theproc.returncode == 0
+        
     
     def pageChanging( self, event ):
-        event.Skip()
+        if (event.GetPage() == self.m_pages[6] and event.GetDirection()):
+            isOK = self.streamTopage6_OK()
+            if isOK:
+                event.Allow()
+            else:
+                event.Veto()
     
     def fileSelected( self, event ):
-        d = MessageDialog(self, 'file selexted', 'Error', wx.OK | wx.ICON_INFORMATION)
-        d.ShowModal()
-        d.Destroy()
+        event.Skip()
         
         
     def enable_m_filePicker3configfile( self, event ):
-        self.m_filePicker3configfile.Enable(event.Checked() )
         if(not event.Checked()):
             thispage = self.m_pages[0]
             semilastpage = self.m_pages[-2]
@@ -683,6 +760,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
             thispage.SetNext(self.m_pages[1])
     
     def setCustomPageOrder(self):
+        
         thispage = self.m_pages[0]
         semilastpage = self.m_pages[-2]
         thispage.SetNext(semilastpage)
