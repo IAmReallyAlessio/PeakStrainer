@@ -717,11 +717,11 @@ class MyWizard1 ( wx.wizard.Wizard ):
     
     def streamTopage6_OK(self):
         self.m_textCtrl18_sysout.AppendText("Staring command..."+ "\n")
-        self.m_textCtrl18_sysout.AppendText("Please wait this may take some time"+ "\n")
         command = self.buildComand()
-        for c in  command:
-            print c
-        sys.exit()
+        self.m_textCtrl18_sysout.AppendText(' '.join(command))
+        self.m_textCtrl18_sysout.AppendText("\n")
+        self.m_textCtrl18_sysout.AppendText("Please wait this may take some time"+ "\n")
+        
         theproc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = theproc.communicate()
         self.m_textCtrl18_sysout.AppendText(out)
