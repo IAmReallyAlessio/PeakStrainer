@@ -504,28 +504,12 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer721.Add( bSizer2111211, 1, wx.EXPAND, 5 )
         
-        bSizer821 = wx.BoxSizer( wx.HORIZONTAL )
-        
-        self.m_staticText1021 = wx.StaticText( self.m_wizPage7, wx.ID_ANY, u"Number of decimal Places", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText1021.Wrap( -1 )
-        bSizer821.Add( self.m_staticText1021, 0, wx.ALL, 5 )
-        
-        self.m_textCtrl421 = wx.TextCtrl( self.m_wizPage7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer821.Add( self.m_textCtrl421, 0, wx.ALL, 5 )
-        
-        self.m_staticText1121 = wx.StaticText( self.m_wizPage7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText1121.Wrap( -1 )
-        bSizer821.Add( self.m_staticText1121, 0, wx.ALL, 5 )
-        
-        
-        bSizer721.Add( bSizer821, 0, 0, 5 )
-        
         self.m_staticline321 = wx.StaticLine( self.m_wizPage7, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
         bSizer721.Add( self.m_staticline321, 0, wx.EXPAND |wx.ALL, 5 )
         
         bSizer2111212 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self.m_staticText931212 = wx.StaticText( self.m_wizPage7, wx.ID_ANY, u"By Peak Resolution", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText931212 = wx.StaticText( self.m_wizPage7, wx.ID_ANY, u"Sort Close Bin", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText931212.Wrap( -1 )
         bSizer2111212.Add( self.m_staticText931212, 0, wx.ALL, 5 )
         
@@ -542,7 +526,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer911 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self.m_staticText621 = wx.StaticText( self.m_wizPage7, wx.ID_ANY, u"Number of decimal places", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText621 = wx.StaticText( self.m_wizPage7, wx.ID_ANY, u"Window Size", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText621.Wrap( -1 )
         bSizer911.Add( self.m_staticText621, 0, wx.ALL, 5 )
         
@@ -557,7 +541,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer2111213 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self.m_staticText931213 = wx.StaticText( self.m_wizPage7, wx.ID_ANY, u"By Resolution Trend Line", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText931213 = wx.StaticText( self.m_wizPage7, wx.ID_ANY, u"Sort in Narrowest Bin", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText931213.Wrap( -1 )
         bSizer2111213.Add( self.m_staticText931213, 0, wx.ALL, 5 )
         
@@ -572,22 +556,12 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer721.Add( bSizer2111213, 1, wx.EXPAND, 5 )
         
-        bSizer1011 = wx.BoxSizer( wx.HORIZONTAL )
-        
-        self.m_staticText1511 = wx.StaticText( self.m_wizPage7, wx.ID_ANY, u"Number of decimal places", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText1511.Wrap( -1 )
-        bSizer1011.Add( self.m_staticText1511, 0, wx.ALL, 5 )
-        
-        self.m_textCtrl711 = wx.TextCtrl( self.m_wizPage7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer1011.Add( self.m_textCtrl711, 0, wx.ALL, 5 )
-        
-        
-        bSizer721.Add( bSizer1011, 1, wx.EXPAND, 5 )
-        
         
         self.m_wizPage7.SetSizer( bSizer721 )
         self.m_wizPage7.Layout()
         bSizer721.Fit( self.m_wizPage7 )
+        
+        
         self.m_wizPage8 = wx.wizard.WizardPageSimple( self  )
         self.add_page( self.m_wizPage8 )
         
@@ -685,12 +659,12 @@ class MyWizard1 ( wx.wizard.Wizard ):
 #             d.ShowModal()
 #             d.Destroy()
 #                     
-        if self.m_checkBox41 or self.m_textCtrl4.GetValue():
+        if self.m_checkBox41.IsChecked() or self.m_textCtrl4.GetValue():
             command.append('--filterRetentionTime')
             command.append(self.m_textCtrl4.GetValue())
             command.append(self.m_textCtrl5.GetValue())
             
-        if  self.m_checkBox411 or self.m_textCtrl6.GetValue():
+        if  self.m_checkBox411.IsChecked() or self.m_textCtrl6.GetValue():
             command.append('--filterText')
             command.append(self.m_textCtrl6.GetValue())
             if self.m_checkBox4.IsChecked() and self.m_textCtrl6.GetValue():
@@ -698,17 +672,41 @@ class MyWizard1 ( wx.wizard.Wizard ):
             if not self.m_checkBox4.IsChecked() and self.m_textCtrl6.GetValue():
                 command.append('False')
         
-        if self.m_checkBox4111 or self.m_textCtrl7.GetValue():
+        if self.m_checkBox4111.IsChecked() or self.m_textCtrl7.GetValue():
             command.append('--filterSamples')
             command.append(self.m_textCtrl7.GetValue())
         
         #Prefilter Peaks
+        if self.m_checkBox41111.IsChecked() or self.m_textCtrl41.GetValue():
+            command.append('--prefilter')
+            command.append(self.m_textCtrl41.GetValue())
+            command.append(self.m_textCtrl51.GetValue())
+        
+        if self.m_checkBox41112.IsChecked() or self.m_textCtrl411.GetValue():
+            command.append('--preliminaryReductionFilter')
+            command.append(self.m_textCtrl411.GetValue())
+            command.append(self.m_textCtrl4111.GetValue())
         
         #Generate Bins
+        if self.m_checkBox411121.IsChecked() or self.m_textCtrl42.GetValue():
+            command.append('--binsDecimal')
+            command.append(self.m_textCtrl42.GetValue())
+        if self.m_checkBox411122.IsChecked() or self.m_textCtrl61.GetValue():
+            command.append('--binsResolution')
+            command.append(self.m_textCtrl61.GetValue())
+        if self.m_checkBox411123.IsChecked() or self.m_textCtrl71.GetValue():
+            command.append('--binsTheoResolution')
+            command.append(self.m_textCtrl71.GetValue())
         
         #Peak Sorting
-        
-        
+        if self.m_checkBox4111211.IsChecked():
+            command.append('--inFirstBin')
+        if self.m_checkBox4111212.IsChecked() or self.m_textCtrl611.GetValue():
+            command.append('--inWindowBin')
+            command.append(self.m_textCtrl611.GetValue())
+        if self.m_checkBox4111213.IsChecked():
+            command.append('--inNarrowBin')
+            
 #         this one must be last because its positional
         if self.m_dirPicker1.TextCtrlValue:
             command.append(self.m_dirPicker1.TextCtrlValue)
