@@ -19,6 +19,7 @@ from lib import MSFileReader
 
 __version__ = "17.03.29.0"
 
+
 def main(file):
     log.setLevel(logging.DEBUG)
     if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
@@ -70,7 +71,9 @@ def main(file):
     filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
     if log.level == logging.DEBUG: filterlineBins_csv(filterlines_filtered,'filteredBins.csv')
     
-    filtered_peaks = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
+#     filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
+    filtered_peaks = {k: bins2Peaks(v, filterlines_inBins[k]) for k, v in filterlines_filtered.iteritems()}
+    if log.level == logging.DEBUG: filterlinePeaks_csv(filtered_peaks,'mzXMLdata.csv')
     newfilename = filename[:-4]+ '.mzXML'
     log.info('Writing results to %s', newfilename)
     write2templateMzXML(newfilename, filtered_peaks)
@@ -568,6 +571,21 @@ def formatPeaks(binData):
         intens.append(sumAbund/count)
     
     return (masses, intens)
+
+def bins2Peaks(binsData, peakData):
+    log.debug('bins2Peaks get all the peaks with given bin, into simple list pair, mass and intentisty')
+    bins_filtered = binsData.keys()
+    masses = peakData[0]
+    abunds = peakData[1]
+    resols = peakData[2]
+    bins_low = peakData[3]
+    bins_high = peakData[4] 
+    bins = peakData[5]
+    
+    filteredRowdata = [(row[0], row[1]) for row in zip(*peakData) if row[5] in bins_filtered]
+    result = zip(*filteredRowdata)
+    return result
+    
 
 
 if __name__ == '__main__':
