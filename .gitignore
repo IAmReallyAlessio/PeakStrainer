@@ -9,3 +9,8 @@
 /aggregateBinData.csv
 /filterBins.csv
 /msBinFilter.pyc
+/filteredBins.csv
+/generateBins.csv
+/msbinfilter.log
+/mzXMLdata.csv
+/sortMassIn.csv
