@@ -135,13 +135,31 @@ def write2templateMzXML(newfilename, scanPeaks):
     msRunElement = tree.find('.//xmlns:msRun', namespaces)
     scanTemplete = msRunElement.find('.//xmlns:scan', namespaces)
     
-    for scan in scanPeaks:
+    
+    for idx, scan in enumerate(scanPeaks):
         (masses, intens) = scanPeaks[scan]
         newScan = copy.deepcopy(scanTemplete)
         newScan.attrib['filterLine'] = scan
         newScan.attrib['peaksCount'] = str(len(masses))
+        newScan.attrib['num']=str(idx+1)
+        newScan.attrib['scanType']=scan.split()[4] 
+        
+        msLevel = 1 if ' ms ' in scan else 2
+        if msLevel == 1:
+            newScan.remove(newScan.find('.//xmlns:precursorMz', namespaces))
+        else:
+            precursorMz = newScan.find('.//xmlns:precursorMz', namespaces)
+            precursorMz.attrib['activationMethod'] = scan.split()[6][7:10]
+            precursorMz.text = scan.split()[6][:6]
+
+        newScan.attrib['msLevel'] = str(msLevel)
+        newScan.attrib['polarity'] = '-' if ' - ' in scan else '+'
+        newScan.attrib['retentionTime'] = 'PT{}S'.format(0.0+idx)
+        
         encodedPeaks = encodePeaks(masses, intens)
         newScan.find('.//xmlns:peaks', namespaces).text = encodedPeaks
         msRunElement.append(newScan)
+    
+    msRunElement.remove(scanTemplete)
     
     tree.write(newfilename, encoding='ISO-8859-1', xml_declaration=True)
