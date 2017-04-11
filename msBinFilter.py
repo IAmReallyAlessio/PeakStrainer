@@ -22,6 +22,7 @@ __version__ = "17.03.29.0"
 def main(file):
     log.setLevel(logging.DEBUG)
     if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
+    if log.level == logging.DEBUG:logging.basicConfig(filename='msbinfilter.log',filemode='w')
     
     log.debug('Start %f', time.clock())
 #     if len(sys.argv) == 1:
@@ -32,6 +33,7 @@ def main(file):
     scans = ThermoRawfile2Scans(filename)
     if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
     
+    scans = filterScanBy_first(scans)
     ''' filtering by scan
     scans = filterScanBy_retentionTime(scans)
     scans = filterScanBy_filterline(scans)
@@ -114,7 +116,12 @@ def ThermoRawfile2Scans_csv(scans):
 '''
 Filter on scans
 '''
-
+                
+def filterScanBy_first(scans, n = 1):
+    log.info('filterScanBy_first %d scans', n)
+    
+    return scans[n:]
+    
 def filterScanBy_retentionTime(scans, lowSeconds=0.5, highSeconds=float("inf")):
     log.info('filterScanBy_retentionTime %f to %f', lowSeconds, highSeconds)
     
