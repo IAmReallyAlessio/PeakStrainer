@@ -8,17 +8,501 @@
 ###########################################################################
 
 import wx
-# import wx.xrc
 import wx.wizard
-import time
 from wx import MessageDialog
 import sys
 import subprocess
-from _ast import If
+
 
 ###########################################################################
 ## Class MyWizard1
 ###########################################################################
+
+
+class myIntValidator(wx.PyValidator):
+     """ This validator is used to ensure that the user has entered something
+         into the text object editor dialog's text field.
+     """
+     def __init__(self):
+         """ Standard constructor.
+         """
+         wx.PyValidator.__init__(self)
+
+     def Clone(self):
+         """ Standard cloner.
+
+             Note that every validator must implement the Clone() method.
+         """
+         return myIntValidator()
+
+
+     def Validate(self, win):
+        """ Validate the contents of the given text control.
+        """
+        textCtrl = self.GetWindow()
+        text = textCtrl.GetValue()
+        
+        if not text: return True
+         
+        if not text.isdigit() :
+            d = wx.MessageBox("Please enter numbers only", "Error")
+            textCtrl.SetBackgroundColour("pink")
+            textCtrl.SetFocus()
+            textCtrl.Refresh()
+            return False
+        else:
+            textCtrl.SetBackgroundColour(
+            wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            textCtrl.Refresh()
+            return True
+
+
+     def TransferToWindow(self):
+         """ Transfer data from validator to window.
+
+             The default implementation returns False, indicating that an error
+             occurred.  We simply return True, as we don't do any data transfer.
+         """
+         return True # Prevent wxDialog from complaining.
+
+
+     def TransferFromWindow(self):
+         """ Transfer data from window to validator.
+
+             The default implementation returns False, indicating that an error
+             occurred.  We simply return True, as we don't do any data transfer.
+         """
+         return True # Prevent wxDialog from complaining.
+     
+class myDoubleValidator(wx.PyValidator):
+     """ This validator is used to ensure that the user has entered something
+         into the text object editor dialog's text field.
+     """
+     def __init__(self):
+         """ Standard constructor.
+         """
+         wx.PyValidator.__init__(self)
+
+     def Clone(self):
+         """ Standard cloner.
+
+             Note that every validator must implement the Clone() method.
+         """
+         return myDoubleValidator()
+
+
+     def Validate(self, win):
+        """ Validate the contents of the given text control.
+        """
+        textCtrl = self.GetWindow()
+        text = textCtrl.GetValue()
+        
+        if not text: return True
+         
+        def passTest(string):
+            try:
+                value = float(string)
+                if value < 0: return False
+                if value > 10 : return False
+                
+                return True
+            except ValueError:
+                return False
+            
+        if not passTest(text) :
+            d = wx.MessageBox("Please enter a number from 0  to 10 ", "Error")
+            textCtrl.SetBackgroundColour("pink")
+            textCtrl.SetFocus()
+            textCtrl.Refresh()
+            return False
+        else:
+            textCtrl.SetBackgroundColour(
+            wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            textCtrl.Refresh()
+            return True
+
+
+     def TransferToWindow(self):
+         """ Transfer data from validator to window.
+
+             The default implementation returns False, indicating that an error
+             occurred.  We simply return True, as we don't do any data transfer.
+         """
+         return True # Prevent wxDialog from complaining.
+
+
+     def TransferFromWindow(self):
+         """ Transfer data from window to validator.
+
+             The default implementation returns False, indicating that an error
+             occurred.  We simply return True, as we don't do any data transfer.
+         """
+         return True # Prevent wxDialog from complaining.
+    
+    
+
+
+class myPercentValidator(wx.PyValidator):
+    """ This validator is used to ensure that the user has entered something
+         into the text object editor dialog's text field.
+    """
+    def __init__(self):
+        """ Standard constructor.
+        """
+        wx.PyValidator.__init__(self)
+
+    def Clone(self):
+        """ Standard cloner.
+             Note that every validator must implement the Clone() method.
+        """
+        return myPercentValidator()
+
+    def Validate(self, win):
+       """ Validate the contents of the given text control.
+       """
+       textCtrl = self.GetWindow()
+       text = textCtrl.GetValue()
+       
+       if not text: return True
+        
+       def passTest(string):
+            try:
+               value = float(string)
+               if value < 0: return False
+               if value > 100: return False
+               return True
+            except ValueError:
+               return False
+       
+       if not passTest(text) :
+           d = wx.MessageBox("Please enter a number between 0  and 100", "Error")
+           textCtrl.SetBackgroundColour("pink")
+           textCtrl.SetFocus()
+           textCtrl.Refresh()
+           return False
+       else:
+           textCtrl.SetBackgroundColour(
+           wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+           textCtrl.Refresh()
+           return True
+
+    def TransferToWindow(self):
+        """ Transfer data from validator to window.
+            The default implementation returns False, indicating that an error
+            occurred.  We simply return True, as we don't do any data transfer.
+         """
+        return True  # Prevent wxDialog from complaining.
+
+
+    def TransferFromWindow(self):
+         """ Transfer data from window to validator.
+
+             The default implementation returns False, indicating that an error
+             occurred.  We simply return True, as we don't do any data transfer.
+         """
+         return True  # Prevent wxDialog from complaining.
+
+
+class my400IntValidator(wx.PyValidator):
+    """ This validator is used to ensure that the user has entered something
+         into the text object editor dialog's text field.
+    """
+    def __init__(self):
+        """ Standard constructor.
+        """
+        wx.PyValidator.__init__(self)
+
+    def Clone(self):
+        """ Standard cloner.
+             Note that every validator must implement the Clone() method.
+        """
+        return my400IntValidator()
+
+    def Validate(self, win):
+       """ Validate the contents of the given text control.
+       """
+       textCtrl = self.GetWindow()
+       text = textCtrl.GetValue()
+       
+       if not text: return True
+        
+       def passTest(string):
+            try:
+               if not string.isdigit(): return False  
+               value = int(string)
+               if value < 0: return False
+               if value > 400: return False
+               return True
+            except ValueError:
+               return False
+       
+       if not passTest(text) :
+           d = wx.MessageBox("Please enter a number between 0  and 400", "Error")
+           textCtrl.SetBackgroundColour("pink")
+           textCtrl.SetFocus()
+           textCtrl.Refresh()
+           return False
+       else:
+           textCtrl.SetBackgroundColour(
+           wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+           textCtrl.Refresh()
+           return True
+
+    def TransferToWindow(self):
+        """ Transfer data from validator to window.
+            The default implementation returns False, indicating that an error
+            occurred.  We simply return True, as we don't do any data transfer.
+         """
+        return True  # Prevent wxDialog from complaining.
+
+
+    def TransferFromWindow(self):
+         """ Transfer data from window to validator.
+
+             The default implementation returns False, indicating that an error
+             occurred.  We simply return True, as we don't do any data transfer.
+         """
+         return True  # Prevent wxDialog from complaining.
+
+
+
+
+class myfilterOutValidator(wx.PyValidator):
+    """ This validator is used to ensure that the user has entered something
+         into the text object editor dialog's text field.
+    """
+    def __init__(self, wizard):
+        """ Standard constructor.
+        """
+        wx.PyValidator.__init__(self)
+        self.wizard = wizard
+
+    def Clone(self):
+        """ Standard cloner.
+             Note that every validator must implement the Clone() method.
+        """
+        return myfilterOutValidator(self.wizard)
+
+    def Validate(self, win):
+        """ Validate the contents of the given text control.
+        """
+        checkbox = self.GetWindow()
+        checked = checkbox.IsChecked()
+        
+#         if not checked: return True
+        
+        def passTest():
+            op1 = self.wizard.m_checkBox41.GetValue() or self.wizard.m_textCtrl4.GetValue()
+            op2 = self.wizard.m_checkBox411.GetValue() or self.wizard.m_textCtrl6.GetValue()
+            op3 = self.wizard.m_checkBox4111.GetValue() or self.wizard.m_textCtrl7.GetValue()
+            
+            if not op1 and not op2 and not op3 : return True
+            if op1 and not(op2 or op3): return True
+            if op2 and not(op1 or op3): return True
+            if op3 and not(op1 or op2): return True
+            return False
+            
+        if not passTest() :
+            d = wx.MessageBox("Please select at Most one option", "Error")
+            return False
+        else:
+            return True
+
+    def TransferToWindow(self):
+        """ Transfer data from validator to window.
+            The default implementation returns False, indicating that an error
+            occurred.  We simply return True, as we don't do any data transfer.
+         """
+        return True  # Prevent wxDialog from complaining.
+
+
+    def TransferFromWindow(self):
+         """ Transfer data from window to validator.
+
+             The default implementation returns False, indicating that an error
+             occurred.  We simply return True, as we don't do any data transfer.
+         """
+         return True  # Prevent wxDialog from complaining.
+
+
+class myPrefilterValidator(wx.PyValidator):
+    """ This validator is used to ensure that the user has entered something
+         into the text object editor dialog's text field.
+    """
+    def __init__(self, wizard):
+        """ Standard constructor.
+        """
+        wx.PyValidator.__init__(self)
+        self.wizard = wizard
+
+    def Clone(self):
+        """ Standard cloner.
+             Note that every validator must implement the Clone() method.
+        """
+        return myPrefilterValidator(self.wizard)
+
+    def Validate(self, win):
+        """ Validate the contents of the given text control.
+        """
+        checkbox = self.GetWindow()
+        checked = checkbox.IsChecked()
+        
+#         if not checked: return True
+        
+        def passTest():
+            op1 = self.wizard.m_checkBox41111.GetValue() or self.wizard.m_textCtrl41.GetValue()
+            op2 = self.wizard.m_checkBox41112.GetValue() or self.wizard.m_textCtrl411.GetValue()
+            op3 = False
+            
+            if not op1 and not op2 and not op3 : return True
+            if op1 and not(op2 or op3): return True
+            if op2 and not(op1 or op3): return True
+            if op3 and not(op1 or op2): return True
+            return False
+            
+        if not passTest() :
+            d = wx.MessageBox("Please select at Most one option", "Error")
+            return False
+        else:
+            return True
+
+    def TransferToWindow(self):
+        """ Transfer data from validator to window.
+            The default implementation returns False, indicating that an error
+            occurred.  We simply return True, as we don't do any data transfer.
+         """
+        return True  # Prevent wxDialog from complaining.
+
+
+    def TransferFromWindow(self):
+         """ Transfer data from window to validator.
+
+             The default implementation returns False, indicating that an error
+             occurred.  We simply return True, as we don't do any data transfer.
+         """
+         return True  # Prevent wxDialog from complaining.
+        
+
+
+class myBinsValidator(wx.PyValidator):
+    """ This validator is used to ensure that the user has entered something
+         into the text object editor dialog's text field.
+    """
+    def __init__(self, wizard):
+        """ Standard constructor.
+        """
+        wx.PyValidator.__init__(self)
+        self.wizard = wizard
+
+    def Clone(self):
+        """ Standard cloner.
+             Note that every validator must implement the Clone() method.
+        """
+        return myBinsValidator(self.wizard)
+
+    def Validate(self, win):
+        """ Validate the contents of the given text control.
+        """
+        checkbox = self.GetWindow()
+        checked = checkbox.IsChecked()
+        
+#         if not checked: return True
+        
+        def passTest():
+            op1 = self.wizard.m_checkBox411121.GetValue() or self.wizard.m_textCtrl42.GetValue()
+            op2 = self.wizard.m_checkBox411122.GetValue() or self.wizard.m_textCtrl61.GetValue()
+            op3 = self.wizard.m_checkBox411123.GetValue() or self.wizard.m_textCtrl71.GetValue()
+            
+            if not op1 and not op2 and not op3 : return True
+            if op1 and not(op2 or op3): return True
+            if op2 and not(op1 or op3): return True
+            if op3 and not(op1 or op2): return True
+            return False
+            
+        if not passTest() :
+            d = wx.MessageBox("Please select at Most one option", "Error")
+            return False
+        else:
+            return True
+
+    def TransferToWindow(self):
+        """ Transfer data from validator to window.
+            The default implementation returns False, indicating that an error
+            occurred.  We simply return True, as we don't do any data transfer.
+         """
+        return True  # Prevent wxDialog from complaining.
+
+
+    def TransferFromWindow(self):
+         """ Transfer data from window to validator.
+
+             The default implementation returns False, indicating that an error
+             occurred.  We simply return True, as we don't do any data transfer.
+         """
+         return True  # Prevent wxDialog from complaining.
+  
+
+
+class mySortValidator(wx.PyValidator):
+    """ This validator is used to ensure that the user has entered something
+         into the text object editor dialog's text field.
+    """
+    def __init__(self, wizard):
+        """ Standard constructor.
+        """
+        wx.PyValidator.__init__(self)
+        self.wizard = wizard
+
+    def Clone(self):
+        """ Standard cloner.
+             Note that every validator must implement the Clone() method.
+        """
+        return mySortValidator(self.wizard)
+
+    def Validate(self, win):
+        """ Validate the contents of the given text control.
+        """
+        checkbox = self.GetWindow()
+        checked = checkbox.IsChecked()
+        
+#         if not checked: return True
+        
+        def passTest():
+            op1 = self.wizard.m_checkBox4111211.GetValue() 
+            op2 = self.wizard.m_checkBox4111212.GetValue() or self.wizard.m_textCtrl611.GetValue()
+            op3 = self.wizard.m_checkBox4111213.GetValue() 
+            
+            if not op1 and not op2 and not op3 : return True
+            if op1 and not(op2 or op3): return True
+            if op2 and not(op1 or op3): return True
+            if op3 and not(op1 or op2): return True
+            return False
+            
+        if not passTest() :
+            d = wx.MessageBox("Please select at Most one option", "Error")
+            return False
+        else:
+            return True
+
+    def TransferToWindow(self):
+        """ Transfer data from validator to window.
+            The default implementation returns False, indicating that an error
+            occurred.  We simply return True, as we don't do any data transfer.
+         """
+        return True  # Prevent wxDialog from complaining.
+
+
+    def TransferFromWindow(self):
+         """ Transfer data from window to validator.
+
+             The default implementation returns False, indicating that an error
+             occurred.  We simply return True, as we don't do any data transfer.
+         """
+         return True  # Prevent wxDialog from complaining.
+  
+
+
+    
 
 class MyWizard1 ( wx.wizard.Wizard ):
     
@@ -49,7 +533,8 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer4 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self.m_filePicker1 = wx.FilePickerCtrl( self.m_wizPage2, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.DefaultSize, wx.FLP_DEFAULT_STYLE|wx.FLP_FILE_MUST_EXIST )
+        self.m_filePicker1 = wx.FilePickerCtrl( self.m_wizPage2, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.raw", wx.DefaultPosition, wx.DefaultSize, wx.FLP_DEFAULT_STYLE|wx.FLP_FILE_MUST_EXIST )
+        self.m_filePicker1.SetToolTipString( u"Select a thermo raw file" )
         bSizer4.Add( self.m_filePicker1, 1, wx.ALL|wx.EXPAND, 5 )
         
         
@@ -146,6 +631,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer21.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
         self.m_checkBox41 = wx.CheckBox( self.m_wizPage4, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox41.SetValidator(myfilterOutValidator(self))
         self.m_checkBox41.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer21.Add( self.m_checkBox41, 0, wx.ALL, 5 )
@@ -159,7 +645,12 @@ class MyWizard1 ( wx.wizard.Wizard ):
         self.m_staticText10.Wrap( -1 )
         bSizer8.Add( self.m_staticText10, 0, wx.ALL, 5 )
         
+        # numctrl does not work well because its functional but ugly
+#         self.m_textCtrl4 = NumCtrl( self.m_wizPage4, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 ,
+#                                          allowNegative = False, allowNone = True)
         self.m_textCtrl4 = wx.TextCtrl( self.m_wizPage4, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl4.SetValidator(myDoubleValidator())
+
         bSizer8.Add( self.m_textCtrl4, 0, wx.ALL, 5 )
         
         self.m_staticText11 = wx.StaticText( self.m_wizPage4, wx.ID_ANY, u" to: ", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -167,6 +658,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer8.Add( self.m_staticText11, 0, wx.ALL, 5 )
         
         self.m_textCtrl5 = wx.TextCtrl( self.m_wizPage4, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl5.SetValidator(myDoubleValidator())
         bSizer8.Add( self.m_textCtrl5, 0, wx.ALL, 5 )
         
         
@@ -185,6 +677,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer211.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
         self.m_checkBox411 = wx.CheckBox( self.m_wizPage4, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+#         self.m_checkBox411.SetValidator(myfilterOutValidator(self))
         self.m_checkBox411.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer211.Add( self.m_checkBox411, 0, wx.ALL, 5 )
@@ -230,6 +723,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer10.Add( self.m_staticText15, 0, wx.ALL, 5 )
         
         self.m_textCtrl7 = wx.TextCtrl( self.m_wizPage4, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl7.SetValidator(myIntValidator())
         bSizer10.Add( self.m_textCtrl7, 0, wx.ALL, 5 )
         
         self.m_staticText16 = wx.StaticText( self.m_wizPage4, wx.ID_ANY, u"Scans", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -270,6 +764,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer21111.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
         self.m_checkBox41111 = wx.CheckBox( self.m_wizPage5, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox41111.SetValidator(myPrefilterValidator(self))
         self.m_checkBox41111.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer21111.Add( self.m_checkBox41111, 0, wx.ALL, 5 )
@@ -284,6 +779,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer81.Add( self.m_staticText101, 0, wx.ALL, 5 )
         
         self.m_textCtrl41 = wx.TextCtrl( self.m_wizPage5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl41.SetValidator(myIntValidator()) 
         bSizer81.Add( self.m_textCtrl41, 0, wx.ALL, 5 )
         
         self.m_staticText111 = wx.StaticText( self.m_wizPage5, wx.ID_ANY, u"Min Group count", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -291,6 +787,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer81.Add( self.m_staticText111, 0, wx.ALL, 5 )
         
         self.m_textCtrl51 = wx.TextCtrl( self.m_wizPage5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl51.SetValidator(myIntValidator())
         bSizer81.Add( self.m_textCtrl51, 0, wx.ALL, 5 )
         
         
@@ -323,6 +820,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer811.Add( self.m_staticText1011, 0, wx.ALL, 5 )
         
         self.m_textCtrl411 = wx.TextCtrl( self.m_wizPage5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl411.SetValidator(myPercentValidator())
         bSizer811.Add( self.m_textCtrl411, 0, wx.ALL, 5 )
         
         self.m_staticText1111 = wx.StaticText( self.m_wizPage5, wx.ID_ANY, u"percent of original, ", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -339,6 +837,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer8111.Add( self.m_staticText10111, 0, wx.ALL, 5 )
         
         self.m_textCtrl4111 = wx.TextCtrl( self.m_wizPage5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl4111.SetValidator(myIntValidator())
         bSizer8111.Add( self.m_textCtrl4111, 0, wx.ALL, 5 )
         
         self.m_staticText11111 = wx.StaticText( self.m_wizPage5, wx.ID_ANY, u"peaks", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -379,6 +878,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer211121.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
         self.m_checkBox411121 = wx.CheckBox( self.m_wizPage6, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox411121.SetValidator(myBinsValidator(self))
         self.m_checkBox411121.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer211121.Add( self.m_checkBox411121, 0, wx.ALL, 5 )
@@ -393,6 +893,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer82.Add( self.m_staticText102, 0, wx.ALL, 5 )
         
         self.m_textCtrl42 = wx.TextCtrl( self.m_wizPage6, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl42.SetValidator(myIntValidator())
         bSizer82.Add( self.m_textCtrl42, 0, wx.ALL, 5 )
         
         self.m_staticText112 = wx.StaticText( self.m_wizPage6, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -429,6 +930,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer91.Add( self.m_staticText62, 0, wx.ALL, 5 )
         
         self.m_textCtrl61 = wx.TextCtrl( self.m_wizPage6, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl61.SetValidator(myIntValidator())
         bSizer91.Add( self.m_textCtrl61, 0, wx.ALL|wx.EXPAND, 5 )
         
         
@@ -461,6 +963,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer101.Add( self.m_staticText151, 0, wx.ALL, 5 )
         
         self.m_textCtrl71 = wx.TextCtrl( self.m_wizPage6, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl71.SetValidator(myIntValidator())
         bSizer101.Add( self.m_textCtrl71, 0, wx.ALL, 5 )
         
         
@@ -497,6 +1000,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer2111211.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
         self.m_checkBox4111211 = wx.CheckBox( self.m_wizPage7, wx.ID_ANY, u"select", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_checkBox4111211.SetValidator(mySortValidator(self))
         self.m_checkBox4111211.SetFont( wx.Font( 8, 74, 93, 90, False, "Arial" ) )
         
         bSizer2111211.Add( self.m_checkBox4111211, 0, wx.ALL, 5 )
@@ -531,6 +1035,7 @@ class MyWizard1 ( wx.wizard.Wizard ):
         bSizer911.Add( self.m_staticText621, 0, wx.ALL, 5 )
         
         self.m_textCtrl611 = wx.TextCtrl( self.m_wizPage7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl611.SetValidator(my400IntValidator())
         bSizer911.Add( self.m_textCtrl611, 0, wx.ALL|wx.EXPAND, 5 )
         
         
@@ -567,8 +1072,9 @@ class MyWizard1 ( wx.wizard.Wizard ):
         
         bSizer55 = wx.BoxSizer( wx.VERTICAL )
         
-        self.m_staticText65 = wx.StaticText( self.m_wizPage8, wx.ID_ANY, u"Process File", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText65 = wx.StaticText( self.m_wizPage8, wx.ID_ANY, u"Press Next to start process", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText65.Wrap( -1 )
+        self.m_staticText65.SetFont( wx.Font( 14, 74, 90, 92, False, "Arial" ) )
         bSizer55.Add( self.m_staticText65, 0, wx.ALL, 5 )
         
         self.m_textCtrl18_sysout = wx.TextCtrl( self.m_wizPage8, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_DONTWRAP|wx.TE_MULTILINE|wx.TE_READONLY )
