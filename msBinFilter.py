@@ -70,13 +70,16 @@ def main(file):
     
     filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
     if log.level == logging.DEBUG: filterlineBins_csv(filterlines_filtered,'filteredBins.csv')
-    
-#     filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
+   
     filtered_peaks = {k: bins2Peaks(v, filterlines_inBins[k]) for k, v in filterlines_filtered.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filtered_peaks,'mzXMLdata.csv')
+       
+    # cant use filtered bins in mzxml because it is not readable by seems
+    filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
+    
     newfilename = filename[:-4]+ '.mzXML'
     log.info('Writing results to %s', newfilename)
-    write2templateMzXML(newfilename, filtered_peaks)
+    write2templateMzXML(newfilename, filtered_bins)
     
     log.debug('finish %f',  time.clock())
     
