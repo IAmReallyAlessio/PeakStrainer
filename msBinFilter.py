@@ -546,21 +546,40 @@ def filterlineBins_csv(filterlineBins, filename = 'filterlineBins.csv'):
                     line = (filterline,)+ (bin,) + row
                     writer.writerow(line)
                     
-def filterBins(binData, minRepetitionRate = 0.75):
-    log.debug('filterBins count %d ,minRepetitionRate %f',len(binData),minRepetitionRate)
+def filterBins(binData, minRepetitionRate = 0.75 , decimal_places = 4):
+    decimal = (10 ** -decimal_places)
+    log.debug('filterBins count %d ,minRepetitionRate %f, decimal places %d, %f',len(binData),minRepetitionRate, decimal_places, decimal)
     maxCount = 0
     maxAbunds = 0
+    
+    
     for bin in binData:
         (count, sumZmass, sumAbund) = binData[bin]
         if maxCount < count: maxCount = count
         if maxAbunds <  (sumAbund/count) : maxAbunds = (sumAbund/count)
-    
+
+    bintable = [(k + binData[k]) for k in binData]
+    sortedBintable = sorted(bintable)
+    #TODO this code is fishy , refactor
     binData_filtered = {}
-    for bin in binData:
-        (count, sumZmass, sumAbund) = binData[bin]
+#     for bin in binData:
+    for idx, row in enumerate(sortedBintable):
+        bin = row[0:2]
+        (count, sumZmass, sumAbund) = row[2:]
         if count >= (maxCount * minRepetitionRate):
             binData_filtered[bin]=(count, sumZmass, sumAbund)
+        
+        if idx+1 >= len(sortedBintable): continue
+            
+        nextrow = sortedBintable[idx+1]  
+        # test edge cases
+        if abs(nextrow[0]-row[1])<decimal : # row highbin is adjecent nextrow lowbin
+            if  row[2]+nextrow[2]>= (maxCount * minRepetitionRate):
+                binData_filtered[bin]=(count, sumZmass, sumAbund)
+                binData_filtered[nextrow[0:2]]=nextrow[2:]
+
     log.debug('Filter rate %f', len(binData_filtered)/len(binData))
+    
     return binData_filtered
     
 
