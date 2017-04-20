@@ -58,6 +58,10 @@ def main(file):
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
+    filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
+    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'mergeBins.csv')
+    
+    
     ''' put each mass in a bin
     filterlines_inBins = {k: sortMassIn_sortWindow(v) for k, v in filterlines_withBins.iteritems()}
     filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
@@ -262,7 +266,7 @@ def generateBins_decimalPlaces(peakData, decimal_places = 4):
     bins_low = [ round(mass-halfWidth,decimal_places) for mass in masses]
     bins_high = [ round(mass+halfWidth,decimal_places) for mass in masses] 
     
-    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], bins_low, bins_high))
+    peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
     return peakData
 
 def generateBins_resolution(peakData, decimal_places = 4):
@@ -278,7 +282,7 @@ def generateBins_resolution(peakData, decimal_places = 4):
     bins_low = [round(low,decimal_places ) for low in bins_low]
     bins_high = [round(low,decimal_places ) for low in bins_high]
     
-    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], bins_low, bins_high))
+    peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
     return peakData
 
 def generateBins_theoreticalResolution(peakData, decimal_places = 4):
@@ -310,7 +314,7 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
     bins_low = [round(low,decimal_places ) for low in bins_low]
     bins_high = [round(low,decimal_places ) for low in bins_high]
     
-    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], bins_low, bins_high))
+    peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
     return peakData
 
 def generateBins_resolutionPowerFunc(peakData, a = 1.0, minus_b = 1.0, decimal_places = 4):
@@ -333,7 +337,7 @@ def generateBins_resolutionPowerFunc(peakData, a = 1.0, minus_b = 1.0, decimal_p
     bins_low = [round(low,decimal_places ) for low in bins_low]
     bins_high = [round(low,decimal_places ) for low in bins_high]
     
-    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], bins_low, bins_high))
+    peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
     return peakData
 
 def generateBins_theoreticalIntensity(peakData, decimal_places = 4):
@@ -365,9 +369,43 @@ def generateBins_theoreticalIntensity(peakData, decimal_places = 4):
     bins_low = [round(low,decimal_places ) for low in bins_low]
     bins_high = [round(low,decimal_places ) for low in bins_high]
     
-    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], bins_low, bins_high))
+    peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
     return peakData
 
+def alterBins_mergeOverlap(peakData):
+    log.debug('alterBins_mergeOverlap')
+    
+    
+    sortedPeakData = zip(*sorted(zip(*peakData)))
+    masses =    list(sortedPeakData[0])
+    abunds =    list(sortedPeakData[1])
+    resols =    list(sortedPeakData[2])
+    bins_low =  list(sortedPeakData[3])
+    bins_high = list(sortedPeakData[4])
+    
+    while True: #bubble check
+        count = 0
+        changed = False
+        for idx, _ in enumerate(bins_high):
+            if idx >= len(bins_high)-1 : continue 
+            low = bins_low[idx]
+            high = bins_high[idx]
+            nextLow = bins_low[idx+1]
+            nexthigh = bins_high[idx+1]
+            
+            if low== nextLow and high == nexthigh : continue # already updated
+            
+            if high > nextLow:
+                bins_high[idx] = nexthigh
+                bins_low[idx+1] = low
+                changed = True
+                count += 1
+        log.debug('merged %d pairs of bins', count)
+        if not changed : break
+                
+    peakData = (masses, abunds, resols, bins_low, bins_high)
+    return peakData 
+    
 '''
 sort each mass in a bin
 '''
@@ -394,7 +432,7 @@ def sortMassIn_FirstBin(peakData):
     if(len(bins) != len(masses)):
         log.error('There was a problem setting masses in bins, please verify bins where created correctly')
     
-    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins))
+    peakData = (peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins)
     return peakData
 
 
@@ -437,7 +475,7 @@ def sortMassIn_NarrowestBin(peakData):
     if(len(bins) != len(masses)):
         log.error('There was a problem setting masses in bins, please verify bins where created correctly')
     
-    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins))
+    peakData = (peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins)
     return peakData
 
 def sortMassIn_sortWindow(peakData, window = 200):
@@ -468,7 +506,7 @@ def sortMassIn_sortWindow(peakData, window = 200):
     if(len(bins) != len(masses)):
         log.error('There was a problem setting masses in bins, please verify bins where created correctly')
     
-    peakData = zip(*zip(peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins))
+    peakData = (peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins)
     return peakData
 
 def sortMassIn_sortNarrowWindow(peakData, window = 200):
@@ -510,14 +548,14 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
     if(len(bins) != len(masses)):
         log.error('There was a problem setting masses in bins, please verify bins where created correctly')
     
-    peakData = zip(*zip(peakData_sorted[0], peakData_sorted[1], peakData_sorted[2], peakData_sorted[3], peakData[4], bins))
+    peakData = (peakData_sorted[0], peakData_sorted[1], peakData_sorted[2], peakData_sorted[3], peakData[4], bins)
     return peakData
 
 '''
 aggregate bins
 '''
 def aggregateBinData(peakData):
-    log.debug('aggregateBinData count &d, count, sumZmass, sumAbund', len(peakData))
+    log.debug('aggregateBinData count %d, count, sumZmass, sumAbund', len(peakData))
     masses = peakData[0]
     abunds = peakData[1]
     resols = peakData[2]
@@ -534,7 +572,7 @@ def aggregateBinData(peakData):
         sumAbund += abund
         binsData[bin] = count, sumZmass, sumAbund 
 
-    log.debug('bin count &d ', len(binsData))
+    log.debug('bin count %d ', len(binsData))
     return binsData
 
 def filterlineBins_csv(filterlineBins, filename = 'filterlineBins.csv'):
