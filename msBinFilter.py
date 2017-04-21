@@ -55,7 +55,7 @@ def main(file):
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
     filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.iteritems()}
     '''
-    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,2096000.0,0.5) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
     filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
@@ -318,7 +318,7 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
     return peakData
 
 def generateBins_resolutionPowerFunc(peakData, a = 1.0, minus_b = 1.0, decimal_places = 4):
-    log.debug('generateBins_resolutionPowerFunc, mass +- res_func, res_func = a*(mass**-b), a= %d, b = %d',a, minus_b  )
+    log.debug('generateBins_resolutionPowerFunc, mass +- res_func, res_func = a*(mass**-b), a= %f, b = %f',a, minus_b  )
     masses = peakData[0]
     log.debug('generateBins_resolutionPowerFunc, peak count %d', len(masses))
     
