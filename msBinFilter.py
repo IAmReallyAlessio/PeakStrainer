@@ -280,8 +280,9 @@ def generateBins_resolution(peakData, decimal_places = 4):
     bins_high = [mass + ((mass/resol)/2) for mass, resol in zip(masses,resols)] 
     bins_low =  [mass - ((mass/resol)/2) for mass, resol in zip(masses,resols)]
     # rounding to make bins larger
-    bins_low = [round(low,decimal_places ) for low in bins_low]
-    bins_high = [round(low,decimal_places ) for low in bins_high]
+    halfWidth= (10**-decimal_places)/2
+    bins_low = [round(mass-halfWidth,decimal_places ) for mass in bins_low]
+    bins_high = [round(mass+halfWidth,decimal_places ) for mass in bins_high]
     
     peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
     return peakData
@@ -311,9 +312,11 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
     
     bins_high = [mass + ((mass/resol)/2) for mass, resol in zip(masses,theoResols)] 
     bins_low =  [mass - ((mass/resol)/2) for mass, resol in zip(masses,theoResols)]
-    # rounding to make bins larger
-    bins_low = [round(low,decimal_places ) for low in bins_low]
-    bins_high = [round(low,decimal_places ) for low in bins_high]
+     # rounding to make bins larger
+    halfWidth= (10**-decimal_places)/2
+    bins_low = [round(mass-halfWidth,decimal_places ) for mass in bins_low]
+    bins_high = [round(mass+halfWidth,decimal_places ) for mass in bins_high]
+    
     
     peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
     return peakData
@@ -334,9 +337,11 @@ def generateBins_resolutionPowerFunc(peakData, a = 1.0, minus_b = 1.0, decimal_p
     
     bins_high = [mass + ((mass/resol)/2) for mass, resol in zip(masses,theoResols)] 
     bins_low =  [mass - ((mass/resol)/2) for mass, resol in zip(masses,theoResols)]
-    # rounding to make bins larger
-    bins_low = [round(low,decimal_places ) for low in bins_low]
-    bins_high = [round(low,decimal_places ) for low in bins_high]
+     # rounding to make bins larger
+    halfWidth= (10**-decimal_places)/2
+    bins_low = [round(mass-halfWidth,decimal_places ) for mass in bins_low]
+    bins_high = [round(mass+halfWidth,decimal_places ) for mass in bins_high]
+    
     
     peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
     return peakData
@@ -366,9 +371,11 @@ def generateBins_theoreticalIntensity(peakData, decimal_places = 4):
     
     bins_high = [mass + ((mass/resol)/2) for mass, resol in zip(masses,theoResols)] 
     bins_low =  [mass - ((mass/resol)/2) for mass, resol in zip(masses,theoResols)]
-    # rounding to make bins larger
-    bins_low = [round(low,decimal_places ) for low in bins_low]
-    bins_high = [round(low,decimal_places ) for low in bins_high]
+     # rounding to make bins larger
+    halfWidth= (10**-decimal_places)/2
+    bins_low = [round(mass-halfWidth,decimal_places ) for mass in bins_low]
+    bins_high = [round(mass+halfWidth,decimal_places ) for mass in bins_high]
+    
     
     peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
     return peakData
@@ -425,13 +432,19 @@ def sortMassIn_FirstBin(peakData):
         return sortMassIn_sortWindow(peakData, len(uniqBins)/100)
     bins = []
     for mass in masses:
+        inbin =False
         for bin_low, bin_high in uniqBins:
             if mass >= bin_low and mass <= bin_high:
                 bins.append((bin_low,bin_high))
+                inbin = True
                 break
+        if not inbin:
+            print 'error'
+            
     
     if(len(bins) != len(masses)):
         log.error('There was a problem setting masses in bins, please verify bins where created correctly')
+        raise Exception('There was a problem setting masses in bins, please verify bins where created correctly')
     
     peakData = (peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins)
     return peakData
