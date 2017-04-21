@@ -55,7 +55,7 @@ def main(file):
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
     filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.iteritems()}
     '''
-    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,2096000.0,0.5) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
     filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
@@ -554,8 +554,8 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
 '''
 aggregate bins
 '''
-def aggregateBinData(peakData, relative_intens_LowerBound=0.1):
-    log.debug('aggregateBinData count %d, relative_intens_LowerBound %f', len(peakData), relative_intens_LowerBound)
+def aggregateBinData(peakData):
+    log.debug('aggregateBinData count %d, count, sumZmass, sumAbund', len(peakData))
     masses = peakData[0]
     abunds = peakData[1]
     resols = peakData[2]
@@ -564,17 +564,13 @@ def aggregateBinData(peakData, relative_intens_LowerBound=0.1):
     bins = peakData[5]
     binsData = dict()
     
-    lowI_Bound = max(abunds) * relative_intens_LowerBound
-    log.debug('Using lower bound of intensity %f for calculating maxCount',lowI_Bound)
-    
-    newRow = 0,0.0,0.0,0 #  count, sumZmass, sumAbund, highI_Count
+    newRow = 0,0.0,0.0 #  count, sumZmass, sumAbund
     for mass, abund, resol, bin_low, bin_high, bin in zip(*peakData):
-        count, sumZmass, sumAbund, highI_Count = binsData.get(bin, newRow)
+        count, sumZmass, sumAbund = binsData.get(bin, newRow) 
         count +=1
         sumZmass += mass
         sumAbund += abund
-        if abund > lowI_Bound: highI_Count += 1
-        binsData[bin] = count, sumZmass, sumAbund, highI_Count
+        binsData[bin] = count, sumZmass, sumAbund 
 
     log.debug('bin count %d ', len(binsData))
     return binsData
@@ -592,13 +588,13 @@ def filterlineBins_csv(filterlineBins, filename = 'filterlineBins.csv'):
 def filterBins(binData, minRepetitionRate = 0.75 , decimal_places = 4):
     decimal = (10 ** -decimal_places)
     log.debug('filterBins count %d ,minRepetitionRate %f, decimal places %d, %f',len(binData),minRepetitionRate, decimal_places, decimal)
-    max_hi_Count = 0
+    maxCount = 0
     maxAbunds = 0
     
     
     for bin in binData:
-        (count, sumZmass, sumAbund, highI_Count) = binData[bin]
-        if max_hi_Count < highI_Count: max_hi_Count = highI_Count
+        (count, sumZmass, sumAbund) = binData[bin]
+        if maxCount < count: maxCount = count
         if maxAbunds <  (sumAbund/count) : maxAbunds = (sumAbund/count)
 
     bintable = [(k + binData[k]) for k in binData]
@@ -608,20 +604,20 @@ def filterBins(binData, minRepetitionRate = 0.75 , decimal_places = 4):
 #     for bin in binData:
     for idx, row in enumerate(sortedBintable):
         bin = row[0:2]
-        (count, sumZmass, sumAbund, highI_Count) = row[2:]
-        if count >= (max_hi_Count * minRepetitionRate):
-            binData_filtered[bin]=(count, sumZmass, sumAbund, highI_Count)
+        (count, sumZmass, sumAbund) = row[2:]
+        if count >= (maxCount * minRepetitionRate):
+            binData_filtered[bin]=(count, sumZmass, sumAbund)
         
         if idx+1 >= len(sortedBintable): continue
             
         nextrow = sortedBintable[idx+1]  
         # test edge cases
         if abs(nextrow[0]-row[1])<decimal : # row highbin is adjecent nextrow lowbin
-            if  row[2]+nextrow[2]>= (max_hi_Count * minRepetitionRate):
-                binData_filtered[bin]=(count, sumZmass, sumAbund, highI_Count)
+            if  row[2]+nextrow[2]>= (maxCount * minRepetitionRate):
+                binData_filtered[bin]=(count, sumZmass, sumAbund)
                 binData_filtered[nextrow[0:2]]=nextrow[2:]
 
-    log.debug('Filter rate %f using max peak Count %d ', len(binData_filtered)/len(binData), max_hi_Count) # max_hi_Count is counting only high intensitiy signals, more than 10% of max 
+    log.debug('Filter rate %f', len(binData_filtered)/len(binData))
     
     return binData_filtered
     
@@ -631,7 +627,7 @@ def formatPeaks(binData):
     masses = []
     intens = []
     for bin in binData:
-        (count, sumZmass, sumAbund, highI_Count) = binData[bin]
+        (count, sumZmass, sumAbund) = binData[bin]
         masses.append(sumZmass/count)
         intens.append(sumAbund/count)
     
