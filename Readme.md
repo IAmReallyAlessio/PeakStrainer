@@ -11,7 +11,9 @@ Quick Start
  - install [MSFileReader](https://github.com/frallain/MSFileReader-Python-bindings)
   this requires comtypes, and  Thermo MSFileReader, see [here](https://github.com/frallain/MSFileReader-Python-bindings/blob/master/README.md) for more details
 
- - run python msBinFilter.py spectra.raw
+ - run ```python msBinFilter_Wizard.py``` for a graphic user interface
+ or  
+ - run ```python msBinFilter.py spectra.raw``` for a command line interface
  
  Several files are created:
   - an mzXML file where the results are stored
