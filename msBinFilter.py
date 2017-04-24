@@ -14,6 +14,7 @@ import csv
 from msBinFilter_util import encodePeaks, write2templateMzXML
 import itertools
 from math import floor
+from bokeh.charts.stats import bins
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -55,7 +56,7 @@ def main(file):
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
     filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.iteritems()} # 5408000.0, 2096000.0
     '''
-    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,5408000.0,0.5) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
     filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
@@ -73,9 +74,10 @@ def main(file):
     filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
     if log.level == logging.DEBUG: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
     
+    
     filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
     if log.level == logging.DEBUG: filterlineBins_csv(filterlines_filtered,'filteredBins.csv')
-   
+    
     filtered_peaks = {k: bins2Peaks(v, filterlines_inBins[k]) for k, v in filterlines_filtered.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filtered_peaks,'mzXMLdata.csv')
        
@@ -390,9 +392,11 @@ def alterBins_mergeOverlap(peakData):
     bins_low =  list(sortedPeakData[3])
     bins_high = list(sortedPeakData[4])
     
+    toggleJoin = False
     while True: #bubble check
         count = 0
         changed = False
+        toggleJoin = not toggleJoin
         for idx, _ in enumerate(bins_high):
             if idx >= len(bins_high)-1 : continue 
             low = bins_low[idx]
@@ -403,8 +407,12 @@ def alterBins_mergeOverlap(peakData):
             if low== nextLow and high == nexthigh : continue # already updated
             
             if high > nextLow:
-                bins_high[idx] = nexthigh
-                bins_low[idx+1] = low
+                if toggleJoin: 
+                    bins_high[idx] = nexthigh 
+                    bins_low[idx+1] = low
+                else: 
+                    bins_high[idx] = round((nexthigh+low)/2,4) 
+                    bins_low[idx+1] = round((nexthigh+low)/2,4)
                 changed = True
                 count += 1
         log.debug('merged %d pairs of bins', count)
