@@ -444,7 +444,7 @@ def sortMassIn_FirstBin(peakData):
     
     if(len(bins) != len(masses)):
         log.error('There was a problem setting masses in bins, please verify bins where created correctly')
-        raise Exception('There was a problem setting masses in bins, please verify bins where created correctly')
+        raise RuntimeError('There was a problem setting masses in bins, please verify bins where created correctly')
     
     peakData = (peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins)
     return peakData
