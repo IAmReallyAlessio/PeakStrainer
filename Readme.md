@@ -7,7 +7,16 @@ and combining the consistent signals.
 
 Quick Start
 -----------
-todo
+ - Install [Python](https://www.continuum.io/downloads) 2 or 3 
+ - install [MSFileReader](https://github.com/frallain/MSFileReader-Python-bindings)
+  this requires comtypes, and  Thermo MSFileReader, see [here](https://github.com/frallain/MSFileReader-Python-bindings/blob/master/README.md) for more details
+
+ - run python msBinFilter.py spectra.raw
+ 
+ Several files are created:
+  - an mzXML file where the results are stored
+  - several csv files that show the intermediate and final steps
+  - a log for the settings, warnings and error information    
 
 Desktop Application
 ----
