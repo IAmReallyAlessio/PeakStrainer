@@ -14,7 +14,6 @@ import csv
 from msBinFilter_util import encodePeaks, write2templateMzXML
 import itertools
 from math import floor
-from __builtin__ import TypeError
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -54,9 +53,9 @@ def main(file):
     filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
     filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
-    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.iteritems()}
+    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.iteritems()} # 5408000.0, 2096000.0
     '''
-    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,5408000.0,0.50) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
     filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
@@ -602,7 +601,7 @@ def filterlineBins_csv(filterlineBins, filename = 'filterlineBins.csv'):
 def filterBins(binData, minRepetitionRate = 0.75 , decimal_places = 4, disregardBottom= 0.10):
     decimal = (10 ** -decimal_places)
     log.debug('filterBins count %d ,minRepetitionRate %f, decimal places %d, %f, desrigarding bottom %f percent',len(binData),minRepetitionRate, decimal_places, decimal, disregardBottom)
-    if disregardBottom >= 1 : raise TypeError('disregardBottom can not be more than 1')
+    if disregardBottom >= 1 : raise RuntimeError('disregardBottom can not be more than 1')
     maxCount = 0
     maxAbunds = 0
     
