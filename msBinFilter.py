@@ -72,7 +72,6 @@ def main(file):
     filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
     if log.level == logging.DEBUG: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
     
-    
     filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
     if log.level == logging.DEBUG: filterlineBins_csv(filterlines_filtered,'filteredBins.csv')
     
@@ -405,8 +404,13 @@ def alterBins_mergeOverlap(peakData):
             if low== nextLow and high == nexthigh : continue # already updated
             
             if high > nextLow:
-                bins_high[idx] = nexthigh
-                bins_low[idx+1] = low
+                if abunds[idx] > abunds[idx+1] * 0.5 and abunds[idx] < abunds[idx+1] * 2:
+                    bins_high[idx] = nexthigh
+                    bins_low[idx+1] = low
+                else:
+                    bins_high[idx] = round((nexthigh+low)/2, 4)
+                    bins_low[idx+1] = round((nexthigh+low)/2, 4)
+                    
                 changed = True
                 count += 1
         log.debug('merged %d pairs of bins', count)
@@ -600,28 +604,32 @@ def filterlineBins_csv(filterlineBins, filename = 'filterlineBins.csv'):
                     row = binsdata[bin]
                     line = (filterline,)+ bin + row
                     writer.writerow(line)
-                    
+                   
+
+def getMaxCount(binData, disregardBottom = 0.10):
+    maxCount = 0
+    maxAbunds = 0
+    for bin in binData:
+        count, sumZmass, sumAbund = binData[bin]
+        if maxAbunds < (sumAbund / count):
+            maxAbunds = sumAbund / count
+    
+    abundsCutoff = maxAbunds * disregardBottom
+    log.debug('bins with average intensity lower than %f are not evaluated to establish min repetition rate', abundsCutoff)
+    for bin in binData:
+        count, sumZmass, sumAbund = binData[bin]
+        if (sumAbund / count) < abundsCutoff: continue  # dont consider the
+        if maxCount < count:
+            maxCount = count
+    
+    log.debug('Max peak count is %d, for bins with average abundance above %f ', maxCount, abundsCutoff)
+    return maxCount
+
 def filterBins(binData, minRepetitionRate = 0.75 , decimal_places = 4, disregardBottom= 0.10):
     decimal = (10 ** -decimal_places)
     log.debug('filterBins count %d ,minRepetitionRate %f, decimal places %d, %f, desrigarding bottom %f percent',len(binData),minRepetitionRate, decimal_places, decimal, disregardBottom)
     if disregardBottom >= 1 : raise RuntimeError('disregardBottom can not be more than 1')
-    maxCount = 0
-    maxAbunds = 0
-    
-    
-    for bin in binData:
-        (count, sumZmass, sumAbund) = binData[bin]
-        if maxAbunds <  (sumAbund/count) : maxAbunds = (sumAbund/count)
-    
-    abundsCutoff = maxAbunds *  disregardBottom
-    log.debug('bins with average intensity lower than %f are not evaluated to establish min repetition rate',abundsCutoff )    
-    
-    for bin in binData:
-        (count, sumZmass, sumAbund) = binData[bin]
-        if (sumAbund/count) < abundsCutoff: continue # dont consider the 
-        if maxCount < count: maxCount = count
-    
-    log.debug('Max peak count is %d, for bins with average abundance above %f ',maxCount , abundsCutoff)
+    maxCount = getMaxCount(binData, disregardBottom)
     
     bintable = [(k + binData[k]) for k in binData]
     sortedBintable = sorted(bintable)
