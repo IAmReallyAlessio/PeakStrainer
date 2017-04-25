@@ -11,10 +11,8 @@ import os
 import time
 import logging
 import csv
-from msBinFilter_util import encodePeaks, write2templateMzXML
+from msBinFilter_util import write2templateMzXML
 import itertools
-from math import floor
-from bokeh.charts.stats import bins
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -394,11 +392,9 @@ def alterBins_mergeOverlap(peakData):
     bins_low =  list(sortedPeakData[3])
     bins_high = list(sortedPeakData[4])
     
-    toggleJoin = False
     while True: #bubble check
         count = 0
         changed = False
-        toggleJoin = not toggleJoin
         for idx, _ in enumerate(bins_high):
             if idx >= len(bins_high)-1 : continue 
             low = bins_low[idx]
@@ -409,12 +405,8 @@ def alterBins_mergeOverlap(peakData):
             if low== nextLow and high == nexthigh : continue # already updated
             
             if high > nextLow:
-                if toggleJoin: 
-                    bins_high[idx] = nexthigh 
-                    bins_low[idx+1] = low
-                else: 
-                    bins_high[idx] = round((nexthigh+low)/2,4) 
-                    bins_low[idx+1] = round((nexthigh+low)/2,4)
+                bins_high[idx] = nexthigh
+                bins_low[idx+1] = low
                 changed = True
                 count += 1
         log.debug('merged %d pairs of bins', count)
