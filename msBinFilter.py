@@ -120,6 +120,7 @@ def ThermoRawfile2Scans(file_path):
 def ThermoRawfile2Scans_csv(scans):
     with open('ThermoRawfile2Scans.csv', "wb") as csv_file:
         writer = csv.writer(csv_file, delimiter=',')
+        writer.writerow(('scanNum', 'filterLine', 'retTime', 'row'))
         for scan in scans:
             (scanNum, filterLine, peak_datas, retTime) = scan
             for row in zip(*peak_datas):
@@ -189,6 +190,7 @@ def mergePeaksOnFilterline(scans):
 def filterlinePeaks_csv(mergedPeaks, filename = 'filterlinePeaks.csv'):
     with open(filename, "wb") as csv_file:
             writer = csv.writer(csv_file, delimiter=',')
+            writer.writerow(('Scan','Row data'))
             for scan in mergedPeaks:
                 peak_data = mergedPeaks[scan]
                 for row in zip(*peak_data):
@@ -599,11 +601,12 @@ def aggregateBinData(peakData):
 def filterlineBins_csv(filterlineBins, filename = 'filterlineBins.csv'):
     with open(filename, "wb") as csv_file:
             writer = csv.writer(csv_file, delimiter=',')
+            writer.writerow(('filterline','binLow', 'binH','row data'))
             for filterline in filterlineBins:
                 binsdata = filterlineBins[filterline]
                 for bin in binsdata:
                     row = binsdata[bin]
-                    line = (filterline,)+ (bin,) + row
+                    line = (filterline,)+ bin + row
                     writer.writerow(line)
                     
 def filterBins(binData, minRepetitionRate = 0.75 , decimal_places = 4, disregardBottom= 0.10):
