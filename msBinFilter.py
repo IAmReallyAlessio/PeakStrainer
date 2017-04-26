@@ -54,7 +54,7 @@ def main(file):
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
     filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.iteritems()} # 5408000.0, 2096000.0
     '''
-    filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,5408000.0,0.5) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
     filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
@@ -504,6 +504,7 @@ def sortMassIn_NarrowestBin(peakData):
     return peakData
 
 def sortMassIn_sortWindow(peakData, window = 200):
+    if window > 200 : window = 200  
     log.debug('sortMassIn_sortWindow, window size %d', window)
     
     peakData_sorted = zip(*sorted(zip(*peakData)))
@@ -514,22 +515,30 @@ def sortMassIn_sortWindow(peakData, window = 200):
     bins_low = peakData_sorted[3]
     bins_high = peakData_sorted[4]
     
-    bins = []
-    for idx, mass in enumerate(masses):
-        found = False
-        lowidx = 0 if idx < (window / 2) else idx - (window / 2)
-        highidx = window + lowidx
-        if idx % window == 0: log.debug('at %d of %d', idx, len(masses))
-        for bin_low, bin_high in zip(bins_low[lowidx:highidx], bins_high[lowidx:highidx]):
-            if mass >= bin_low and mass <= bin_high:
-                found = True
-                bins.append((bin_low,bin_high))
+    tryAgain =True
+    
+    while tryAgain:
+        tryAgain = False
+        bins = []
+        for idx, mass in enumerate(masses):
+            found = False
+            lowidx = 0 if idx < (window / 2) else idx - (window / 2)
+            highidx = window + lowidx
+            if idx % window == 0: log.debug('at %d of %d', idx, len(masses))
+            for bin_low, bin_high in zip(bins_low[lowidx:highidx], bins_high[lowidx:highidx]):
+                if mass >= bin_low and mass <= bin_high:
+                    found = True
+                    bins.append((bin_low,bin_high))
+                    break 
+            if not found:
+                log.error('the mass at index %d did not find a bin, window size %d', idx, window)
+                window = window * 2
+                log.error('change window size to %d', window)
+                tryAgain =True
                 break
-        if not found:
-            log.error('the mass at index %d did not find a bin', idx)
     
     if(len(bins) != len(masses)):
-        log.error('There was a problem setting masses in bins, please verify bins where created correctly')
+        log.error('There was a problem setting masses in bins, please verify bins where created correctly, and window size')
     
     peakData = (peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins)
     return peakData
