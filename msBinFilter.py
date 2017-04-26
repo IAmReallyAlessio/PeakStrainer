@@ -54,7 +54,7 @@ def main(file):
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
     filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.iteritems()} # 5408000.0, 2096000.0
     '''
-    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,5408000.0,0.5) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
     filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
@@ -406,17 +406,10 @@ def alterBins_mergeOverlap(peakData):
                 newHigh = max(nexthigh, high)
                 newLow = min(nextLow, low)
                 
-                if abunds[idx] > abunds[idx+1] * 0.5:
-                    bins_low[idx+1] = bins_high[idx]
-                elif abunds[idx] < abunds[idx+1] * 2: 
-                    bins_high[idx] = bins_low[idx+1]
-                else:    
-                    bins_high[idx] = newHigh
-                    bins_high[idx+1] = newHigh
-                    bins_low[idx] = newLow
-                    bins_low[idx+1] = newLow
-                
-                    
+                bins_high[idx] = newHigh
+                bins_high[idx+1] = newHigh
+                bins_low[idx] = newLow
+                bins_low[idx+1] = newLow
                     
                 changeCount += 1
         log.debug('merged %d pairs of bins', changeCount)
