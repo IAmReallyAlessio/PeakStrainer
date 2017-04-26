@@ -54,7 +54,7 @@ def main(file):
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
     filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.iteritems()} # 5408000.0, 2096000.0
     '''
-    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,5408000.0,0.5) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
     filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
@@ -392,8 +392,7 @@ def alterBins_mergeOverlap(peakData):
     bins_high = list(sortedPeakData[4])
     
     while True: #bubble check
-        count = 0
-        changed = False
+        changeCount = 0
         for idx, _ in enumerate(bins_high):
             if idx >= len(bins_high)-1 : continue 
             low = bins_low[idx]
@@ -402,19 +401,26 @@ def alterBins_mergeOverlap(peakData):
             nexthigh = bins_high[idx+1]
             
             if low== nextLow and high == nexthigh : continue # already updated
-            
+                        
             if high > nextLow:
-                if abunds[idx] > abunds[idx+1] * 0.5 and abunds[idx] < abunds[idx+1] * 2:
-                    bins_high[idx] = nexthigh
-                    bins_low[idx+1] = low
-                else:
-                    bins_high[idx] = round((nexthigh+low)/2, 4)
-                    bins_low[idx+1] = round((nexthigh+low)/2, 4)
+                newHigh = max(nexthigh, high)
+                newLow = min(nextLow, low)
+                
+                if abunds[idx] > abunds[idx+1] * 0.5:
+                    bins_low[idx+1] = bins_high[idx]
+                elif abunds[idx] < abunds[idx+1] * 2: 
+                    bins_high[idx] = bins_low[idx+1]
+                else:    
+                    bins_high[idx] = newHigh
+                    bins_high[idx+1] = newHigh
+                    bins_low[idx] = newLow
+                    bins_low[idx+1] = newLow
+                
                     
-                changed = True
-                count += 1
-        log.debug('merged %d pairs of bins', count)
-        if not changed : break
+                    
+                changeCount += 1
+        log.debug('merged %d pairs of bins', changeCount)
+        if changeCount == 0 : break
                 
     peakData = (masses, abunds, resols, bins_low, bins_high)
     return peakData 
@@ -434,7 +440,7 @@ def sortMassIn_FirstBin(peakData):
     log.debug('Mass count %d, available bins %d', len(masses), len(uniqBins))
     if (len(masses) * len(uniqBins) > 1000000):
         log.debug('this operation may take a long time, use sortMassIn_sortWindow instead')
-        return sortMassIn_sortWindow(peakData, len(uniqBins)/100)
+        return sortMassIn_sortWindow(peakData,len(uniqBins)/100)
     bins = []
     for mass in masses:
         inbin =False
