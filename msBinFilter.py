@@ -13,6 +13,7 @@ import logging
 import csv
 from msBinFilter_util import write2templateMzXML
 import itertools
+import math
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -287,6 +288,23 @@ def generateBins_resolution(peakData, decimal_places = 4):
     peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
     return peakData
 
+def peakWidth_at_hight(abunds, highth = 0.95):
+    ''' Note:
+    for future implementation
+    assuming that the peak has a gausian curve,
+    and that the resols is full width at half maximum, fwhm
+    and given the equation in wikipedia for fwhm
+    
+    the formula for the full width at an abritary height between [0,1]
+    
+    is width = 2 * sqrt(abund**2 * log(hight) / (-4*log(2))) 
+    
+    '''
+    def widthAtHight(fwhm , normHight ):
+        return 2 * math.sqrt(fwhm**2 * math.log(normHight) / (-4*math.log(2)))
+    
+    return [widthAtHight(abund, highth) for abund in abunds]
+    
 def generateBins_theoreticalResolution(peakData, decimal_places = 4):
     log.debug('generateBins_theoreticalResolution, decimal_places %d',  decimal_places)
     masses = peakData[0]
@@ -300,7 +318,7 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
         return  a*(x**-b)
     
     sort_mass = sorted(zip(abunds, masses, resols))#filter on intensity
-        
+        # 5408000.0, 2096000.0
     select_abunds, select_masses, select_resols = zip(*sort_mass)
     log.debug('Selecting only 90% highest intensity, as per Kai S.')
     side_len = len(select_masses) / 10
