@@ -651,7 +651,7 @@ def getMaxCount(binData, disregardBottom = 0.10):
     log.debug('Max peak count is %d, for bins with average abundance above %f ', maxCount, abundsCutoff)
     return maxCount
 
-def filterBins(binData, minRepetitionRate = 0.70 , decimal_places = 4, disregardBottom= 0.10):
+def filterBins(binData, minRepetitionRate = 0.70, decimal_places = 4, disregardBottom= 0.10):
     decimal = (10 ** -decimal_places)
     log.debug('filterBins count %d ,minRepetitionRate %f, decimal places %d, %f, desrigarding bottom %f percent',len(binData),minRepetitionRate, decimal_places, decimal, disregardBottom)
     if disregardBottom >= 1 : raise RuntimeError('disregardBottom can not be more than 1')
