@@ -11,7 +11,7 @@ import os
 import time
 import logging
 import csv
-from msBinFilter_util import write2templateMzXML
+from msBinFilter_util import write2templateMzXML, reorderScans
 import itertools
 import math
 log = logging.getLogger(os.path.basename(__file__))
@@ -79,8 +79,11 @@ def main(file):
     filtered_peaks = {k: bins2Peaks(v, filterlines_inBins[k]) for k, v in filterlines_filtered.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filtered_peaks,'mzXMLdata.csv')
        
-    # cant use filtered bins in mzxml because it is not readable by seems
+    # can't use filtered bins in mzxml because it is not readable by seems
     filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
+    
+    order = [' ms ', '.33-', ' ms ']
+    filtered_bins = reorderScans(filtered_bins, order)
     
     newfilename = filename[:-4]+ '.mzXML'
     log.info('Writing results to %s', newfilename)

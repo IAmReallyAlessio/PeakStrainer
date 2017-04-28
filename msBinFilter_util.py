@@ -12,6 +12,7 @@ import random
 import xml.etree.ElementTree as ET
 import re
 import copy
+from collections import OrderedDict
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -163,3 +164,16 @@ def write2templateMzXML(newfilename, scanPeaks):
     msRunElement.remove(scanTemplete)
     
     tree.write(newfilename, encoding='ISO-8859-1', xml_declaration=True)
+    
+def reorderScans(filtered_bins, order= None):
+    if order== None: return filtered_bins
+    
+    newfiltered_bins = OrderedDict()
+    for idxOrder, selectionText in enumerate(order):
+        for scan in filtered_bins:
+            if selectionText in scan:
+                newfiltered_bins[scan+', '+str(idxOrder)] = filtered_bins[scan]
+        
+    return newfiltered_bins
+    
+
