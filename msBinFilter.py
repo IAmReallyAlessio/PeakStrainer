@@ -55,7 +55,7 @@ def main(file):
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
     filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.iteritems()} # 5408000.0, 2096000.0
     '''
-    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
     filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
@@ -651,7 +651,7 @@ def getMaxCount(binData, disregardBottom = 0.10):
     log.debug('Max peak count is %d, for bins with average abundance above %f ', maxCount, abundsCutoff)
     return maxCount
 
-def filterBins(binData, minRepetitionRate = 0.75 , decimal_places = 4, disregardBottom= 0.10):
+def filterBins(binData, minRepetitionRate = 0.70 , decimal_places = 4, disregardBottom= 0.10):
     decimal = (10 ** -decimal_places)
     log.debug('filterBins count %d ,minRepetitionRate %f, decimal places %d, %f, desrigarding bottom %f percent',len(binData),minRepetitionRate, decimal_places, decimal, disregardBottom)
     if disregardBottom >= 1 : raise RuntimeError('disregardBottom can not be more than 1')
