@@ -82,8 +82,8 @@ def main(file):
     # can't use filtered bins in mzxml because it is not readable by seems
     filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
     
-    order = [' ms ', '.33-', ' ms ']
-    filtered_bins = reorderScans(filtered_bins, order)
+#     order = [' ms ', '.33-', ' ms ']
+#     filtered_bins = reorderScans(filtered_bins, order)
     
     newfilename = filename[:-4]+ '.mzXML'
     log.info('Writing results to %s', newfilename)
