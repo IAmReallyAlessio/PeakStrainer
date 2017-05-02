@@ -58,6 +58,11 @@ def main(file):
     filterlines_withBins = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
+#     filterlines_withBins_ms = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.iteritems() if ' ms ' in k }
+#     filterlines_withBins_msms = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.iteritems() if ' ms ' not in k}
+#     filterlines_withBins = filterlines_withBins_ms.update(filterlines_withBins_msms)
+#     for different function for ms and for msms
+    
     filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'mergeBins.csv')
     
