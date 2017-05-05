@@ -83,7 +83,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_panel3.SetSizer( bSizer5 )
 		self.m_panel3.Layout()
 		bSizer5.Fit( self.m_panel3 )
-		self.m_notebook1.AddPage( self.m_panel3, u"General", False )
+		self.m_notebook1.AddPage( self.m_panel3, u"General", True )
 		self.m_panel4 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer9 = wx.BoxSizer( wx.VERTICAL )
 		
@@ -629,7 +629,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_panel9.SetSizer( bSizer39 )
 		self.m_panel9.Layout()
 		bSizer39.Fit( self.m_panel9 )
-		self.m_notebook1.AddPage( self.m_panel9, u"Status", True )
+		self.m_notebook1.AddPage( self.m_panel9, u"Status", False )
 		
 		bSizer3.Add( self.m_notebook1, 9, wx.EXPAND |wx.ALL, 5 )
 		
