@@ -16,8 +16,8 @@ class MyFrame(MyFrame2):
         
    # Virtual event handlers, overide them in your derived class
     def clickedBrowse( self, event ):
-        wildcard = "spectra (*.mzXML)|*.mzXML;*mzxml"
-        dlg = wx.FileDialog(self, message="Select your files",defaultDir=os.getcwd(),defaultFile="*.mzXML", wildcard=wildcard, style=wx.OPEN|wx.MULTIPLE)
+        wildcard = "Thermo raw (*.raw)|*.raw;*RAW"
+        dlg = wx.FileDialog(self, message="Select your files",defaultDir=os.getcwd(),defaultFile="*.raw", wildcard=wildcard, style=wx.OPEN|wx.MULTIPLE)
 
         if dlg.ShowModal() == wx.ID_OK:
                 path, file = os.path.split(dlg.GetPath())
