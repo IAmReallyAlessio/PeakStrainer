@@ -5,7 +5,6 @@ Created on 04.05.2017
 '''
 from msBinFilterGUI import MyFrame2
 import wx
-from FileDialog import FileDialog
 import os
 
 
