@@ -44,6 +44,8 @@ class MyFrame2 ( wx.Frame ):
 		
 		self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_panel3 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		self.m_panel3.Hide()
+		
 		bSizer5 = wx.BoxSizer( wx.VERTICAL )
 		
 		bSizer6 = wx.BoxSizer( wx.HORIZONTAL )
@@ -90,6 +92,8 @@ class MyFrame2 ( wx.Frame ):
 		bSizer10.Add( self.m_staticText31, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_dirPicker1 = wx.DirPickerCtrl( self.m_panel4, wx.ID_ANY, wx.EmptyString, u"Select a folder", wx.DefaultPosition, wx.DefaultSize, wx.DIRP_DEFAULT_STYLE )
+		self.m_dirPicker1.Enable( False )
+		
 		bSizer10.Add( self.m_dirPicker1, 1, wx.ALL, 5 )
 		
 		
@@ -112,6 +116,8 @@ class MyFrame2 ( wx.Frame ):
 		bSizer11.Add( self.m_staticText16, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_slider1 = wx.Slider( self.m_panel4, wx.ID_ANY, 1, 1, 5, wx.DefaultPosition, wx.DefaultSize, wx.SL_AUTOTICKS|wx.SL_HORIZONTAL )
+		self.m_slider1.Enable( False )
+		
 		bSizer11.Add( self.m_slider1, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_staticText17 = wx.StaticText( self.m_panel4, wx.ID_ANY, u"high", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -134,6 +140,8 @@ class MyFrame2 ( wx.Frame ):
 		bSizer12.Add( self.m_staticText5, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_filePicker2 = wx.FilePickerCtrl( self.m_panel4, wx.ID_ANY, wx.EmptyString, u"Select a config.ini", u"*.ini", wx.DefaultPosition, wx.DefaultSize, wx.FLP_DEFAULT_STYLE )
+		self.m_filePicker2.Enable( False )
+		
 		bSizer12.Add( self.m_filePicker2, 1, wx.ALL, 5 )
 		
 		
@@ -166,6 +174,8 @@ class MyFrame2 ( wx.Frame ):
 		bSizer21.Add( self.m_staticText8, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_textCtrl2 = wx.TextCtrl( self.m_panel5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl2.Enable( False )
+		
 		bSizer21.Add( self.m_textCtrl2, 0, wx.ALL, 5 )
 		
 		self.m_staticText9 = wx.StaticText( self.m_panel5, wx.ID_ANY, u"to", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -173,6 +183,8 @@ class MyFrame2 ( wx.Frame ):
 		bSizer21.Add( self.m_staticText9, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_textCtrl3 = wx.TextCtrl( self.m_panel5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl3.Enable( False )
+		
 		bSizer21.Add( self.m_textCtrl3, 0, wx.ALL, 5 )
 		
 		self.m_staticText10 = wx.StaticText( self.m_panel5, wx.ID_ANY, u"in seconds", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -195,11 +207,15 @@ class MyFrame2 ( wx.Frame ):
 		bSizer23.Add( self.m_staticText11, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_textCtrl4 = wx.TextCtrl( self.m_panel5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl4.Enable( False )
+		
 		bSizer23.Add( self.m_textCtrl4, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		m_radioBox1Choices = [ u"including", u"excluding" ]
 		self.m_radioBox1 = wx.RadioBox( self.m_panel5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, m_radioBox1Choices, 1, wx.RA_SPECIFY_ROWS )
-		self.m_radioBox1.SetSelection( 1 )
+		self.m_radioBox1.SetSelection( 0 )
+		self.m_radioBox1.Enable( False )
+		
 		bSizer23.Add( self.m_radioBox1, 0, wx.ALL, 5 )
 		
 		
@@ -238,24 +254,31 @@ class MyFrame2 ( wx.Frame ):
 		self.m_staticText14 = wx.StaticText( self.m_panel6, wx.ID_ANY, u"Group to decimal place", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText14.Wrap( -1 )
 		self.m_staticText14.SetFont( wx.Font( 9, 74, 90, 92, False, "Arial" ) )
+		self.m_staticText14.Enable( False )
 		
 		bSizer26.Add( self.m_staticText14, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_spinCtrl2 = wx.SpinCtrl( self.m_panel6, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 1, 10, 2 )
+		self.m_spinCtrl2.Enable( False )
+		
 		bSizer26.Add( self.m_spinCtrl2, 0, wx.ALL, 5 )
 		
 		self.m_staticText15 = wx.StaticText( self.m_panel6, wx.ID_ANY, u"discard groups with", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText15.Wrap( -1 )
 		self.m_staticText15.SetFont( wx.Font( 9, 74, 90, 92, False, "Arial" ) )
+		self.m_staticText15.Enable( False )
 		
 		bSizer26.Add( self.m_staticText15, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_spinCtrl1 = wx.SpinCtrl( self.m_panel6, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 1, 10, 2 )
+		self.m_spinCtrl1.Enable( False )
+		
 		bSizer26.Add( self.m_spinCtrl1, 0, wx.ALL, 5 )
 		
 		self.m_staticText22 = wx.StaticText( self.m_panel6, wx.ID_ANY, u"or less", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText22.Wrap( -1 )
 		self.m_staticText22.SetFont( wx.Font( 9, 74, 90, 92, False, "Arial" ) )
+		self.m_staticText22.Enable( False )
 		
 		bSizer26.Add( self.m_staticText22, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
@@ -294,6 +317,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_staticText23 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"By Measured Resolution trend line", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText23.Wrap( -1 )
 		self.m_staticText23.SetFont( wx.Font( 9, 74, 90, 90, False, "Arial" ) )
+		self.m_staticText23.Enable( False )
 		
 		bSizer32.Add( self.m_staticText23, 0, wx.ALL, 5 )
 		
@@ -316,6 +340,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_staticText231 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"By Resolution based on quadratic function r = a *m/z ^ -b, seperate MS1 and MS2", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText231.Wrap( -1 )
 		self.m_staticText231.SetFont( wx.Font( 9, 74, 90, 90, False, "Arial" ) )
+		self.m_staticText231.Enable( False )
 		
 		bSizer321.Add( self.m_staticText231, 0, wx.ALL, 5 )
 		
@@ -327,23 +352,31 @@ class MyFrame2 ( wx.Frame ):
 		self.m_staticText241 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"where a =", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText241.Wrap( -1 )
 		self.m_staticText241.SetFont( wx.Font( 9, 74, 90, 90, False, "Arial" ) )
+		self.m_staticText241.Enable( False )
 		
 		bSizer331.Add( self.m_staticText241, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_textCtrl61 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl61.Enable( False )
+		
 		bSizer331.Add( self.m_textCtrl61, 0, wx.ALL, 5 )
 		
 		self.m_staticText251 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"and b =", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText251.Wrap( -1 )
 		self.m_staticText251.SetFont( wx.Font( 9, 74, 90, 90, False, "Arial" ) )
+		self.m_staticText251.Enable( False )
 		
 		bSizer331.Add( self.m_staticText251, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_textCtrl71 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl71.Enable( False )
+		
 		bSizer331.Add( self.m_textCtrl71, 0, wx.ALL, 5 )
 		
 		self.m_staticText38 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"for MS1", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText38.Wrap( -1 )
+		self.m_staticText38.Enable( False )
+		
 		bSizer331.Add( self.m_staticText38, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		
@@ -354,23 +387,31 @@ class MyFrame2 ( wx.Frame ):
 		self.m_staticText2411 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"where a =", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText2411.Wrap( -1 )
 		self.m_staticText2411.SetFont( wx.Font( 9, 74, 90, 90, False, "Arial" ) )
+		self.m_staticText2411.Enable( False )
 		
 		bSizer3311.Add( self.m_staticText2411, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_textCtrl611 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl611.Enable( False )
+		
 		bSizer3311.Add( self.m_textCtrl611, 0, wx.ALL, 5 )
 		
 		self.m_staticText2511 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"and b =", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText2511.Wrap( -1 )
 		self.m_staticText2511.SetFont( wx.Font( 9, 74, 90, 90, False, "Arial" ) )
+		self.m_staticText2511.Enable( False )
 		
 		bSizer3311.Add( self.m_staticText2511, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_textCtrl711 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl711.Enable( False )
+		
 		bSizer3311.Add( self.m_textCtrl711, 0, wx.ALL, 5 )
 		
 		self.m_staticText381 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"for MS2", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText381.Wrap( -1 )
+		self.m_staticText381.Enable( False )
+		
 		bSizer3311.Add( self.m_staticText381, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		
@@ -386,6 +427,8 @@ class MyFrame2 ( wx.Frame ):
 		
 		self.m_checkBox11 = wx.CheckBox( self.m_panel7, wx.ID_ANY, u"Merge overlapping bins", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_checkBox11.SetValue(True) 
+		self.m_checkBox11.Enable( False )
+		
 		bSizer38.Add( self.m_checkBox11, 0, wx.ALL, 5 )
 		
 		
@@ -439,6 +482,16 @@ class MyFrame2 ( wx.Frame ):
 		
 		# Connect Events
 		self.m_buttonBrowse.Bind( wx.EVT_BUTTON, self.clickedBrowse )
+		self.m_checkBox8.Bind( wx.EVT_CHECKBOX, self.checkOutcsv )
+		self.m_checkBox9.Bind( wx.EVT_CHECKBOX, self.checkoutLog )
+		self.m_checkBox10.Bind( wx.EVT_CHECKBOX, self.checkOutConf )
+		self.m_checkBox5.Bind( wx.EVT_CHECKBOX, self.checkScanRet )
+		self.m_checkBox6.Bind( wx.EVT_CHECKBOX, self.checkScanHead )
+		self.m_radioBtn10.Bind( wx.EVT_RADIOBUTTON, self.radioPre )
+		self.m_radioBtn11.Bind( wx.EVT_RADIOBUTTON, self.radioPre )
+		self.m_radioBtn9.Bind( wx.EVT_RADIOBUTTON, self.radioBin )
+		self.m_radioBtn1.Bind( wx.EVT_RADIOBUTTON, self.radioBin )
+		self.m_radioBtn4.Bind( wx.EVT_RADIOBUTTON, self.radioBin )
 		self.m_buttonFinish.Bind( wx.EVT_BUTTON, self.clickedFinish )
 	
 	def __del__( self ):
@@ -448,6 +501,30 @@ class MyFrame2 ( wx.Frame ):
 	# Virtual event handlers, overide them in your derived class
 	def clickedBrowse( self, event ):
 		event.Skip()
+	
+	def checkOutcsv( self, event ):
+		event.Skip()
+	
+	def checkoutLog( self, event ):
+		event.Skip()
+	
+	def checkOutConf( self, event ):
+		event.Skip()
+	
+	def checkScanRet( self, event ):
+		event.Skip()
+	
+	def checkScanHead( self, event ):
+		event.Skip()
+	
+	def radioPre( self, event ):
+		event.Skip()
+	
+	
+	def radioBin( self, event ):
+		event.Skip()
+	
+	
 	
 	def clickedFinish( self, event ):
 		event.Skip()

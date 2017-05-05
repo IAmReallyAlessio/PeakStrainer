@@ -455,7 +455,7 @@
                                 <property name="floatable">1</property>
                                 <property name="font"></property>
                                 <property name="gripper">0</property>
-                                <property name="hidden">0</property>
+                                <property name="hidden">1</property>
                                 <property name="id">wxID_ANY</property>
                                 <property name="max_size"></property>
                                 <property name="maximize_button">0</property>
@@ -1038,7 +1038,7 @@
                                                     <property name="window_name"></property>
                                                     <property name="window_style"></property>
                                                     <event name="OnChar"></event>
-                                                    <event name="OnCheckBox"></event>
+                                                    <event name="OnCheckBox">checkOutcsv</event>
                                                     <event name="OnEnterWindow"></event>
                                                     <event name="OnEraseBackground"></event>
                                                     <event name="OnKeyDown"></event>
@@ -1171,7 +1171,7 @@
                                                     <property name="dock">Dock</property>
                                                     <property name="dock_fixed">0</property>
                                                     <property name="docking">Left</property>
-                                                    <property name="enabled">1</property>
+                                                    <property name="enabled">0</property>
                                                     <property name="fg"></property>
                                                     <property name="floatable">1</property>
                                                     <property name="font"></property>
@@ -1389,7 +1389,7 @@
                                                     <property name="window_name"></property>
                                                     <property name="window_style"></property>
                                                     <event name="OnChar"></event>
-                                                    <event name="OnCheckBox"></event>
+                                                    <event name="OnCheckBox">checkoutLog</event>
                                                     <event name="OnEnterWindow"></event>
                                                     <event name="OnEraseBackground"></event>
                                                     <event name="OnKeyDown"></event>
@@ -1605,7 +1605,7 @@
                                                     <property name="dock">Dock</property>
                                                     <property name="dock_fixed">0</property>
                                                     <property name="docking">Left</property>
-                                                    <property name="enabled">1</property>
+                                                    <property name="enabled">0</property>
                                                     <property name="fg"></property>
                                                     <property name="floatable">1</property>
                                                     <property name="font"></property>
@@ -1926,7 +1926,7 @@
                                                     <property name="window_name"></property>
                                                     <property name="window_style"></property>
                                                     <event name="OnChar"></event>
-                                                    <event name="OnCheckBox"></event>
+                                                    <event name="OnCheckBox">checkOutConf</event>
                                                     <event name="OnEnterWindow"></event>
                                                     <event name="OnEraseBackground"></event>
                                                     <event name="OnKeyDown"></event>
@@ -2059,7 +2059,7 @@
                                                     <property name="dock">Dock</property>
                                                     <property name="dock_fixed">0</property>
                                                     <property name="docking">Left</property>
-                                                    <property name="enabled">1</property>
+                                                    <property name="enabled">0</property>
                                                     <property name="fg"></property>
                                                     <property name="floatable">1</property>
                                                     <property name="font"></property>
@@ -2447,7 +2447,7 @@
                                                     <property name="window_name"></property>
                                                     <property name="window_style"></property>
                                                     <event name="OnChar"></event>
-                                                    <event name="OnCheckBox"></event>
+                                                    <event name="OnCheckBox">checkScanRet</event>
                                                     <event name="OnEnterWindow"></event>
                                                     <event name="OnEraseBackground"></event>
                                                     <event name="OnKeyDown"></event>
@@ -2580,7 +2580,7 @@
                                                     <property name="dock">Dock</property>
                                                     <property name="dock_fixed">0</property>
                                                     <property name="docking">Left</property>
-                                                    <property name="enabled">1</property>
+                                                    <property name="enabled">0</property>
                                                     <property name="fg"></property>
                                                     <property name="floatable">1</property>
                                                     <property name="font"></property>
@@ -2754,7 +2754,7 @@
                                                     <property name="dock">Dock</property>
                                                     <property name="dock_fixed">0</property>
                                                     <property name="docking">Left</property>
-                                                    <property name="enabled">1</property>
+                                                    <property name="enabled">0</property>
                                                     <property name="fg"></property>
                                                     <property name="floatable">1</property>
                                                     <property name="font"></property>
@@ -3058,7 +3058,7 @@
                                                     <property name="window_name"></property>
                                                     <property name="window_style"></property>
                                                     <event name="OnChar"></event>
-                                                    <event name="OnCheckBox"></event>
+                                                    <event name="OnCheckBox">checkScanHead</event>
                                                     <event name="OnEnterWindow"></event>
                                                     <event name="OnEraseBackground"></event>
                                                     <event name="OnKeyDown"></event>
@@ -3191,7 +3191,7 @@
                                                     <property name="dock">Dock</property>
                                                     <property name="dock_fixed">0</property>
                                                     <property name="docking">Left</property>
-                                                    <property name="enabled">1</property>
+                                                    <property name="enabled">0</property>
                                                     <property name="fg"></property>
                                                     <property name="floatable">1</property>
                                                     <property name="font"></property>
@@ -3283,7 +3283,7 @@
                                                     <property name="dock">Dock</property>
                                                     <property name="dock_fixed">0</property>
                                                     <property name="docking">Left</property>
-                                                    <property name="enabled">1</property>
+                                                    <property name="enabled">0</property>
                                                     <property name="fg"></property>
                                                     <property name="floatable">1</property>
                                                     <property name="font"></property>
@@ -3307,7 +3307,7 @@
                                                     <property name="pin_button">1</property>
                                                     <property name="pos"></property>
                                                     <property name="resize">Resizable</property>
-                                                    <property name="selection">1</property>
+                                                    <property name="selection">0</property>
                                                     <property name="show">1</property>
                                                     <property name="size"></property>
                                                     <property name="style">wxRA_SPECIFY_ROWS</property>
@@ -3352,11 +3352,11 @@
                                 </object>
                             </object>
                         </object>
-                        <object class="notebookpage" expanded="1">
+                        <object class="notebookpage" expanded="0">
                             <property name="bitmap"></property>
                             <property name="label">Prefilter Peaks</property>
                             <property name="select">0</property>
-                            <object class="wxPanel" expanded="1">
+                            <object class="wxPanel" expanded="0">
                                 <property name="BottomDockable">1</property>
                                 <property name="LeftDockable">1</property>
                                 <property name="RightDockable">1</property>
@@ -3430,7 +3430,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxBoxSizer" expanded="1">
+                                <object class="wxBoxSizer" expanded="0">
                                     <property name="minimum_size"></property>
                                     <property name="name">bSizer25</property>
                                     <property name="orient">wxVERTICAL</property>
@@ -3516,20 +3516,20 @@
                                             <event name="OnUpdateUI"></event>
                                         </object>
                                     </object>
-                                    <object class="sizeritem" expanded="1">
+                                    <object class="sizeritem" expanded="0">
                                         <property name="border">5</property>
                                         <property name="flag">wxEXPAND</property>
                                         <property name="proportion">0</property>
-                                        <object class="wxBoxSizer" expanded="1">
+                                        <object class="wxBoxSizer" expanded="0">
                                             <property name="minimum_size"></property>
                                             <property name="name">bSizer43</property>
                                             <property name="orient">wxVERTICAL</property>
                                             <property name="permission">none</property>
-                                            <object class="sizeritem" expanded="1">
+                                            <object class="sizeritem" expanded="0">
                                                 <property name="border">5</property>
                                                 <property name="flag">wxALL</property>
                                                 <property name="proportion">0</property>
-                                                <object class="wxRadioButton" expanded="1">
+                                                <object class="wxRadioButton" expanded="0">
                                                     <property name="BottomDockable">1</property>
                                                     <property name="LeftDockable">1</property>
                                                     <property name="RightDockable">1</property>
@@ -3604,7 +3604,7 @@
                                                     <event name="OnMouseEvents"></event>
                                                     <event name="OnMouseWheel"></event>
                                                     <event name="OnPaint"></event>
-                                                    <event name="OnRadioButton"></event>
+                                                    <event name="OnRadioButton">radioPre</event>
                                                     <event name="OnRightDClick"></event>
                                                     <event name="OnRightDown"></event>
                                                     <event name="OnRightUp"></event>
@@ -3615,11 +3615,11 @@
                                             </object>
                                         </object>
                                     </object>
-                                    <object class="sizeritem" expanded="1">
+                                    <object class="sizeritem" expanded="0">
                                         <property name="border">5</property>
                                         <property name="flag">wxEXPAND | wxALL</property>
                                         <property name="proportion">0</property>
-                                        <object class="wxStaticLine" expanded="1">
+                                        <object class="wxStaticLine" expanded="0">
                                             <property name="BottomDockable">1</property>
                                             <property name="LeftDockable">1</property>
                                             <property name="RightDockable">1</property>
@@ -3705,11 +3705,11 @@
                                             <property name="name">bSizer26</property>
                                             <property name="orient">wxHORIZONTAL</property>
                                             <property name="permission">none</property>
-                                            <object class="sizeritem" expanded="1">
+                                            <object class="sizeritem" expanded="0">
                                                 <property name="border">5</property>
                                                 <property name="flag">wxALL</property>
                                                 <property name="proportion">0</property>
-                                                <object class="wxRadioButton" expanded="1">
+                                                <object class="wxRadioButton" expanded="0">
                                                     <property name="BottomDockable">1</property>
                                                     <property name="LeftDockable">1</property>
                                                     <property name="RightDockable">1</property>
@@ -3784,7 +3784,7 @@
                                                     <event name="OnMouseEvents"></event>
                                                     <event name="OnMouseWheel"></event>
                                                     <event name="OnPaint"></event>
-                                                    <event name="OnRadioButton"></event>
+                                                    <event name="OnRadioButton">radioPre</event>
                                                     <event name="OnRightDClick"></event>
                                                     <event name="OnRightDown"></event>
                                                     <event name="OnRightUp"></event>
@@ -3818,7 +3818,7 @@
                                                     <property name="dock">Dock</property>
                                                     <property name="dock_fixed">0</property>
                                                     <property name="docking">Left</property>
-                                                    <property name="enabled">1</property>
+                                                    <property name="enabled">0</property>
                                                     <property name="fg"></property>
                                                     <property name="floatable">1</property>
                                                     <property name="font">Arial,90,92,9,74,0</property>
@@ -3901,7 +3901,7 @@
                                                     <property name="dock">Dock</property>
                                                     <property name="dock_fixed">0</property>
                                                     <property name="docking">Left</property>
-                                                    <property name="enabled">1</property>
+                                                    <property name="enabled">0</property>
                                                     <property name="fg"></property>
                                                     <property name="floatable">1</property>
                                                     <property name="font"></property>
@@ -3989,7 +3989,7 @@
                                                     <property name="dock">Dock</property>
                                                     <property name="dock_fixed">0</property>
                                                     <property name="docking">Left</property>
-                                                    <property name="enabled">1</property>
+                                                    <property name="enabled">0</property>
                                                     <property name="fg"></property>
                                                     <property name="floatable">1</property>
                                                     <property name="font">Arial,90,92,9,74,0</property>
@@ -4072,7 +4072,7 @@
                                                     <property name="dock">Dock</property>
                                                     <property name="dock_fixed">0</property>
                                                     <property name="docking">Left</property>
-                                                    <property name="enabled">1</property>
+                                                    <property name="enabled">0</property>
                                                     <property name="fg"></property>
                                                     <property name="floatable">1</property>
                                                     <property name="font"></property>
@@ -4160,7 +4160,7 @@
                                                     <property name="dock">Dock</property>
                                                     <property name="dock_fixed">0</property>
                                                     <property name="docking">Left</property>
-                                                    <property name="enabled">1</property>
+                                                    <property name="enabled">0</property>
                                                     <property name="fg"></property>
                                                     <property name="floatable">1</property>
                                                     <property name="font">Arial,90,92,9,74,0</property>
@@ -4223,11 +4223,11 @@
                                 </object>
                             </object>
                         </object>
-                        <object class="notebookpage" expanded="1">
+                        <object class="notebookpage" expanded="0">
                             <property name="bitmap"></property>
                             <property name="label">Bin Type</property>
                             <property name="select">0</property>
-                            <object class="wxPanel" expanded="1">
+                            <object class="wxPanel" expanded="0">
                                 <property name="BottomDockable">1</property>
                                 <property name="LeftDockable">1</property>
                                 <property name="RightDockable">1</property>
@@ -4301,25 +4301,25 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxBoxSizer" expanded="1">
+                                <object class="wxBoxSizer" expanded="0">
                                     <property name="minimum_size"></property>
                                     <property name="name">bSizer34</property>
                                     <property name="orient">wxVERTICAL</property>
                                     <property name="permission">none</property>
-                                    <object class="sizeritem" expanded="1">
+                                    <object class="sizeritem" expanded="0">
                                         <property name="border">5</property>
                                         <property name="flag">wxEXPAND</property>
                                         <property name="proportion">0</property>
-                                        <object class="wxBoxSizer" expanded="1">
+                                        <object class="wxBoxSizer" expanded="0">
                                             <property name="minimum_size"></property>
                                             <property name="name">bSizer42</property>
                                             <property name="orient">wxHORIZONTAL</property>
                                             <property name="permission">none</property>
-                                            <object class="sizeritem" expanded="1">
+                                            <object class="sizeritem" expanded="0">
                                                 <property name="border">5</property>
                                                 <property name="flag">wxALL|wxALIGN_CENTER_VERTICAL</property>
                                                 <property name="proportion">0</property>
-                                                <object class="wxRadioButton" expanded="1">
+                                                <object class="wxRadioButton" expanded="0">
                                                     <property name="BottomDockable">1</property>
                                                     <property name="LeftDockable">1</property>
                                                     <property name="RightDockable">1</property>
@@ -4394,7 +4394,7 @@
                                                     <event name="OnMouseEvents"></event>
                                                     <event name="OnMouseWheel"></event>
                                                     <event name="OnPaint"></event>
-                                                    <event name="OnRadioButton"></event>
+                                                    <event name="OnRadioButton">radioBin</event>
                                                     <event name="OnRightDClick"></event>
                                                     <event name="OnRightDown"></event>
                                                     <event name="OnRightUp"></event>
@@ -4583,7 +4583,7 @@
                                                             <event name="OnMouseEvents"></event>
                                                             <event name="OnMouseWheel"></event>
                                                             <event name="OnPaint"></event>
-                                                            <event name="OnRadioButton"></event>
+                                                            <event name="OnRadioButton">radioBin</event>
                                                             <event name="OnRightDClick"></event>
                                                             <event name="OnRightDown"></event>
                                                             <event name="OnRightUp"></event>
@@ -4617,7 +4617,7 @@
                                                             <property name="dock">Dock</property>
                                                             <property name="dock_fixed">0</property>
                                                             <property name="docking">Left</property>
-                                                            <property name="enabled">1</property>
+                                                            <property name="enabled">0</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
                                                             <property name="font">Arial,90,90,9,74,0</property>
@@ -4857,7 +4857,7 @@
                                                             <event name="OnMouseEvents"></event>
                                                             <event name="OnMouseWheel"></event>
                                                             <event name="OnPaint"></event>
-                                                            <event name="OnRadioButton"></event>
+                                                            <event name="OnRadioButton">radioBin</event>
                                                             <event name="OnRightDClick"></event>
                                                             <event name="OnRightDown"></event>
                                                             <event name="OnRightUp"></event>
@@ -4891,7 +4891,7 @@
                                                             <property name="dock">Dock</property>
                                                             <property name="dock_fixed">0</property>
                                                             <property name="docking">Left</property>
-                                                            <property name="enabled">1</property>
+                                                            <property name="enabled">0</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
                                                             <property name="font">Arial,90,90,9,74,0</property>
@@ -4985,7 +4985,7 @@
                                                             <property name="dock">Dock</property>
                                                             <property name="dock_fixed">0</property>
                                                             <property name="docking">Left</property>
-                                                            <property name="enabled">1</property>
+                                                            <property name="enabled">0</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
                                                             <property name="font">Arial,90,90,9,74,0</property>
@@ -5068,7 +5068,7 @@
                                                             <property name="dock">Dock</property>
                                                             <property name="dock_fixed">0</property>
                                                             <property name="docking">Left</property>
-                                                            <property name="enabled">1</property>
+                                                            <property name="enabled">0</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
                                                             <property name="font"></property>
@@ -5159,7 +5159,7 @@
                                                             <property name="dock">Dock</property>
                                                             <property name="dock_fixed">0</property>
                                                             <property name="docking">Left</property>
-                                                            <property name="enabled">1</property>
+                                                            <property name="enabled">0</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
                                                             <property name="font">Arial,90,90,9,74,0</property>
@@ -5242,7 +5242,7 @@
                                                             <property name="dock">Dock</property>
                                                             <property name="dock_fixed">0</property>
                                                             <property name="docking">Left</property>
-                                                            <property name="enabled">1</property>
+                                                            <property name="enabled">0</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
                                                             <property name="font"></property>
@@ -5333,7 +5333,7 @@
                                                             <property name="dock">Dock</property>
                                                             <property name="dock_fixed">0</property>
                                                             <property name="docking">Left</property>
-                                                            <property name="enabled">1</property>
+                                                            <property name="enabled">0</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
                                                             <property name="font"></property>
@@ -5427,7 +5427,7 @@
                                                             <property name="dock">Dock</property>
                                                             <property name="dock_fixed">0</property>
                                                             <property name="docking">Left</property>
-                                                            <property name="enabled">1</property>
+                                                            <property name="enabled">0</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
                                                             <property name="font">Arial,90,90,9,74,0</property>
@@ -5510,7 +5510,7 @@
                                                             <property name="dock">Dock</property>
                                                             <property name="dock_fixed">0</property>
                                                             <property name="docking">Left</property>
-                                                            <property name="enabled">1</property>
+                                                            <property name="enabled">0</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
                                                             <property name="font"></property>
@@ -5601,7 +5601,7 @@
                                                             <property name="dock">Dock</property>
                                                             <property name="dock_fixed">0</property>
                                                             <property name="docking">Left</property>
-                                                            <property name="enabled">1</property>
+                                                            <property name="enabled">0</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
                                                             <property name="font">Arial,90,90,9,74,0</property>
@@ -5684,7 +5684,7 @@
                                                             <property name="dock">Dock</property>
                                                             <property name="dock_fixed">0</property>
                                                             <property name="docking">Left</property>
-                                                            <property name="enabled">1</property>
+                                                            <property name="enabled">0</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
                                                             <property name="font"></property>
@@ -5775,7 +5775,7 @@
                                                             <property name="dock">Dock</property>
                                                             <property name="dock_fixed">0</property>
                                                             <property name="docking">Left</property>
-                                                            <property name="enabled">1</property>
+                                                            <property name="enabled">0</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
                                                             <property name="font"></property>
@@ -5837,11 +5837,11 @@
                                             </object>
                                         </object>
                                     </object>
-                                    <object class="sizeritem" expanded="1">
+                                    <object class="sizeritem" expanded="0">
                                         <property name="border">5</property>
                                         <property name="flag">wxEXPAND | wxALL</property>
                                         <property name="proportion">0</property>
-                                        <object class="wxStaticLine" expanded="1">
+                                        <object class="wxStaticLine" expanded="0">
                                             <property name="BottomDockable">1</property>
                                             <property name="LeftDockable">1</property>
                                             <property name="RightDockable">1</property>
@@ -5918,7 +5918,7 @@
                                             <event name="OnUpdateUI"></event>
                                         </object>
                                     </object>
-                                    <object class="sizeritem" expanded="1">
+                                    <object class="sizeritem" expanded="0">
                                         <property name="border">5</property>
                                         <property name="flag">wxEXPAND</property>
                                         <property name="proportion">1</property>
@@ -5953,7 +5953,7 @@
                                                     <property name="dock">Dock</property>
                                                     <property name="dock_fixed">0</property>
                                                     <property name="docking">Left</property>
-                                                    <property name="enabled">1</property>
+                                                    <property name="enabled">0</property>
                                                     <property name="fg"></property>
                                                     <property name="floatable">1</property>
                                                     <property name="font"></property>
@@ -6098,16 +6098,16 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxBoxSizer" expanded="1">
+                                <object class="wxBoxSizer" expanded="0">
                                     <property name="minimum_size"></property>
                                     <property name="name">bSizer39</property>
                                     <property name="orient">wxVERTICAL</property>
                                     <property name="permission">none</property>
-                                    <object class="sizeritem" expanded="1">
+                                    <object class="sizeritem" expanded="0">
                                         <property name="border">5</property>
                                         <property name="flag">wxEXPAND | wxALL</property>
                                         <property name="proportion">0</property>
-                                        <object class="wxStaticLine" expanded="1">
+                                        <object class="wxStaticLine" expanded="0">
                                             <property name="BottomDockable">1</property>
                                             <property name="LeftDockable">1</property>
                                             <property name="RightDockable">1</property>
@@ -6184,11 +6184,11 @@
                                             <event name="OnUpdateUI"></event>
                                         </object>
                                     </object>
-                                    <object class="sizeritem" expanded="1">
+                                    <object class="sizeritem" expanded="0">
                                         <property name="border">5</property>
                                         <property name="flag">wxALL</property>
                                         <property name="proportion">0</property>
-                                        <object class="wxStaticText" expanded="1">
+                                        <object class="wxStaticText" expanded="0">
                                             <property name="BottomDockable">1</property>
                                             <property name="LeftDockable">1</property>
                                             <property name="RightDockable">1</property>
@@ -6267,11 +6267,11 @@
                                             <event name="OnUpdateUI"></event>
                                         </object>
                                     </object>
-                                    <object class="sizeritem" expanded="1">
+                                    <object class="sizeritem" expanded="0">
                                         <property name="border">5</property>
                                         <property name="flag">wxALL|wxEXPAND</property>
                                         <property name="proportion">1</property>
-                                        <object class="wxTextCtrl" expanded="1">
+                                        <object class="wxTextCtrl" expanded="0">
                                             <property name="BottomDockable">1</property>
                                             <property name="LeftDockable">1</property>
                                             <property name="RightDockable">1</property>
