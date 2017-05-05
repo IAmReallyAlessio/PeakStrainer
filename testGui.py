@@ -26,11 +26,28 @@ class MyFrame(MyFrame2):
                 # ----
                 self.m_buttonFinish.Enable(True)
     
-    def clickedCustomize( self, event ):
-        self.m_panel4.Enable(False)
-        
-                 
-    
+    def radioBin( self, event ):
+        self.m_staticText23.Enable(self.m_radioBtn1.GetValue())
+#         ----
+        self.m_staticText231 .Enable(self.m_radioBtn4.GetValue())
+        self.m_staticText241 .Enable(self.m_radioBtn4.GetValue())
+        self.m_textCtrl61    .Enable(self.m_radioBtn4.GetValue())
+        self.m_staticText2511.Enable(self.m_radioBtn4.GetValue())
+        self.m_textCtrl711   .Enable(self.m_radioBtn4.GetValue())
+        self.m_staticText381 .Enable(self.m_radioBtn4.GetValue())
+        self.m_checkBox11    .Enable(self.m_radioBtn4.GetValue())
+        self.m_staticText251 .Enable(self.m_radioBtn4.GetValue())
+        self.m_textCtrl71    .Enable(self.m_radioBtn4.GetValue())
+        self.m_staticText38  .Enable(self.m_radioBtn4.GetValue())
+        self.m_staticText2411.Enable(self.m_radioBtn4.GetValue())
+        self.m_textCtrl611   .Enable(self.m_radioBtn4.GetValue())
+
+    def radioPre( self, event ):
+        self.m_staticText14 .Enable(self.m_radioBtn11.GetValue())
+        self.m_spinCtrl2    .Enable(self.m_radioBtn11.GetValue())
+        self.m_staticText15 .Enable(self.m_radioBtn11.GetValue())
+        self.m_spinCtrl1    .Enable(self.m_radioBtn11.GetValue())       
+        self.m_staticText22 .Enable(self.m_radioBtn11.GetValue())
     
 def main():
     app = wx.App(False)

@@ -44,6 +44,9 @@ class MyFrame2 ( wx.Frame ):
 		
 		self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_panel3 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		self.m_panel3.Enable( False )
+		self.m_panel3.Hide()
+		
 		bSizer5 = wx.BoxSizer( wx.VERTICAL )
 		
 		bSizer6 = wx.BoxSizer( wx.HORIZONTAL )
@@ -76,7 +79,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_panel3.SetSizer( bSizer5 )
 		self.m_panel3.Layout()
 		bSizer5.Fit( self.m_panel3 )
-		self.m_notebook1.AddPage( self.m_panel3, u"General", True )
+		self.m_notebook1.AddPage( self.m_panel3, u"General", False )
 		self.m_panel4 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer9 = wx.BoxSizer( wx.VERTICAL )
 		
@@ -238,24 +241,31 @@ class MyFrame2 ( wx.Frame ):
 		self.m_staticText14 = wx.StaticText( self.m_panel6, wx.ID_ANY, u"Group to decimal place", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText14.Wrap( -1 )
 		self.m_staticText14.SetFont( wx.Font( 9, 74, 90, 92, False, "Arial" ) )
+		self.m_staticText14.Enable( False )
 		
 		bSizer26.Add( self.m_staticText14, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_spinCtrl2 = wx.SpinCtrl( self.m_panel6, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 1, 10, 2 )
+		self.m_spinCtrl2.Enable( False )
+		
 		bSizer26.Add( self.m_spinCtrl2, 0, wx.ALL, 5 )
 		
 		self.m_staticText15 = wx.StaticText( self.m_panel6, wx.ID_ANY, u"discard groups with", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText15.Wrap( -1 )
 		self.m_staticText15.SetFont( wx.Font( 9, 74, 90, 92, False, "Arial" ) )
+		self.m_staticText15.Enable( False )
 		
 		bSizer26.Add( self.m_staticText15, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_spinCtrl1 = wx.SpinCtrl( self.m_panel6, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 1, 10, 2 )
+		self.m_spinCtrl1.Enable( False )
+		
 		bSizer26.Add( self.m_spinCtrl1, 0, wx.ALL, 5 )
 		
 		self.m_staticText22 = wx.StaticText( self.m_panel6, wx.ID_ANY, u"or less", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText22.Wrap( -1 )
 		self.m_staticText22.SetFont( wx.Font( 9, 74, 90, 92, False, "Arial" ) )
+		self.m_staticText22.Enable( False )
 		
 		bSizer26.Add( self.m_staticText22, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
@@ -266,7 +276,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_panel6.SetSizer( bSizer25 )
 		self.m_panel6.Layout()
 		bSizer25.Fit( self.m_panel6 )
-		self.m_notebook1.AddPage( self.m_panel6, u"Prefilter Peaks", False )
+		self.m_notebook1.AddPage( self.m_panel6, u"Prefilter Peaks", True )
 		self.m_panel7 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer34 = wx.BoxSizer( wx.VERTICAL )
 		
@@ -294,6 +304,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_staticText23 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"By Measured Resolution trend line", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText23.Wrap( -1 )
 		self.m_staticText23.SetFont( wx.Font( 9, 74, 90, 90, False, "Arial" ) )
+		self.m_staticText23.Enable( False )
 		
 		bSizer32.Add( self.m_staticText23, 0, wx.ALL, 5 )
 		
@@ -316,6 +327,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_staticText231 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"By Resolution based on quadratic function r = a *m/z ^ -b, seperate MS1 and MS2", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText231.Wrap( -1 )
 		self.m_staticText231.SetFont( wx.Font( 9, 74, 90, 90, False, "Arial" ) )
+		self.m_staticText231.Enable( False )
 		
 		bSizer321.Add( self.m_staticText231, 0, wx.ALL, 5 )
 		
@@ -327,23 +339,31 @@ class MyFrame2 ( wx.Frame ):
 		self.m_staticText241 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"where a =", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText241.Wrap( -1 )
 		self.m_staticText241.SetFont( wx.Font( 9, 74, 90, 90, False, "Arial" ) )
+		self.m_staticText241.Enable( False )
 		
 		bSizer331.Add( self.m_staticText241, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_textCtrl61 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl61.Enable( False )
+		
 		bSizer331.Add( self.m_textCtrl61, 0, wx.ALL, 5 )
 		
 		self.m_staticText251 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"and b =", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText251.Wrap( -1 )
 		self.m_staticText251.SetFont( wx.Font( 9, 74, 90, 90, False, "Arial" ) )
+		self.m_staticText251.Enable( False )
 		
 		bSizer331.Add( self.m_staticText251, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_textCtrl71 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl71.Enable( False )
+		
 		bSizer331.Add( self.m_textCtrl71, 0, wx.ALL, 5 )
 		
 		self.m_staticText38 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"for MS1", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText38.Wrap( -1 )
+		self.m_staticText38.Enable( False )
+		
 		bSizer331.Add( self.m_staticText38, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		
@@ -354,23 +374,31 @@ class MyFrame2 ( wx.Frame ):
 		self.m_staticText2411 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"where a =", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText2411.Wrap( -1 )
 		self.m_staticText2411.SetFont( wx.Font( 9, 74, 90, 90, False, "Arial" ) )
+		self.m_staticText2411.Enable( False )
 		
 		bSizer3311.Add( self.m_staticText2411, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_textCtrl611 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl611.Enable( False )
+		
 		bSizer3311.Add( self.m_textCtrl611, 0, wx.ALL, 5 )
 		
 		self.m_staticText2511 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"and b =", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText2511.Wrap( -1 )
 		self.m_staticText2511.SetFont( wx.Font( 9, 74, 90, 90, False, "Arial" ) )
+		self.m_staticText2511.Enable( False )
 		
 		bSizer3311.Add( self.m_staticText2511, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_textCtrl711 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl711.Enable( False )
+		
 		bSizer3311.Add( self.m_textCtrl711, 0, wx.ALL, 5 )
 		
 		self.m_staticText381 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"for MS2", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText381.Wrap( -1 )
+		self.m_staticText381.Enable( False )
+		
 		bSizer3311.Add( self.m_staticText381, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		
@@ -386,6 +414,8 @@ class MyFrame2 ( wx.Frame ):
 		
 		self.m_checkBox11 = wx.CheckBox( self.m_panel7, wx.ID_ANY, u"Merge overlapping bins", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_checkBox11.SetValue(True) 
+		self.m_checkBox11.Enable( False )
+		
 		bSizer38.Add( self.m_checkBox11, 0, wx.ALL, 5 )
 		
 		
@@ -439,6 +469,11 @@ class MyFrame2 ( wx.Frame ):
 		
 		# Connect Events
 		self.m_buttonBrowse.Bind( wx.EVT_BUTTON, self.clickedBrowse )
+		self.m_radioBtn10.Bind( wx.EVT_RADIOBUTTON, self.radioPre )
+		self.m_radioBtn11.Bind( wx.EVT_RADIOBUTTON, self.radioPre )
+		self.m_radioBtn9.Bind( wx.EVT_RADIOBUTTON, self.radioBin )
+		self.m_radioBtn1.Bind( wx.EVT_RADIOBUTTON, self.radioBin )
+		self.m_radioBtn4.Bind( wx.EVT_RADIOBUTTON, self.radioBin )
 		self.m_buttonFinish.Bind( wx.EVT_BUTTON, self.clickedFinish )
 	
 	def __del__( self ):
@@ -448,6 +483,15 @@ class MyFrame2 ( wx.Frame ):
 	# Virtual event handlers, overide them in your derived class
 	def clickedBrowse( self, event ):
 		event.Skip()
+	
+	def radioPre( self, event ):
+		event.Skip()
+	
+	
+	def radioBin( self, event ):
+		event.Skip()
+	
+	
 	
 	def clickedFinish( self, event ):
 		event.Skip()
