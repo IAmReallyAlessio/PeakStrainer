@@ -123,8 +123,8 @@ def ThermoRawfile2Scans(file_path):
     
     return MSrawscans
 
-def ThermoRawfile2Scans_csv(scans):
-    with open('ThermoRawfile2Scans.csv', "wb") as csv_file:
+def ThermoRawfile2Scans_csv(scans, filename='ThermoRawfile2Scans.csv'):
+    with open(filename, "wb") as csv_file:
         writer = csv.writer(csv_file, delimiter=',')
         writer.writerow(('scanNum', 'filterLine', 'retTime', 'row'))
         for scan in scans:

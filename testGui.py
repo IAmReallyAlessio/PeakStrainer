@@ -6,6 +6,11 @@ Created on 04.05.2017
 from msBinFilterGUI import MyFrame2
 import wx
 import os
+from msBinFilter import *
+
+sys.path.append(os.path.abspath('C:\\Users\\mirandaa\\git\\ReorderScans'))
+
+from batch import main as  reorderscansMain  
 
 
 def main():
@@ -72,27 +77,132 @@ class MyFrame(MyFrame2):
     def checkOutConf( self, event ):
         self.m_filePicker2.Enable(self.m_checkBox10.GetValue())
     
+
+    
+    
+    
     def clickedFinish( self, event ):
         self.m_notebook1.SetSelection(self.m_notebook1.GetPageCount()-1)
-        self.run_it()
+        self.run_all()
 
         
     #===========================================================================
     # Backend
     #===========================================================================
-    def run_it(self):
+    
+    def run_all(self):
         self.path
         self.fileNames
         
-        file = str(self.path+'\\'+self.fileNames[0])
+        for onefile in self.fileNames:
+            filepath = str(self.path+'\\'+onefile)
+            self.m_statuslog.WriteText('Starting filepath '+ filepath + '\n')
+            self.run_once(filepath, onefile)
+            self.m_statuslog.WriteText('finished filepath '+ filepath+ '\n')
+            self.m_statuslog.WriteText('=========================='+ '\n')
         
+        self.m_statuslog.WriteText('finished All '+ str(len(self.fileNames))+ ' files \n')
+        self.m_buttonFinish.Enable(False)
         
-        
-        
+        if self.m_checkBox2.GetValue(): reorderscansMain(self.path)
+            
+        raise SystemExit
+    
+
+    def getLoglevel(self):
+        if not self.m_checkBox9.GetValue():
+            return logging.WARNING
+        elif self.m_panel4.GetValue()==1 : return logging.CRITICAL
+        elif self.m_panel4.GetValue()==2 : return logging.ERROR
+        elif self.m_panel4.GetValue()==3 : return logging.WARNING
+        elif self.m_panel4.GetValue()==4 : return logging.INFO
+        elif self.m_panel4.GetValue()==5 : return logging.DEBUG 
     
     
+    def getCSVpath_file(self, file):
+        return self.m_dirPicker1.GetPath()+file[:-4]
     
     
+    def run_once(self, filepath, rawfilename):
+        
+        log.setLevel(self.getLoglevel())
+        if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
+        if self.m_checkBox9.GetValue():logging.basicConfig(filename=filepath[:-4]+'.log',filemode='w')
+        
+        log.debug('Start %f', time.clock())
+        
+        scans = ThermoRawfile2Scans(filepath)
+        if self.m_checkBox8.GetValue(): ThermoRawfile2Scans_csv(scans, self.getCSVpath_file(rawfilename)+'-raw.csv')
+        
+        scans = filterScanBy_first(scans)
+        
+        if self.m_checkBox5.GetValue(): scans = filterScanBy_retentionTime(scans, self.m_textCtrl2.GetValue(), self.m_textCtrl3.GetValue() )
+        #NOTE use try catch notify to validate input
+        if self.m_checkBox6.GetValue(): scans = filterScanBy_filterline(scans, self.m_textCtrl4.GetValue(), self.m_radioBox1.getselection()==0)
+        ''' filtering by scan
+        scans = filterScanBy_samples(scans, step_size = 3)
+        '''
+        
+        #Note: mergePeaksOnFilterline_withRandom to generate testing data
+        filterLines = mergePeaksOnFilterline(scans)
+        if self.m_checkBox8.GetValue(): filterlinePeaks_csv(filterLines, self.getCSVpath_file(rawfilename)+'-mergePeaksOnFilterline.csv')
+        
+        if self.m_radioBtn10.GetValue(): preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
+        if self.m_radioBtn11.GetValue(): preFiltered_filterlines = {k: preliminaryFilter(v, self.m_spinCtrl2.GetValue(), self.m_spinCtrl1.GetValue()) for k, v in filterLines.iteritems()}
+        #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
+        if self.m_checkBox8.GetValue(): filterlinePeaks_csv(preFiltered_filterlines,self.getCSVpath_file(rawfilename)+'-preliminaryFilter.csv')    
+        
+        ''' create bins for peaks
+        filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
+        filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
+        filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
+        filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.iteritems()} # 5408000.0, 2096000.0
+        '''
+        if self.m_radioBtn9.GetValue(): filterlines_withBins = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.iteritems()} # values as per Kai S.
+        if self.m_radioBtn1.GetValue(): filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
+        if self.m_radioBtn4.GetValue(): 
+            #     for different function for ms and for msms
+            filterlines_withBins_ms = {k: generateBins_resolutionPowerFunc(v, self.m_textCtrl61.GetValue(), self.m_textCtrl71.GetValue() ) for k, v in filterLines.iteritems() if ' ms ' in k }
+            filterlines_withBins_msms = {k: generateBins_resolutionPowerFunc(v, self.m_textCtrl611.GetValue(), self.m_textCtrl711.GetValue() ) for k, v in filterLines.iteritems() if ' ms ' not in k}
+            filterlines_withBins = filterlines_withBins_ms.update(filterlines_withBins_msms)
+            
+        
+        if self.m_checkBox8.GetValue(): filterlinePeaks_csv(filterlines_withBins,self.getCSVpath_file(rawfilename)+'-generateBins.csv')
+        
+        if self.m_checkBox11.GetValue(): filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
+        
+        if self.m_checkBox8.GetValue(): filterlinePeaks_csv(filterlines_withBins,self.getCSVpath_file(rawfilename)+'-mergeBins.csv')
+        
+        
+        ''' put each mass in a bin
+        filterlines_inBins = {k: sortMassIn_sortWindow(v) for k, v in filterlines_withBins.iteritems()}
+        filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+        filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
+        '''
+        filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+        if self.m_checkBox8.GetValue(): filterlinePeaks_csv(filterlines_inBins,self.getCSVpath_file(rawfilename)+'-sortMassIn.csv')
+        
+        filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
+        if self.m_checkBox8.GetValue(): filterlineBins_csv(filterlines_binData,self.getCSVpath_file(rawfilename)+'-aggregateBinData.csv')
+        
+        filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
+        if self.m_checkBox8.GetValue(): filterlineBins_csv(filterlines_filtered,self.getCSVpath_file(rawfilename)+'-filteredBins.csv')
+        
+        filtered_peaks = {k: bins2Peaks(v, filterlines_inBins[k]) for k, v in filterlines_filtered.iteritems()}
+        if self.m_checkBox8.GetValue(): filterlinePeaks_csv(filtered_peaks,self.getCSVpath_file(rawfilename)+'-mzXMLdata.csv')
+           
+        # can't use filtered bins in mzxml because it is not readable by seems
+        filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
+        
+    #     order = [' ms ', '.33-', ' ms ']
+    #     filtered_bins = reorderScans(filtered_bins, order)
+        
+        newfilename = filepath[:-4]+ '.mzXML'
+        log.info('Writing results to %s', newfilename)
+        self.m_statuslog.WriteText('Writing results to mzxml'+ '\n')
+        write2templateMzXML(newfilename, filtered_bins)
+        
+        log.debug('finish %f',  time.clock())
     
 
 

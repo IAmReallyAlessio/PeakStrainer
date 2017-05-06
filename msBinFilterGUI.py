@@ -87,9 +87,9 @@ class MyFrame2 ( wx.Frame ):
 		self.m_checkBox8 = wx.CheckBox( self.m_panel4, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer10.Add( self.m_checkBox8, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
-		self.m_staticText31 = wx.StaticText( self.m_panel4, wx.ID_ANY, u"CSV output directory:", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_staticText31.Wrap( -1 )
-		bSizer10.Add( self.m_staticText31, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		self.m_staticTexttocsv = wx.StaticText( self.m_panel4, wx.ID_ANY, u"CSV output directory:", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticTexttocsv.Wrap( -1 )
+		bSizer10.Add( self.m_staticTexttocsv, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.m_dirPicker1 = wx.DirPickerCtrl( self.m_panel4, wx.ID_ANY, wx.EmptyString, u"Select a folder", wx.DefaultPosition, wx.DefaultSize, wx.DIRP_DEFAULT_STYLE )
 		self.m_dirPicker1.Enable( False )
@@ -449,8 +449,8 @@ class MyFrame2 ( wx.Frame ):
 		self.m_staticText41.Wrap( -1 )
 		bSizer39.Add( self.m_staticText41, 0, wx.ALL, 5 )
 		
-		self.m_textCtrl12 = wx.TextCtrl( self.m_panel9, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE|wx.TE_READONLY )
-		bSizer39.Add( self.m_textCtrl12, 1, wx.ALL|wx.EXPAND, 5 )
+		self.m_statuslog = wx.TextCtrl( self.m_panel9, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE|wx.TE_READONLY )
+		bSizer39.Add( self.m_statuslog, 1, wx.ALL|wx.EXPAND, 5 )
 		
 		
 		self.m_panel9.SetSizer( bSizer39 )
