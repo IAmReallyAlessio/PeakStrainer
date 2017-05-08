@@ -78,7 +78,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_panel3.SetSizer( bSizer5 )
 		self.m_panel3.Layout()
 		bSizer5.Fit( self.m_panel3 )
-		self.m_notebook1.AddPage( self.m_panel3, u"General", True )
+		self.m_notebook1.AddPage( self.m_panel3, u"General", False )
 		self.m_panel4 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer9 = wx.BoxSizer( wx.VERTICAL )
 		
@@ -289,7 +289,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_panel6.SetSizer( bSizer25 )
 		self.m_panel6.Layout()
 		bSizer25.Fit( self.m_panel6 )
-		self.m_notebook1.AddPage( self.m_panel6, u"Prefilter Peaks", False )
+		self.m_notebook1.AddPage( self.m_panel6, u"Prefilter Peaks", True )
 		self.m_panel7 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer34 = wx.BoxSizer( wx.VERTICAL )
 		
@@ -578,10 +578,8 @@ class MyFrame2 ( wx.Frame ):
 		event.Skip()
 	
 	
-	
 	def radioFil( self, event ):
 		event.Skip()
-	
 	
 	def clickedFinish( self, event ):
 		event.Skip()
