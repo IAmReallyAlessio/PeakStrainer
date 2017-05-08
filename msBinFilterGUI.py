@@ -439,6 +439,57 @@ class MyFrame2 ( wx.Frame ):
 		self.m_panel7.Layout()
 		bSizer34.Fit( self.m_panel7 )
 		self.m_notebook1.AddPage( self.m_panel7, u"Bin Type", False )
+		self.m_panel8 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		bSizer251 = wx.BoxSizer( wx.VERTICAL )
+		
+		self.m_staticline151 = wx.StaticLine( self.m_panel8, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+		bSizer251.Add( self.m_staticline151, 0, wx.EXPAND |wx.ALL, 5 )
+		
+		bSizer431 = wx.BoxSizer( wx.VERTICAL )
+		
+		self.m_radioBtn101 = wx.RadioButton( self.m_panel8, wx.ID_ANY, u"Use Default", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_radioBtn101.SetValue( True ) 
+		self.m_radioBtn101.SetFont( wx.Font( 9, 74, 90, 92, False, "Arial" ) )
+		
+		bSizer431.Add( self.m_radioBtn101, 0, wx.ALL, 5 )
+		
+		
+		bSizer251.Add( bSizer431, 0, wx.EXPAND, 5 )
+		
+		self.m_staticline1811 = wx.StaticLine( self.m_panel8, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+		bSizer251.Add( self.m_staticline1811, 0, wx.EXPAND |wx.ALL, 5 )
+		
+		bSizer261 = wx.BoxSizer( wx.HORIZONTAL )
+		
+		self.m_radioBtn111 = wx.RadioButton( self.m_panel8, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer261.Add( self.m_radioBtn111, 0, wx.ALL, 5 )
+		
+		self.m_staticline1812 = wx.StaticText( self.m_panel8, wx.ID_ANY, u"Minimum Repetition Rate", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticline1812.Wrap( -1 )
+		self.m_staticline1812.SetFont( wx.Font( 9, 74, 90, 92, False, "Arial" ) )
+		self.m_staticline1812.Enable( False )
+		
+		bSizer261.Add( self.m_staticline1812, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		
+		self.m_spinCtrl21 = wx.SpinCtrl( self.m_panel8, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 1, 99, 70 )
+		self.m_spinCtrl21.Enable( False )
+		
+		bSizer261.Add( self.m_spinCtrl21, 0, wx.ALL, 5 )
+		
+		self.m_staticText26 = wx.StaticText( self.m_panel8, wx.ID_ANY, u"%", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText26.Wrap( -1 )
+		self.m_staticText26.Enable( False )
+		
+		bSizer261.Add( self.m_staticText26, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		
+		
+		bSizer251.Add( bSizer261, 0, wx.EXPAND, 5 )
+		
+		
+		self.m_panel8.SetSizer( bSizer251 )
+		self.m_panel8.Layout()
+		bSizer251.Fit( self.m_panel8 )
+		self.m_notebook1.AddPage( self.m_panel8, u"Bin Filter", False )
 		self.m_panel9 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer39 = wx.BoxSizer( wx.VERTICAL )
 		
@@ -492,6 +543,8 @@ class MyFrame2 ( wx.Frame ):
 		self.m_radioBtn9.Bind( wx.EVT_RADIOBUTTON, self.radioBin )
 		self.m_radioBtn1.Bind( wx.EVT_RADIOBUTTON, self.radioBin )
 		self.m_radioBtn4.Bind( wx.EVT_RADIOBUTTON, self.radioBin )
+		self.m_radioBtn101.Bind( wx.EVT_RADIOBUTTON, self.radioFil )
+		self.m_radioBtn111.Bind( wx.EVT_RADIOBUTTON, self.radioFil )
 		self.m_buttonFinish.Bind( wx.EVT_BUTTON, self.clickedFinish )
 	
 	def __del__( self ):
@@ -524,6 +577,10 @@ class MyFrame2 ( wx.Frame ):
 	def radioBin( self, event ):
 		event.Skip()
 	
+	
+	
+	def radioFil( self, event ):
+		event.Skip()
 	
 	
 	def clickedFinish( self, event ):

@@ -78,7 +78,10 @@ class MyFrame(MyFrame2):
         self.m_filePicker2.Enable(self.m_checkBox10.GetValue())
     
 
-    
+    def radioFil( self, event ):
+        self.m_staticline1812.Enable(self.m_radioBtn111.GetValue())
+        self.m_spinCtrl21.Enable(self.m_radioBtn111.GetValue())
+        self.m_staticText26.Enable(self.m_radioBtn111.GetValue())
     
     
     def clickedFinish( self, event ):
@@ -185,7 +188,10 @@ class MyFrame(MyFrame2):
         filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
         if self.m_checkBox8.GetValue(): filterlineBins_csv(filterlines_binData,self.getCSVpath_file(rawfilename)+'-aggregateBinData.csv')
         
-        filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
+        if self.m_radioBtn101.GetValue(): filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
+        if self.m_radioBtn111.GetValue(): filterlines_filtered = {k: filterBins(v, minRepetitionRate = (self.m_spinCtrl21.GetValue() * 0.01) ) for k, v in filterlines_binData.iteritems()}
+        
+        
         if self.m_checkBox8.GetValue(): filterlineBins_csv(filterlines_filtered,self.getCSVpath_file(rawfilename)+'-filteredBins.csv')
         
         filtered_peaks = {k: bins2Peaks(v, filterlines_inBins[k]) for k, v in filterlines_filtered.iteritems()}
