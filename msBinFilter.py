@@ -11,7 +11,7 @@ import os
 import time
 import logging
 import csv
-from msBinFilter_util import write2templateMzXML, reorderScans
+from utils.msBinFilter_util import write2templateMzXML
 import itertools
 import math
 log = logging.getLogger(os.path.basename(__file__))
