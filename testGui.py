@@ -8,9 +8,7 @@ import wx
 import os
 from msBinFilter import *
 
-sys.path.append(os.path.abspath('C:\\Users\\mirandaa\\git\\ReorderScans'))
-
-from batch import main as  reorderscansMain  
+from reorderScans import main as reorderscansMain  
 
 
 def main():
