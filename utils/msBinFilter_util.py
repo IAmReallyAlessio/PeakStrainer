@@ -131,7 +131,8 @@ def getMZXMLEncondedScans(filePath):
 def write2templateMzXML(newfilename, scanPeaks):
     namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}
     ET.register_namespace('', 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0')
-    tree = ET.parse('resources/template.mzXML')
+    scriptPath = os.path.dirname(os.path.realpath(__file__))
+    tree = ET.parse(scriptPath+'\\template.mzXML')
     
     msRunElement = tree.find('.//xmlns:msRun', namespaces)
     scanTemplete = msRunElement.find('.//xmlns:scan', namespaces)

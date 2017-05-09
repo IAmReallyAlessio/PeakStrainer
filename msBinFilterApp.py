@@ -8,7 +8,7 @@ import wx
 import os
 from msBinFilter import *
 
-from reorderScans import main as reorderscansMain  
+from lib.reorderScans.reorderScans import main as reorderscansMain  
 
 
 def main():
