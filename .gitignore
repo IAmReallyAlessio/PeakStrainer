@@ -3,3 +3,6 @@
 *.log
 /.pydevproject
 /.project
+/build/
+/dist/
+/..spec
