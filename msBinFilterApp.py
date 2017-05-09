@@ -3,7 +3,7 @@ Created on 04.05.2017
 
 @author: mirandaa
 '''
-from msBinFilterGUI import MyFrame2
+from utils.msBinFilterGUI import MyFrame2
 import wx
 import os
 from msBinFilter import *
@@ -34,6 +34,10 @@ class MyFrame(MyFrame2):
                 self.m_textCtrl1.SetValue(str(self.path).replace('\\\\', '\\')+' '+ str(len(self.fileNames))+' files')
                 # ----
                 self.m_buttonFinish.Enable(True)
+    
+    def clickOpenSpecReord( self, event ):
+        reorderscansMain()
+        raise SystemExit
     
     def radioBin( self, event ):
         self.m_staticText23.Enable(self.m_radioBtn1.GetValue())

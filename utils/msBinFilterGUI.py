@@ -67,9 +67,12 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer7 = wx.BoxSizer( wx.HORIZONTAL )
 		
-		self.m_checkBox2 = wx.CheckBox( self.m_panel3, wx.ID_ANY, u"Open Spectra Reorder", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_checkBox2 = wx.CheckBox( self.m_panel3, wx.ID_ANY, u"Open with", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_checkBox2.SetValue(True) 
-		bSizer7.Add( self.m_checkBox2, 0, wx.ALL, 5 )
+		bSizer7.Add( self.m_checkBox2, 0, wx.ALIGN_CENTER_VERTICAL|wx.TOP|wx.BOTTOM|wx.LEFT, 5 )
+		
+		self.m_button3 = wx.Button( self.m_panel3, wx.ID_ANY, u"Spectra Reorder", wx.DefaultPosition, wx.DefaultSize, wx.NO_BORDER )
+		bSizer7.Add( self.m_button3, 0, wx.TOP|wx.BOTTOM|wx.RIGHT, 5 )
 		
 		
 		bSizer5.Add( bSizer7, 0, 0, 5 )
@@ -533,6 +536,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		# Connect Events
 		self.m_buttonBrowse.Bind( wx.EVT_BUTTON, self.clickedBrowse )
+		self.m_button3.Bind( wx.EVT_BUTTON, self.clickOpenSpecReord )
 		self.m_checkBox8.Bind( wx.EVT_CHECKBOX, self.checkOutcsv )
 		self.m_checkBox9.Bind( wx.EVT_CHECKBOX, self.checkoutLog )
 		self.m_checkBox10.Bind( wx.EVT_CHECKBOX, self.checkOutConf )
@@ -553,6 +557,9 @@ class MyFrame2 ( wx.Frame ):
 	
 	# Virtual event handlers, overide them in your derived class
 	def clickedBrowse( self, event ):
+		event.Skip()
+	
+	def clickOpenSpecReord( self, event ):
 		event.Skip()
 	
 	def checkOutcsv( self, event ):
@@ -578,8 +585,10 @@ class MyFrame2 ( wx.Frame ):
 		event.Skip()
 	
 	
+	
 	def radioFil( self, event ):
 		event.Skip()
+	
 	
 	def clickedFinish( self, event ):
 		event.Skip()
