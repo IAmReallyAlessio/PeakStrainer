@@ -1,7 +1,7 @@
 # -*- mode: python -*-
 # used by pyinstaller to create .exe
 # C:\apps\Anaconda2) C:\apps\eclipseRCP\workspace\MS_Bin_and_Filter>
-# pyinstaller --onefile msBinFilterApp.spec
+# pyinstaller msBinFilterApp.spec
 block_cipher = None
 
 
