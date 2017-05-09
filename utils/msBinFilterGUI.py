@@ -27,11 +27,20 @@ class MyFrame2 ( wx.Frame ):
 		self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer2 = wx.BoxSizer( wx.VERTICAL )
 		
-		self.m_staticText1 = wx.StaticText( self.m_panel1, wx.ID_ANY, u"MS Bin Filter", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer30 = wx.BoxSizer( wx.VERTICAL )
+		
+		self.m_staticText1 = wx.StaticText( self.m_panel1, wx.ID_ANY, u"Peaksieb", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText1.Wrap( -1 )
 		self.m_staticText1.SetFont( wx.Font( 14, 74, 90, 92, False, "Arial" ) )
 		
-		bSizer2.Add( self.m_staticText1, 0, wx.ALL, 5 )
+		bSizer30.Add( self.m_staticText1, 0, wx.TOP|wx.RIGHT|wx.LEFT, 5 )
+		
+		self.m_staticText27 = wx.StaticText( self.m_panel1, wx.ID_ANY, u"Shotgun MS repetition rate filter", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText27.Wrap( -1 )
+		bSizer30.Add( self.m_staticText27, 0, wx.ALIGN_BOTTOM|wx.BOTTOM|wx.RIGHT|wx.LEFT, 5 )
+		
+		
+		bSizer2.Add( bSizer30, 1, wx.EXPAND, 5 )
 		
 		self.m_staticline1 = wx.StaticLine( self.m_panel1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
 		bSizer2.Add( self.m_staticline1, 0, wx.EXPAND |wx.ALL, 5 )
