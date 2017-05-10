@@ -66,7 +66,7 @@ def getSourceList(folderPath):
     return sourceList
 
 
-def saveFile(filePath, targetOrder):
+def saveFile(filePath, targetOrder, includeSims=False):
        #     TODO:handle different namespaces of mzxml 
     namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}
     ET.register_namespace('', 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0')
@@ -83,6 +83,7 @@ def saveFile(filePath, targetOrder):
         mode = selectionLine.split(',')[1]
         for scan in scanElems:
             scanLine = scan.attrib['filterLine']
+            if includeSims == False and ' sim ' in scanLine.lower(): continue
             if type in scanLine and mode in scanLine:
                 msRunElement.append(scan)
 
@@ -94,11 +95,11 @@ def saveFile(filePath, targetOrder):
     tree.write(newfilename, encoding='ISO-8859-1', xml_declaration=True)
 
 
-def saveFiles(path, targetOrder):
+def saveFiles(path, targetOrder, includeSims = False):
     files =  getMZXMLFiles(path)
     
     for file in files:
-        saveFile(file, targetOrder)
+        saveFile(file, targetOrder,includeSims)
         
 
 class MyModel(object):
@@ -135,7 +136,7 @@ class MyFrame(MyFrame1):
         
     
     def finish( self, event ):
-        saveFiles(self.m_dirPicker1.GetPath(), self.model.target)
+        saveFiles(self.m_dirPicker1.GetPath(), self.model.target, self.m_checkBox1.GetValue())
         raise SystemExit
 
         
