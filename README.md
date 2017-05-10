@@ -8,7 +8,7 @@ and combining the consistent signals.
 Quick Start
 -----------
  - Download [MSPeakStrainer.zip](https://idisk-srv1.mpi-cbg.de/~mirandaa/MSPeakStrainer.zip)
- - decompress it
+ - Unzip the file
  - run ```MSPeakStrainer.bat```   
 
 Desktop Application
