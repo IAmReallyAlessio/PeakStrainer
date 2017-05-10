@@ -9,29 +9,34 @@ Quick Start
 -----------
  - Download [MSPeakStrainer.zip](https://idisk-srv1.mpi-cbg.de/~mirandaa/MSPeakStrainer.zip)
  - Unzip the file
- - run ```MSPeakStrainer.bat```   
+ - run ```MSPeakStrainerApp.bat```   
 
 Desktop Application
 ----
-Run ```MSPeakStrainer.bat``` this will start the Desktop application.
-Once a thermo.raw file is selected, you can click finish to process the file.
-The Desktop application contains several pages where setting can be changed from the default,
+Run ```MSPeakStrainerApp.bat``` this will start the Desktop application.
+Once one or more thermo.raw file are selected, you can click finish to process the file with default settings.
+The Desktop application contains several pages where setting can be changed from the default.
 
 If you don't change anything the default values are used.
 
 Command line Application
 -------
-Run `msbf.py ` this will show all the parameters that can be set.
-In case you want to use custom setting from the command line.
+Run `MSPeakStrainer.py file.raw` from the command line to process the file with the default settings.
+custom settings can be applied on the command line with ```utils\msps.py```
 
-I would recommend that you look at the code in msPeakStrainer.py
-in main, the code should be readable and you can change it to your setting.
+I would recommend that you look at the code in ```msPeakStrainer.py```
+in the main method and update it there,
+the code should be readable and you can change it to your setting.
 
 
 ## Options
-Ms bin filter can be configured to run in different ways,
+msPeakStrainer can be configured to run in different ways,
 but the default setting should work most of the time.
 Just in case here are some options you can change.
+
+Please note that some options are not available in the GUI.
+one of the goals of the GUI is to maintain simplicity.
+This is why some options are only in the code.
 
 ### Select Scans
 A simple way to reduce the size of the file is by removing some scans.
