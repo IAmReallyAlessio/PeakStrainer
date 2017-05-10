@@ -13,10 +13,9 @@ Quick Start
 
 Desktop Application
 ----
-Run `msBinFilter_Wizard.py` this will start the gui application.
-The application is a wizard,
-this means that you advance though different pages 
-and decide what to change.
+Run ```MSPeakStrainer.bat``` this will start the Desktop application.
+Once a thermo.raw file is selected, you can click finish to process the file.
+The Desktop application contains several pages where setting can be changed from the default,
 
 If you don't change anything the default values are used.
 
@@ -25,7 +24,7 @@ Command line Application
 Run `msbf.py ` this will show all the parameters that can be set.
 In case you want to use custom setting from the command line.
 
-I would recommend that you look at the code in msBinFilter.py
+I would recommend that you look at the code in msPeakStrainer.py
 in main, the code should be readable and you can change it to your setting.
 
 

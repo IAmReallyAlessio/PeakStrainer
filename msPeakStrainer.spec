@@ -1,12 +1,12 @@
 # -*- mode: python -*-
 # used by pyinstaller to create .exe
-# C:\apps\Anaconda2) C:\apps\eclipseRCP\workspace\MS_Bin_and_Filter>
-# pyinstaller msBinFilterApp.spec
+# C:\apps\Anaconda2) C:\apps\eclipseRCP\workspace\MSPeakStrainer>
+# pyinstaller msPeakStrainer.spec
 block_cipher = None
 
 
-a = Analysis(['msBinFilterApp.py'],
-             pathex=['C:\\apps\\eclipseRCP\\workspace\\MS_Bin_and_Filter'],
+a = Analysis(['msPeakStrainerApp.py'],
+             pathex=['C:\\apps\\eclipseRCP\\workspace\\MSPeakStrainer'],
              binaries=[],
              datas=[('utils\\template.mzXML','utils')],
              hiddenimports=[],
@@ -21,7 +21,7 @@ pyz = PYZ(a.pure, a.zipped_data,
 exe = EXE(pyz,
           a.scripts,
           exclude_binaries=True,
-          name='msBinFilterApp',
+          name='msPeakStrainerApp',
           debug=False,
           strip=False,
           upx=False,
@@ -32,4 +32,4 @@ coll = COLLECT(exe,
                a.datas,
                strip=False,
                upx=False,
-               name='msBinFilterApp')
+               name='msPeakStrainerApp')

@@ -1,11 +1,11 @@
 '''
 Created on 31.03.2017
-command line access to msBinFilter
+command line access to msPeakStrainer
 @author: mirandaa
 '''
 
 import logging
-from msBinFilter import *
+from msPeakStrainer import *
 import configargparse
 
 def loglevel(v_count):
@@ -62,7 +62,7 @@ def main():
     args = parser.parse_args()
         
     '''
-    start application, copy pasta from main in msBinFilter
+    start application, copy pasta from main in msPeakStrainer
     '''
     log.setLevel(loglevel(args.verbose))
     if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
@@ -130,5 +130,5 @@ def main():
     log.debug('finish %f',  time.clock())
 
 if __name__ == '__main__':
-    #NOTE: alter the main method in msBinFilter.py instead of setting everything in the command line
+    #NOTE: alter the main method in msPeakStrainer.py instead of setting everything in the command line
     main()
