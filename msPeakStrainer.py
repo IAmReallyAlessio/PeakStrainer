@@ -3,7 +3,7 @@
 '''
 Created on 29.03.2017
 msBinFilter is a tool to reduce the size of an MS spectra,
-usage: msBinFilter spectra_file.raw
+usage: msPeakStrainer spectra_file.raw
 @author: mirandaa
 '''
 import sys
