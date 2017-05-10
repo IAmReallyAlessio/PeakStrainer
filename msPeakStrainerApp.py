@@ -3,7 +3,7 @@ Created on 04.05.2017
 
 @author: mirandaa
 '''
-from utils.msBinFilterGUI import MyFrame2
+from utils.msPeakStrainerGUI import MyFrame2
 import wx
 import os
 from msBinFilter import *

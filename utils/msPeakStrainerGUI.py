@@ -282,7 +282,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer26.Add( self.m_staticText15, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
-		self.m_spinCtrl1 = wx.SpinCtrl( self.m_panel6, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 1, 10, 2 )
+		self.m_spinCtrl1 = wx.SpinCtrl( self.m_panel6, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 0, 10, 2 )
 		self.m_spinCtrl1.Enable( False )
 		
 		bSizer26.Add( self.m_spinCtrl1, 0, wx.ALL, 5 )
