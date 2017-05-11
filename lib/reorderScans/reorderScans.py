@@ -45,22 +45,32 @@ def getMZXMLFiles(folderPath):
 
 def getSourceList(folderPath):
     sourceList = []
-    sourceList.append(' ms , - ') # notice comma I split on comma
-    sourceList.append(' ms , + ') 
     
     files = getMZXMLFiles(folderPath)
     first = files[0]
     scans = getScanHeaders(first)
     
     select = set()
+    containsMS = False
+    containsPos = False
+    containsNeg = False
     for scan in scans:
+        if not containsMS and ' ms ' in scan: containsMS = True 
+        if not containsPos and ' + ' in scan: containsPos = True
+        if not containsNeg and ' - ' in scan: containsNeg = True
+        
         m = re.search(r'@(.*?) ', scan)
         if m:
             select.add(m.group(1))
     
+    #----
+    if containsMS:
+        if containsNeg: sourceList.append(' ms , - ') # notice comma I split on comma
+        if containsPos: sourceList.append(' ms , + ')
+        
     for e in select:
-        sourceList.append(e+', - ')
-        sourceList.append(e+', + ')
+        if containsNeg: sourceList.append(e+', - ')
+        if containsPos: sourceList.append(e+', + ')
     
     
     return sourceList
