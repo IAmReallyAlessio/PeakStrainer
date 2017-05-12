@@ -102,7 +102,11 @@ class MyFrame(MyFrame2):
         for onefile in self.fileNames:
             filepath = str(self.path+'\\'+onefile)
             self.m_statuslog.WriteText('Starting filepath '+ filepath + '\n')
-            self.run_once(filepath, onefile)
+            try:
+                self.run_once(filepath, onefile)
+            except :
+                self.m_statuslog.WriteText('\n *** THERE WAS A PROBLEM PROCESSING THE FILE *** \n'+ filepath+ '\n')
+            
             self.m_statuslog.WriteText('finished filepath '+ filepath+ '\n')
             self.m_statuslog.WriteText('=========================='+ '\n')
         
@@ -144,7 +148,7 @@ class MyFrame(MyFrame2):
                 
         scans = filterScanBy_first(scans)
         
-        if self.m_checkBox5.GetValue(): scans = filterScanBy_retentionTime(scans, self.m_textCtrl2.GetValue(), self.m_textCtrl3.GetValue() )
+        if self.m_checkBox5.GetValue(): scans = filterScanBy_retentionTime(scans, float(self.m_textCtrl2.GetValue()), float(self.m_textCtrl3.GetValue()) )
         #NOTE use try catch notify to validate input
         if self.m_checkBox6.GetValue(): scans = filterScanBy_filterline(scans, self.m_textCtrl4.GetValue(), self.m_radioBox1.GetSelection()==0)
         ''' filtering by scan
