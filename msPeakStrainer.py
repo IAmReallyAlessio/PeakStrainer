@@ -144,31 +144,34 @@ def filterScanBy_first(scans, n = 1):
     
 def filterScanBy_retentionTime(scans, lowSeconds=0.5, highSeconds=float("inf")):
     log.info('filterScanBy_retentionTime %f to %f', lowSeconds, highSeconds)
-    
+    result = []
     for row in scans:
         scanNum, filterLine, peak_datas, retTime = row 
         if retTime >+ lowSeconds and  retTime <= highSeconds:
-            yield row
+            result.append(row)
+    return result
     
 
 def filterScanBy_filterline(scans, subtext = ' ms ', keep=False):
     log.info('filterScanBy_filterline %s filter keep: %s', subtext, keep)
-    
+    result=[]
     for row in scans:
         scanNum, filterLine, peak_datas, retTime = row 
         if keep:
             if (subtext in filterLine):
-                yield row
+                result.append(row)
         else: #not keep
             if (subtext not in filterLine):
-                yield row
+                result.append(row)
+    return result
 
 def filterScanBy_samples(scans, step_size = 10):
     log.info('filterScanBy_samples step_size %d', step_size)
-    
+    result = []
     for idx, row in enumerate(scans):
         if idx %  step_size == 0:
-            yield row
+            result.append(row)
+    return result
 
 '''
 merge peaks and coarse grained filtering 

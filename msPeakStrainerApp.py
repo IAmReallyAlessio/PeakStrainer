@@ -6,7 +6,7 @@ Created on 04.05.2017
 from utils.msPeakStrainerGUI import MyFrame2
 import wx
 import os
-from msBinFilter import *
+from msPeakStrainer import *
 
 from lib.reorderScans.reorderScans import main as reorderscansMain  
 
@@ -146,7 +146,7 @@ class MyFrame(MyFrame2):
         
         if self.m_checkBox5.GetValue(): scans = filterScanBy_retentionTime(scans, self.m_textCtrl2.GetValue(), self.m_textCtrl3.GetValue() )
         #NOTE use try catch notify to validate input
-        if self.m_checkBox6.GetValue(): scans = filterScanBy_filterline(scans, self.m_textCtrl4.GetValue(), self.m_radioBox1.getselection()==0)
+        if self.m_checkBox6.GetValue(): scans = filterScanBy_filterline(scans, self.m_textCtrl4.GetValue(), self.m_radioBox1.GetSelection()==0)
         ''' filtering by scan
         scans = filterScanBy_samples(scans, step_size = 3)
         '''
