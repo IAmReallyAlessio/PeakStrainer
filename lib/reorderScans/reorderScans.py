@@ -8,6 +8,7 @@ import wx
 import xml.etree.ElementTree as ET
 import os
 import re
+from numba.types import none
 
 def main(folderpath = None):
     app = wx.App(False)
@@ -128,7 +129,10 @@ class MyFrame(MyFrame1):
             self.directoryUpdated(None)
         
     def directoryUpdated( self, event ):
-        self.model.source = getSourceList(self.m_dirPicker1.GetPath())
+        if event is None: 
+            self.model.source = []
+        else:
+            self.model.source = getSourceList(self.m_dirPicker1.GetPath())
         self.m_listBox1.Set(self.model.source)
         self.model.target = []
         self.m_listBox2.Set(self.model.target)
@@ -147,8 +151,11 @@ class MyFrame(MyFrame1):
     
     def finish( self, event ):
         saveFiles(self.m_dirPicker1.GetPath(), self.model.target, self.m_checkBox1.GetValue())
-        raise SystemExit
-
+        self.m_dirPicker1.SetPath('')
+        self.directoryUpdated(None)
+        wx.MessageBox('Process complete', 'Info', 
+            wx.OK | wx.ICON_INFORMATION)
+#         raise SystemExit
         
 
 if __name__ == '__main__':
