@@ -84,17 +84,24 @@ def saveFile(filePath, targetOrder, includeSims=False):
  
     msRunElement = tree.find('.//xmlns:msRun', namespaces)
     scanElems = msRunElement.findall('.//xmlns:scan', namespaces)
+    filterlines = [scan.attrib['filterLine'] for scan in scanElems]
+    
+    _, sortedScanElems = zip(*sorted(zip(filterlines,scanElems )))
     
     for scan in scanElems:
         msRunElement.remove(scan)
     
+    
+    counter = 0
     for selectionLine in targetOrder:
         type = selectionLine.split(',')[0]
         mode = selectionLine.split(',')[1]
-        for scan in scanElems:
+        for scan in sortedScanElems:
             scanLine = scan.attrib['filterLine']
             if includeSims == False and ' sim ' in scanLine.lower(): continue
             if type in scanLine and mode in scanLine:
+                counter = counter + 1 
+                scan.attrib['retentionTime'] = 'PT'+str(counter)+'.0S'
                 msRunElement.append(scan)
 
     dir,file = os.path.split(filePath)
