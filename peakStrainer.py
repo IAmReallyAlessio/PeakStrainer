@@ -2,8 +2,8 @@
 # encoding: utf-8
 '''
 Created on 29.03.2017
-msBinFilter is a tool to reduce the size of an MS spectra,
-usage: msPeakStrainer spectra_file.raw
+PeakStrainer is a tool to reduce the size of an MS spectra,
+usage: peakStrainer spectra_file.raw
 @author: mirandaa
 '''
 import sys
@@ -11,7 +11,7 @@ import os
 import time
 import logging
 import csv
-from utils.msBinFilter_util import write2templateMzXML
+from utils.peakstrainer_util import write2templateMzXML
 import itertools
 import math
 log = logging.getLogger(os.path.basename(__file__))
@@ -23,7 +23,7 @@ __version__ = "17.03.29.0"
 def main(file):
     log.setLevel(logging.DEBUG)
     if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
-    if log.level == logging.DEBUG:logging.basicConfig(filename='msbinfilter.log',filemode='w')
+    if log.level == logging.DEBUG:logging.basicConfig(filename='peakTrainer.log',filemode='w')
     
     log.debug('Start %f', time.clock())
 #     if len(sys.argv) == 1:

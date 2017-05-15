@@ -1,19 +1,19 @@
-MSPeakStrainer
+PeakStrainer
 =============
 
-MSPeakStrainer is a tool to reduce the size of MS spectra,
+PeakStrainer is a tool to reduce the size of MS spectra,
 with the goal of removing inconsistent signals
 and combining the consistent signals.
 
 Quick Start
 -----------
- - Download [MSPeakStrainer.zip](https://idisk-srv1.mpi-cbg.de/~mirandaa/MSPeakStrainer.zip)
+ - Download [PeakStrainer.zip](https://idisk-srv1.mpi-cbg.de/~mirandaa/peakStrainer.zip)
  - Unzip the file
- - run ```MSPeakStrainerApp.bat```   
+ - run ```peakStrainerApp.bat```   
 
 Desktop Application
 ----
-Run ```MSPeakStrainerApp.bat``` this will start the Desktop application.
+Run ```peakStrainerApp.bat``` this will start the Desktop application.
 Once one or more thermo.raw file are selected, you can click finish to process the file with default settings.
 The Desktop application contains several pages where setting can be changed from the default.
 
@@ -21,16 +21,16 @@ If you don't change anything the default values are used.
 
 Command line Application
 -------
-Run `MSPeakStrainer.py file.raw` from the command line to process the file with the default settings.
+Run `peakStrainer.py file.raw` from the command line to process the file with the default settings.
 custom settings can be applied on the command line with ```utils\msps.py```
 
-I would recommend that you look at the code in ```msPeakStrainer.py```
+I would recommend that you look at the code in ```peakStrainer.py```
 in the main method and update it there,
 the code should be readable and you can change it to your setting.
 
 
 ## Options
-msPeakStrainer can be configured to run in different ways,
+PeakStrainer can be configured to run in different ways,
 but the default setting should work most of the time.
 Just in case here are some options you can change.
 

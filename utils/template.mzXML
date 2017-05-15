@@ -10,7 +10,7 @@
    <software name="Xcalibur" type="acquisition" version="2.3-176401/2.3.0.1765" />
   </msInstrument>
   <dataProcessing centroided="1">
-  <software name="msbinfilter" type="conversion" version="20170330" /></dataProcessing>
+  <software name="peakstrainer" type="conversion" version="20170515" /></dataProcessing>
   <scan basePeakIntensity="99999" basePeakMz="800.0" filterLine="FTMS - p NSI Full lock ms [400.00-1200.00]" 
   highMz="1200.0" lowMz="400.0" msLevel="1" num="1" peaksCount="3464" polarity="-" retentionTime="PT0.0S" scanType="Full" totIonCurrent="1.23456e+007">
   <precursorMz activationMethod="HCD" precursorIntensity="1.234">746.54</precursorMz>

@@ -1,1 +1,1 @@
-start /d "msPeakStrainerApp" msPeakStrainerApp.exe
+start /d "peakStrainerApp" peakStrainerApp.exe

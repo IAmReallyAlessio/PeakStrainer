@@ -1,12 +1,12 @@
 # -*- mode: python -*-
 # used by pyinstaller to create .exe
-# C:\apps\Anaconda2) C:\apps\eclipseRCP\workspace\MSPeakStrainer>
-# pyinstaller msPeakStrainer.spec
+# C:\apps\Anaconda2) C:\apps\eclipseRCP\workspace\PeakStrainer>
+# pyinstaller peakStrainer.spec
 block_cipher = None
 
 
-a = Analysis(['msPeakStrainerApp.py'],
-             pathex=['C:\\apps\\eclipseRCP\\workspace\\MSPeakStrainer'],
+a = Analysis(['peakStrainerApp.py'],
+             pathex=['C:\\apps\\eclipseRCP\\workspace\\PeakStrainer'],
              binaries=[],
              datas=[('utils\\template.mzXML','utils')],
              hiddenimports=[],
@@ -21,7 +21,7 @@ pyz = PYZ(a.pure, a.zipped_data,
 exe = EXE(pyz,
           a.scripts,
           exclude_binaries=True,
-          name='msPeakStrainerApp',
+          name='peakStrainerApp',
           debug=False,
           strip=False,
           upx=False,
@@ -32,4 +32,4 @@ coll = COLLECT(exe,
                a.datas,
                strip=False,
                upx=False,
-               name='msPeakStrainerApp')
+               name='peakStrainerApp')

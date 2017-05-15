@@ -3,10 +3,10 @@ Created on 04.05.2017
 
 @author: mirandaa
 '''
-from utils.msPeakStrainerGUI import MyFrame2
+from utils.peakStrainerGUI import MyFrame2
 import wx
 import os
-from msPeakStrainer import *
+from peakStrainer import *
 
 from lib.reorderScans.reorderScans import main as reorderscansMain  
 

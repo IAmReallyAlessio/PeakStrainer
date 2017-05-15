@@ -1,11 +1,11 @@
 '''
 Created on 31.03.2017
-command line access to msPeakStrainer
+command line access to PeakStrainer
 @author: mirandaa
 '''
 
 import logging
-from msPeakStrainer import *
+from peakStrainer import *
 import configargparse
 
 def loglevel(v_count):

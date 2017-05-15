@@ -1,6 +1,6 @@
 '''
 Created on 29.03.2017
-msBinFilter_util contains functions that are useful but not used
+peakStrainer_util contains functions that are useful but not used
 @author: mirandaa
 '''
 from base64 import b64decode, b64encode
