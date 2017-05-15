@@ -8,7 +8,6 @@ import wx
 import xml.etree.ElementTree as ET
 import os
 import re
-from numba.types import none
 
 def main(folderpath = None):
     app = wx.App(False)
