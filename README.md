@@ -7,7 +7,7 @@ and combining the consistent signals.
 
 Quick Start
 -----------
- - Download [PeakStrainer.zip](https://idisk-srv1.mpi-cbg.de/~mirandaa/peakStrainer.zip)
+ - Download [PeakStrainer.zip](https://git.mpi-cbg.de/labShevchenko/PeakStrainer/blob/master/dist/peakStrainerApp.zip)
  - Unzip the file
  - run ```peakStrainerApp.bat```   
 
