@@ -143,6 +143,11 @@ class MyFrame(MyFrame1):
         self.model.target = []
         self.m_listBox2.Set(self.model.target)
         
+    def sourceDubleClicked( self, event ):
+        idx = self.m_listBox1.GetSelection()
+        self.model.target.append(self.m_listBox1.GetItems()[idx])
+        self.m_listBox2.Set(self.model.target)
+    
     
     def addToTargetList( self, event ):
         idx = self.m_listBox1.GetSelection()

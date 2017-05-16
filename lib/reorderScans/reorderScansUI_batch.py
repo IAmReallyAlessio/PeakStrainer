@@ -112,6 +112,7 @@ class MyFrame1 ( wx.Frame ):
 		
 		# Connect Events
 		self.m_dirPicker1.Bind( wx.EVT_DIRPICKER_CHANGED, self.directoryUpdated )
+		self.m_listBox1.Bind( wx.EVT_LISTBOX_DCLICK, self.sourceDubleClicked )
 		self.m_button1.Bind( wx.EVT_BUTTON, self.addToTargetList )
 		self.m_button2.Bind( wx.EVT_BUTTON, self.removeFromTargetList )
 		self.m_button3.Bind( wx.EVT_BUTTON, self.finish )
@@ -122,6 +123,9 @@ class MyFrame1 ( wx.Frame ):
 	
 	# Virtual event handlers, overide them in your derived class
 	def directoryUpdated( self, event ):
+		event.Skip()
+	
+	def sourceDubleClicked( self, event ):
 		event.Skip()
 	
 	def addToTargetList( self, event ):
