@@ -8,6 +8,7 @@ import wx
 import xml.etree.ElementTree as ET
 import os
 import re
+import copy
 
 def main(folderpath = None):
     app = wx.App(False)
@@ -100,9 +101,10 @@ def saveFile(filePath, targetOrder, includeSims=False):
             scanLine = scan.attrib['filterLine']
             if includeSims == False and ' sim ' in scanLine.lower(): continue
             if type in scanLine and mode in scanLine:
+                new_scan = copy.deepcopy(scan)
                 counter = counter + 1 
-                scan.attrib['retentionTime'] = 'PT'+str(counter)+'.0S'
-                msRunElement.append(scan)
+                new_scan.attrib['retentionTime'] = 'PT'+str(counter)+'.0S'
+                msRunElement.append(new_scan)
 
     dir,file = os.path.split(filePath)
     
