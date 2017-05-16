@@ -5,12 +5,16 @@ Created on 16.05.2017
 '''
 
 from peakStrainer import ThermoRawfile2Scans, preliminaryFilter
-from utils.peakStrainer_util import decode_mzXML_Peaks, encodePeaks
+from utils.peakStrainer_util import decode_mzXML_Peaks, encodePeaks, setLogger
 from collections import OrderedDict
 import xml.etree.ElementTree as ET
 import copy, os
 
+import logging
+log = logging.getLogger(os.path.basename(__file__))
+
 def main():
+    setLogger()
     fileName = r'C:\apps\eclipseRCP\workspace\PeakStrainer\resources\qc3_01.raw'
     step=3
     
@@ -23,35 +27,36 @@ def main():
     for idx, scan in enumerate(ms_scans):
         if idx+step >len(ms_scans): break 
         
-        if idx % step == 0  :
+#         if idx % step == 0  :
 #             mergeM, mergeI = decode_mzXML_Peaks(ms_scans[idx][2])
-            mergeM, mergeI = map(list,ms_scans[idx][2][0:2])
-        
-            thisM1, thisI1 = ms_scans[idx+1][2][0:2] 
-            thisM2, thisI2 = ms_scans[idx+2][2][0:2]
-            
-            mergeM.extend(thisM1)  
-            mergeI.extend(thisI1)
-            
-            mergeM.extend(thisM2)  
-            mergeI.extend(thisI2)
-            
-            print 'Merged group '+str(idx) +' has '+str(len(mergeM))
-            peakdata = (mergeM, mergeI)  
-            
-            newpeakData = preliminaryFilter(peakdata, minCount = 1)
-            
-            #scanNum, filterline, retTime
-            scanHead = (scan[0], scan[1], scan[3])
-            if newpeakData:
-                print 'filered Merged group '+str(idx) +' has '+str(len(newpeakData[0]))
-            else:
-                print 'filered Merged group '+str(idx) +' has no peaks '+ str(scanHead)
-                newpeakData = ([],[])
-                
-            
-            print 'Scan Head '+str(scanHead)
-            scansData[scanHead] = newpeakData
+        mergeM, mergeI = map(list,ms_scans[idx][2][0:2])
+     
+        thisM1, thisI1 = ms_scans[idx+1][2][0:2] 
+        thisM2, thisI2 = ms_scans[idx+2][2][0:2]
+         
+        mergeM.extend(thisM1)  
+        mergeI.extend(thisI1)
+         
+        mergeM.extend(thisM2)  
+        mergeI.extend(thisI2)
+         
+        print 'Merged group '+str(idx) +' has '+str(len(mergeM))
+        peakdata = (mergeM, mergeI)  
+         
+        newpeakData = preliminaryFilter(peakdata, minCount = 1)
+         
+        #scanNum, filterline, retTime
+        scanHead = (scan[0], scan[1], scan[3])
+        if newpeakData:
+            print 'filered Merged group '+str(idx) +' has '+str(len(newpeakData[0]))
+             
+        else:
+            print 'filered Merged group '+str(idx) +' has no peaks '+ str(scanHead)
+            newpeakData = ([],[])
+             
+        log.debug(('analitics',)+scanHead+(len(peakdata[0]),len(newpeakData[0])))
+        print 'Scan Head '+str(scanHead)
+        scansData[scanHead] = newpeakData
         
     print 'writing mzxml'
     write2templateMzXML(fileName[:-4]+'.mzxml', scansData)
