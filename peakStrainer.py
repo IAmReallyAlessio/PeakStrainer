@@ -23,7 +23,7 @@ __version__ = "17.03.29.0"
 def main(file):
     log.setLevel(logging.DEBUG)
     if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
-    if log.level == logging.DEBUG:logging.basicConfig(filename='peakTrainer.log',filemode='w')
+    if log.level == logging.DEBUG:logging.basicConfig(filename='peakStrainer.log',filemode='w')
     
     log.debug('Start %f', time.clock())
 #     if len(sys.argv) == 1:
