@@ -21,6 +21,8 @@ def main():
     scans = ThermoRawfile2Scans(fileName)
     print 'og scans '+str(len(scans))
     ms_scans = [scan for scan in scans if ' ms ' in scan[1]]
+    '''for msms get filterline, get offset, remove offset from filterline
+    get two more scans with same filterline that are within 120sec timewindow'''
     print 'ms scans '+str(len(ms_scans))
     
     scansData = OrderedDict()
