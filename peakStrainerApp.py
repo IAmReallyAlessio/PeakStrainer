@@ -130,8 +130,9 @@ class MyFrame(MyFrame2):
     def statusLog(self, text):
         self.m_statuslog.WriteText(text+ '\n')
     
-    def getCSVpath_file(self, file):
-        return self.m_dirPicker1.GetPath()+file[:-4]
+    def getCSVpath_file(self, fileName):
+        Base_fileName = fileName[:-4]
+        return self.m_dirPicker1.GetPath()+ '\\'+Base_fileName
     
     
     def run_once(self, filepath, rawfilename):
