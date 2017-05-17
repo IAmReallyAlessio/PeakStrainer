@@ -121,17 +121,18 @@ class MyFrame(MyFrame2):
     def getLoglevel(self):
         if not self.m_checkBox9.GetValue():
             return logging.WARNING
-        elif self.m_panel4.GetValue()==1 : return logging.CRITICAL
-        elif self.m_panel4.GetValue()==2 : return logging.ERROR
-        elif self.m_panel4.GetValue()==3 : return logging.WARNING
-        elif self.m_panel4.GetValue()==4 : return logging.INFO
-        elif self.m_panel4.GetValue()==5 : return logging.DEBUG 
+        elif self.m_slider1.GetValue()==1 : return logging.CRITICAL
+        elif self.m_slider1.GetValue()==2 : return logging.ERROR
+        elif self.m_slider1.GetValue()==3 : return logging.WARNING
+        elif self.m_slider1.GetValue()==4 : return logging.INFO
+        elif self.m_slider1.GetValue()==5 : return logging.DEBUG 
     
     def statusLog(self, text):
         self.m_statuslog.WriteText(text+ '\n')
     
-    def getCSVpath_file(self, file):
-        return self.m_dirPicker1.GetPath()+file[:-4]
+    def getCSVpath_file(self, fileName):
+        Base_fileName = fileName[:-4]
+        return self.m_dirPicker1.GetPath()+ '\\'+Base_fileName
     
     
     def run_once(self, filepath, rawfilename):
