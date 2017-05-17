@@ -43,7 +43,7 @@ def main():
         print 'Merged group '+str(idx) +' has '+str(len(mergeM))
         peakdata = (mergeM, mergeI)  
          
-        newpeakData = preliminaryFilter(peakdata, minCount = 1)
+        newpeakData = preliminaryFilter(peakdata, minCount = 2)
          
         #scanNum, filterline, retTime
         scanHead = (scan[0], scan[1], scan[3])
