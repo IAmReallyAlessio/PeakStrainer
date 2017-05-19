@@ -22,7 +22,7 @@ def main(fileName = None):
         for scan in scans:
             line = str((scan[0],scan[1],scan[3]))
             outfile.write(line[1:-1]+'\n')
-    msScan = [scan for scan in scans if ' ms ' in scan[1].lower()]
+    msScan = [scan for scan in scans if ' full ms ' in scan[1].lower()]
     scans = [scan for scan in scans if 'sim' in scan[1].lower()]
     
     decodedScans =[]
@@ -193,8 +193,28 @@ def main(fileName = None):
     print 'get the  ms'
     msMasses, msIntens =  decode_mzXML_Peaks(msScan[0][2])
     
+    with file('validationMSPeaks.csv', 'wb') as outfile:
+        for e in zip(msMasses, msIntens):
+            line = str(e)
+            outfile.write(line[1:-1]+'\n')
     
-    print 'find corresponding in ms'
+    comparable = []
+    found = None
+    for s_mass,s_intens in selections:
+        for idx, m_mass in  enumerate(msMasses):
+            if round(s_mass,1) == round(m_mass,1):
+                found = True
+                comparable.append((s_mass,s_intens,' ',  m_mass, msIntens[idx]))
+                break
+        if not found:
+            print 'no match found for {} in ms'.format((round(s_mass,1),s_intens))
+    
+    with file('validationCompare.csv', 'wb') as outfile:
+        for e in comparable:
+            line = str(e)
+            outfile.write(line[1:-1]+'\n')              
+    
+   
     
     
     
