@@ -14,9 +14,15 @@ import copy
 
 
 
-def main():
-    fileName= r'C:\apps\eclipseRCP\workspace\ReorderScans\tests\20160213_retina_ko_NH4HCO2_posneg_WT_11.mzXML'#sys.argv[1]
+
+def main(fileName = None):
+
     scans = getMZXMLEncondedScans(fileName)
+    with file('scans.csv', 'wb') as outfile:
+        for scan in scans:
+            line = str((scan[0],scan[1],scan[3]))
+            outfile.write(line[1:-1]+'\n')
+        
     scans = [scan for scan in scans if 'sim' in scan[1].lower()]
     
     decodedScans =[]
@@ -24,10 +30,20 @@ def main():
         masses, intens = decode_mzXML_Peaks(scan[2]) 
         decodedScans.append(scan+(masses, intens))
     
+    with file('simScans.csv', 'wb') as outfile:
+        for decodedScan in decodedScans:
+            head = (decodedScan[0],decodedScan[1],decodedScan[3])
+            masses = decodedScan[4]
+            intens = decodedScan[5]
+            for massintens in zip(masses, intens):
+                line = head + massintens
+                line = str(line)
+                outfile.write(line[1:-1]+'\n')
+        
+    
     filterlines = [scan[1] for scan in scans]
     filterlines = sorted(filterlines)
     
-    print 'sort for overlap'
     filterlineSplits = []
     Filterline = namedtuple('Filterline', 'head low high filterline')
     for filterline in filterlines:
@@ -35,36 +51,59 @@ def main():
         filterlineSplits.append(Filterline(m.group(1), float(m.group(2)), float(m.group(3)), m.group(0)))
     
     sortedFilterLine = sorted(filterlineSplits)
-#     print '\n'.join(map(str,sortedFilterLine))
     
     filterLineCols = zip(*sortedFilterLine)
     filterLineCols = map(list,filterLineCols)
     
-    filterline_newLow = []
-    filterline_newhigh = []
     uniqueFilterLines = defaultdict(set)
-    for idx, _ in enumerate(filterLineCols[0][:-1]):
+    overlap = False
+    step = 0
+    for idx, _ in enumerate(filterLineCols[0]):
         head = filterLineCols[0][idx]
         low =  filterLineCols[1][idx]
         high = filterLineCols[2][idx]
-        nextHead = filterLineCols[0][idx+1]
-        nextLow =  filterLineCols[1][idx+1]
-        nextHigh = filterLineCols[2][idx+1]
         
-        if head == nextHead and  high > nextLow and high < nextHigh: # high < nextHigh to avoid subsumes
+        if idx+1 < len(filterLineCols[0]):
+            nextHead = filterLineCols[0][idx+1]
+            nextLow =  filterLineCols[1][idx+1]
+            nextHigh = filterLineCols[2][idx+1]
+        #else: # no change still the last
+            
+        
+        old_overlap = overlap 
+        overlap = ( head == nextHead and  high > nextLow and high < nextHigh) # high < nextHigh to avoid subsumes
+        first = head not in uniqueFilterLines.keys() #first, so trim low
+        last = old_overlap == True and overlap == False
+        old_step= step
+        step = (high - nextLow)/2
+                
+        if first and overlap:
+            filterLineCols[1][idx] = filterLineCols[1][idx] + step  
+            low =  filterLineCols[1][idx]
+            uniqueFilterLines[head].add(low)
+        if last:
+            filterLineCols[2][idx] = filterLineCols[2][idx] - old_step
+            high = filterLineCols[2][idx]
+            uniqueFilterLines[head].add(high)
+        
+        if overlap:
             mid = (high + nextLow)/2
             filterLineCols[2][idx] = mid
             filterLineCols[1][idx+1] = mid
-            uniqueFilterLines[head].add(low)
-            uniqueFilterLines[head].add(nextHigh)
-        
+            
             
     
+   
+        
     newFilterline = []
     for head in filterLineCols[0]:
         newFilterline.append(head +'['+ str(min(uniqueFilterLines[head])) + '-' + str(max(uniqueFilterLines[head]))+']')
-        
+    
     filterLineCols.append(newFilterline)
+    with file('newScans.csv', 'wb') as outfile:
+        for line in zip(*filterLineCols):
+            line = str(line)
+            outfile.write(line[1:-1]+'\n')
     
     orderedScans = []
     for line in zip(*filterLineCols):
@@ -78,7 +117,6 @@ def main():
     filterLineCols.append(orderedScans)
     
 #     print '\n'.join(map(str,zip(*filterLineCols)))
-    
     
     stittchedMass = defaultdict(list)
     stittchedIntes = defaultdict(list)
@@ -103,9 +141,21 @@ def main():
         print (e,min(stittchedMass[e]),max(stittchedMass[e]))
         scanPeaks[e]=(stittchedMass[e], stittchedIntes[e])
     
-    write2templateMzXML('test.zmxml', scanPeaks)
-        
-    
+    with file('outScans.csv', 'wb') as outfile:
+        for e in scanPeaks:
+            line = (e,min(scanPeaks[e][0]),max(scanPeaks[e][1]))
+            line = str(line)
+            outfile.write(line[1:-1]+'\n')
+            
+    write2templateMzXML(outputFile(fileName), scanPeaks)
+
+def outputFile(fileName):
+    dir,file = os.path.split(fileName)
+    if not os.path.exists(dir+'\\stitched'):
+        os.makedirs(dir+'\\stitched')
+    newfilename = dir+'\\stitched\\'+file[:-6]+'-s'+file[-6:]
+    return newfilename
+
 def write2templateMzXML(newfilename, scanPeaks):
     namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}
     ET.register_namespace('', 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0')
@@ -195,5 +245,8 @@ def decode_mzXML_Peaks(encodedPeaks):
 
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) > 0:
+        main(sys.argv[1])
+    else:
+        main()
     
