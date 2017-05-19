@@ -22,7 +22,7 @@ def main(fileName = None):
         for scan in scans:
             line = str((scan[0],scan[1],scan[3]))
             outfile.write(line[1:-1]+'\n')
-        
+    msScan = [scan for scan in scans if ' ms ' in scan[1].lower()]
     scans = [scan for scan in scans if 'sim' in scan[1].lower()]
     
     decodedScans =[]
@@ -148,6 +148,57 @@ def main(fileName = None):
             outfile.write(line[1:-1]+'\n')
             
     write2templateMzXML(outputFile(fileName), scanPeaks)
+    
+    '''start validation'''
+    
+    selections = []
+    for line in zip(*filterLineCols):
+        masss = line[5][4]
+        intens = line[5][5] 
+        low = line[1]
+        high = line[2]
+        filterline = line[3]
+        stitchedFilterline = line[4] 
+        rtime = line[5][3]
+        
+        center = (high+low)/2
+        minInten = max(intens)*0.05
+        intensPass =[inten > minInten for inten in intens]
+        
+        massCandidates = list(compress(masss, intensPass))
+        
+        cleanPass = []
+        for idx, _ in enumerate(massCandidates[:-1]):
+            if idx == 0 :continue
+            passes =  (massCandidates[idx] - massCandidates[idx-1])>=0.5
+            passes = passes and (massCandidates[idx+1] - massCandidates[idx])>=0.5
+            cleanPass.append(passes)
+        
+        massCandidates = list(compress(massCandidates, cleanPass))
+        count = len(massCandidates)
+        mode = count/2
+        selection =  massCandidates[mode] if mode else None
+        if selection:
+            selections.append((selection, intens[masss.index(selection)]))
+        else:
+            print 'no selection for {}'.format(filterline)
+        
+    
+    with file('validationSimSelection.csv', 'wb') as outfile:
+        for e in selections:
+            line = str(e)
+            outfile.write(line[1:-1]+'\n')
+    
+    
+    print 'get the  ms'
+    msMasses, msIntens =  decode_mzXML_Peaks(msScan[0][2])
+    
+    
+    print 'find corresponding in ms'
+    
+    
+    
+    print 'get offset and output to csv'
 
 def outputFile(fileName):
     dir,file = os.path.split(fileName)
