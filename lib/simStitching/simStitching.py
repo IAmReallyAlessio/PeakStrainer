@@ -76,7 +76,14 @@ def main(fileName = None):
         last = old_overlap == True and overlap == False
         old_step= step
         step = (high - nextLow)/2
-                
+        
+        if first and not overlap: #first and only
+#             filterLineCols[1][idx] = filterLineCols[1][idx] + step  
+            low =  filterLineCols[1][idx]
+            uniqueFilterLines[head].add(low)
+            high = filterLineCols[2][idx]
+            uniqueFilterLines[head].add(high)
+        
         if first and overlap:
             filterLineCols[1][idx] = filterLineCols[1][idx] + step  
             low =  filterLineCols[1][idx]
