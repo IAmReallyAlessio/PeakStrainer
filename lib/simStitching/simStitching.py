@@ -22,7 +22,7 @@ def main(fileName = None):
         for scan in scans:
             line = str((scan[0],scan[1],scan[3]))
             outfile.write(line[1:-1]+'\n')
-    msScan = [scan for scan in scans if ' full ms ' in scan[1].lower()]
+    msScan = [scan for scan in scans if ' ms ' in scan[1].lower() and ' full ' in scan[1].lower()]
     scans = [scan for scan in scans if 'sim' in scan[1].lower()]
     
     decodedScans =[]
@@ -91,13 +91,10 @@ def main(fileName = None):
             filterLineCols[2][idx] = mid
             filterLineCols[1][idx+1] = mid
             
-            
-    
-   
-        
     newFilterline = []
     for head in filterLineCols[0]:
-        newFilterline.append(head +'['+ str(min(uniqueFilterLines[head])) + '-' + str(max(uniqueFilterLines[head]))+']')
+        if uniqueFilterLines[head]:
+            newFilterline.append(head +'['+ str(min(uniqueFilterLines[head])) + '-' + str(max(uniqueFilterLines[head]))+']')
     
     filterLineCols.append(newFilterline)
     with file('newScans.csv', 'wb') as outfile:
@@ -178,10 +175,11 @@ def main(fileName = None):
         count = len(massCandidates)
         mode = count/2
         selection =  massCandidates[mode] if mode else None
-        if selection:
-            selections.append((selection, intens[masss.index(selection)]))
-        else:
-            print 'no selection for {}'.format(filterline)
+        for selection in massCandidates:
+            if selection:
+                selections.append((selection, intens[masss.index(selection)], filterline, stitchedFilterline))
+            else:
+                    print 'no selection for sim {}'.format(filterline)
         
     
     with file('validationSimSelection.csv', 'wb') as outfile:
@@ -190,22 +188,36 @@ def main(fileName = None):
             outfile.write(line[1:-1]+'\n')
     
     
-    print 'get the  ms'
-    msMasses, msIntens =  decode_mzXML_Peaks(msScan[0][2])
+    print 'get the  mutiupl ems '
+    msMasses=[]
+    msIntens = []
+    msFilterLine =[]
+    for scan in msScan:
+        masses, intens =  decode_mzXML_Peaks(scan[2])
+        msMasses.extend(masses)
+        msIntens.extend(intens)
+        msFilterLine.extend([scan[1]]*len(masses))
+            
+        
     
     with file('validationMSPeaks.csv', 'wb') as outfile:
-        for e in zip(msMasses, msIntens):
+        for e in zip(msMasses, msIntens,msFilterLine ):
             line = str(e)
             outfile.write(line[1:-1]+'\n')
     
+    def modematch(strin1 , string2):
+        if ' - ' in strin1 and ' - ' in string2: return True
+        if ' + ' in strin1 and ' + ' in string2: return True
+        return False
+         
     comparable = []
     found = None
-    for s_mass,s_intens in selections:
+    for s_mass,s_intens, s_filterline, s_stichedFilterline in selections:
         for idx, m_mass in  enumerate(msMasses):
-            if round(s_mass,1) == round(m_mass,1):
+            if round(s_mass,2) == round(m_mass,2) and modematch(s_filterline,msFilterLine[idx] ):
                 found = True
-                comparable.append((s_mass,s_intens,' ',  m_mass, msIntens[idx]))
-                break
+                comparable.append(( m_mass, msIntens[idx],msFilterLine[idx],'',s_mass,s_intens,s_filterline, s_stichedFilterline))
+                
         if not found:
             print 'no match found for {} in ms'.format((round(s_mass,1),s_intens))
     
@@ -213,9 +225,6 @@ def main(fileName = None):
         for e in comparable:
             line = str(e)
             outfile.write(line[1:-1]+'\n')              
-    
-   
-    
     
     
     print 'get offset and output to csv'
