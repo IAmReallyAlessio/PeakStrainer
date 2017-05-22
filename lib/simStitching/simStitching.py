@@ -180,13 +180,13 @@ def main(fileName = None):
         
         massCandidates = list(compress(massCandidates, cleanPass))
         count = len(massCandidates)
-        mode = count/2
-        selection =  massCandidates[mode] if massCandidates else None
+#         mode = count/2
+#         selection =  massCandidates[mode] if massCandidates else None
         for selection in massCandidates:
-            if selection:
-                selections.append((selection, intens[masss.index(selection)], filterline, stitchedFilterline))
-            else:
-                    print 'no selection for sim {}'.format(filterline)
+#             if selection:
+            selections.append((selection, intens[masss.index(selection)], filterline, stitchedFilterline))
+#             else:
+#                     print 'no selection for sim {}'.format(filterline)
         
     
     with file('validationSimSelection.csv', 'wb') as outfile:
@@ -220,6 +220,7 @@ def main(fileName = None):
     comparable = []
     found = None
     for s_mass,s_intens, s_filterline, s_stichedFilterline in selections:
+        found = False
         for idx, m_mass in  enumerate(msMasses):
             if round(s_mass,2) == round(m_mass,2) and modematch(s_filterline,msFilterLine[idx] ):
                 found = True
