@@ -77,7 +77,7 @@ def main(fileName = None):
         old_step= step
         step = (high - nextLow)/2
         
-        if first and not overlap: #first and only
+        if not overlap: #first and only
 #             filterLineCols[1][idx] = filterLineCols[1][idx] + step  
             low =  filterLineCols[1][idx]
             uniqueFilterLines[head].add(low)
@@ -181,7 +181,7 @@ def main(fileName = None):
         massCandidates = list(compress(massCandidates, cleanPass))
         count = len(massCandidates)
         mode = count/2
-        selection =  massCandidates[mode] if mode else None
+        selection =  massCandidates[mode] if massCandidates else None
         for selection in massCandidates:
             if selection:
                 selections.append((selection, intens[masss.index(selection)], filterline, stitchedFilterline))
@@ -207,7 +207,7 @@ def main(fileName = None):
             
         
     
-    with file('validationMSPeaks.csv', 'wb') as outfile:
+    with file('MSPeaks.csv', 'wb') as outfile:
         for e in zip(msMasses, msIntens,msFilterLine ):
             line = str(e)
             outfile.write(line[1:-1]+'\n')
