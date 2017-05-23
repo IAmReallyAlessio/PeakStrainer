@@ -275,7 +275,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer26.Add( self.m_spinCtrl2, 0, wx.ALL, 5 )
 		
-		self.m_staticText15 = wx.StaticText( self.m_panel6, wx.ID_ANY, u"discard groups with", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText15 = wx.StaticText( self.m_panel6, wx.ID_ANY, u"discard groups less than", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText15.Wrap( -1 )
 		self.m_staticText15.SetFont( wx.Font( 9, 74, 90, 92, False, "Arial" ) )
 		self.m_staticText15.Enable( False )
@@ -287,7 +287,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer26.Add( self.m_spinCtrl1, 0, wx.ALL, 5 )
 		
-		self.m_staticText22 = wx.StaticText( self.m_panel6, wx.ID_ANY, u"or less", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText22 = wx.StaticText( self.m_panel6, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText22.Wrap( -1 )
 		self.m_staticText22.SetFont( wx.Font( 9, 74, 90, 92, False, "Arial" ) )
 		self.m_staticText22.Enable( False )

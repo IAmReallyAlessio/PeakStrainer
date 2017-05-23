@@ -235,7 +235,7 @@ def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionR
         bins[rounded] = bins.get(rounded, 0) + 1
     
     log.debug('Prelimianry groups count %d', len(bins))
-    minCount_bin = {bin:(count/3)+1 for bin,count in bins.iteritems() if (count/3)+1 > minCount}
+    minCount_bin = {bin:(count/3)+1 for bin,count in bins.iteritems() if (count/3)+1 >= minCount}
     log.debug('groups with minCount %d: %d', minCount,len(minCount_bin))
     minCount_bin_max = float(max(minCount_bin.values())) if len(minCount_bin) is not 0 else 0 
     minRepetitionRate_bin = {bin:count for bin,count in minCount_bin.iteritems() if (count/minCount_bin_max) > minRepetitionRate }
