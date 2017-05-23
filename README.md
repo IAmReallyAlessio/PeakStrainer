@@ -34,9 +34,9 @@ PeakStrainer can be configured to run in different ways,
 but the default setting should work most of the time.
 Just in case here are some options you can change.
 
-Please note that some options are not available in the GUI.
+**Please note that some options are not available in the GUI.
 one of the goals of the GUI is to maintain simplicity.
-This is why some options are only in the code.
+This is why some options are only in the code.**
 
 ### Select Scans
 A simple way to reduce the size of the file is by removing some scans.
