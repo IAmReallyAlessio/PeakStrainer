@@ -25,14 +25,15 @@ class Scan(object):
         def __repr__(self):
             return self.filterline
         
-        def head(self):
+        def _head(self):
             return self.match.group(1)
-        def low(self):
+        def _low(self):
             return float(self.match.group(2))
-        def high(self):
+        def _high(self):
             return float(self.match.group(3))
+        def asTuple(self):
+            return (self._head(),self._low(),self._high())
         
-    
     def __init__(self, scanNo, filterLine, encodedPeaks, retTime = None):
         self.scanNo = scanNo
         self.filterLine = self.FilterLine(filterLine)
@@ -42,8 +43,9 @@ class Scan(object):
         self.previous = None
         self.next = None
         
+        
     def __str__(self):
-        return 'Scan Num {}, {}, peak Count = {}'.format(self.scanNo,self.filterLine, len(self.masses))
+        return 'Scan Num {}, {}, peak Count = {}, low ={}, high = {}'.format(self.scanNo,self.filterLine, len(self.masses), self.overlapLow(), self.overlapHigh())
     
     def __repr__(self):
         return '{}; {}; {}; {};'.format(self.scanNo,self.filterLine, self.retTime, self.encodedPeaks)
@@ -59,8 +61,36 @@ class Scan(object):
         intens = peaks[1::2]
         return mass, intens
     
+
+    def _getHighOverlap(self): # 3 cases either last one, or there is an overlap or there isn't
+        if self.next is None or self.filterLine._head() != self.next.filterLine._head(): return 0
+        
+        if self.filterLine._high() > self.next.filterLine._low():
+            return (self.filterLine._high() - self.next.filterLine._low())/2
+        else:
+            return 0
+    
+    def _getLowOverlap(self): # 3 cases either first one, or there is an overlap or there isn't
+        if self.previous is None or self.filterLine._head() != self.previous.filterLine._head(): return 0
+        
+        if self.previous.filterLine._high() > self.filterLine._low():
+            return (self.previous.filterLine._high() - self.filterLine._low())/2
+        else:
+            return 0
     
     
+    def overlapLow(self):
+        if self.previous is None or self.filterLine._head() != self.previous.filterLine._head(): # use the difference in high
+            return self.filterLine._low()+ self._getHighOverlap()
+        else:
+            return self.filterLine._low() + self._getLowOverlap()
+        
+    def overlapHigh(self):
+        if self.next is None  or self.filterLine._head() != self.next.filterLine._head(): # use the difference in low
+            return self.filterLine._high()-self._getLowOverlap()
+        else:
+            return self.filterLine._high()-self._getHighOverlap()
+        
         
 
 def simStitcher(filePath = None):
@@ -77,18 +107,19 @@ def simStitcher(filePath = None):
     
     scans =[Scan(*scan_xml) for scan_xml in scans_mzxml_sim]
     
-    log.info('get sorted filterlines')
-    scans.sort(key=lambda scan: (scan.filterLine.head(),scan.filterLine.low(),scan.filterLine.high()))
+    log.info('get sorted filterlines') # where low is a number instead of a text
+    scans.sort(key=lambda scan: scan.filterLine.asTuple())
     
     log.debug('\n'.join(map(str,scans)))
     
     scans[0].next = scans[1] #previous is none
-    for idx, scan in enumerate(scans[1:-1]):
-        scan.previous = scans[idx-1]
-        scan.next = scans[idx+1]
+    for idx, scan in enumerate(scans):
+        if idx == 0 or idx >= len(scans)-1: continue
+        scans[idx].previous = scans[idx-1]
+        scans[idx].next = scans[idx+1]
     scans[-1].previous = scans[-2] #next is none
     
-    
+    print('\n'.join(map(str,scans)))
     log.info('finish')
     
 def getMZXMLEncondedScanRows(filePath):
