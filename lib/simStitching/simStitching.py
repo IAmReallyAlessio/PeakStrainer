@@ -24,6 +24,7 @@ def main(fileName = None):
             outfile.write(line[1:-1]+'\n')
     msScan = [scan for scan in scans if ' ms ' in scan[1].lower() and ' full ' in scan[1].lower()]
     scans = [scan for scan in scans if 'sim' in scan[1].lower()]
+    scans =scans[1:]
     
     decodedScans =[]
     for scan in scans:
@@ -172,21 +173,29 @@ def main(fileName = None):
         massCandidates = list(compress(masss, intensPass))
         
         cleanPass = []
-        for idx, _ in enumerate(massCandidates[:-1]):
-            if idx == 0 :continue
-            passes =  (massCandidates[idx] - massCandidates[idx-1])>=0.5
-            passes = passes and (massCandidates[idx+1] - massCandidates[idx])>=0.5
+        for idx, _ in enumerate(massCandidates):
+            if idx == 0 : 
+                passes = True #first
+            else:
+                passes =  (massCandidates[idx] - massCandidates[idx-1])>=0.05
+                
+            if idx >= len(massCandidates)-1:
+                passes = passes and True #last
+            else:
+                passes = passes and (massCandidates[idx+1] - massCandidates[idx])>=0.05
+                
             cleanPass.append(passes)
         
         massCandidates = list(compress(massCandidates, cleanPass))
-        count = len(massCandidates)
-#         mode = count/2
-#         selection =  massCandidates[mode] if massCandidates else None
-        for selection in massCandidates:
-#             if selection:
+        targetMass = (low+high)/2
+        rankedCandidates = [ (abs((mass-targetMass)),mass) for mass in massCandidates]
+        sortedCandidates = sorted(rankedCandidates)
+        
+        if sortedCandidates:
+            selection= sortedCandidates[0][1]
             selections.append((selection, intens[masss.index(selection)], filterline, stitchedFilterline))
-#             else:
-#                     print 'no selection for sim {}'.format(filterline)
+        else:
+            print 'no selection for sim {}'.format(filterline)
         
     
     with file('validationSimSelection.csv', 'wb') as outfile:
@@ -222,9 +231,10 @@ def main(fileName = None):
     for s_mass,s_intens, s_filterline, s_stichedFilterline in selections:
         found = False
         for idx, m_mass in  enumerate(msMasses):
-            if round(s_mass,2) == round(m_mass,2) and modematch(s_filterline,msFilterLine[idx] ):
+            if abs((s_mass - m_mass)) < 0.02 and modematch(s_filterline,msFilterLine[idx] ):
                 found = True
                 comparable.append(( m_mass, msIntens[idx],msFilterLine[idx],'',s_mass,s_intens,s_filterline, s_stichedFilterline))
+            
                 
         if not found:
             print 'no match found for {} in ms'.format((round(s_mass,1),s_intens))
