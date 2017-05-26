@@ -15,7 +15,12 @@ from itertools import compress
 
 class Scan(object):
     
+   
+    
     class FilterLine(object):
+        MODE_POS = '+'
+        MODE_NEG = '-'
+        
         def __init__(self, filterline):
             self.filterline = filterline
             self.match = re.match(r'(.*)\[(\d+\.\d*)-(\d+\.\d*)\]', filterline)
@@ -35,9 +40,10 @@ class Scan(object):
         def asTuple(self):
             return (self._head(),self._low(),self._high())
         def mode(self):
-            if ' + ' in self._head(): return  '+'
-            elif ' - '  in self._head(): return  '-'
+            if ' + ' in self._head(): return  self.MODE_POS
+            elif ' - '  in self._head(): return  self.MODE_NEG
             else: return None
+        
         
     def __init__(self, scanNo, filterLine, encodedPeaks, retTime = None):
         self.scanNo = scanNo
@@ -107,25 +113,71 @@ class Scan(object):
   
 
 
-def getSampleSimPeak(scans):
-    SimSample =  namedtuple('SimSample', 'mass intens sim mode')
+def getSampleSimPeak(scans, relintens= 0.05, mzGap = 0.5):
+    
+    def hasGap(mass, masses, mzGap ):
+        idx = masses.index(mass)
+        prev =  masses[idx -1] if idx>0 else mass - mzGap
+        next =  masses[idx +1] if idx< len(masses)-1 else mass + mzGap
+        
+        if mass - prev >= mzGap and next - mass >= mzGap:
+            return True
+        else:
+            log.debug('no gap of {} for mass {}'.format(mzGap, mass))
+            return False
+        
+    
+    SimSample =  namedtuple('SimSample', 'mass intens filterLine')
     results = []
     for scan in scans:
         found =False
         target = (scan.filterLine._high()+scan.filterLine._low())/2
         masses, intens = scan.nonOverlapPeaks()
-        masses.sort(key= lambda mass: abs(mass-target))
-        intensLimit = max(intens) *0.05
+        intensLimit = max(intens) * relintens
         
-        for idx, mass in enumerate(masses):
-            if intens[idx] >  intensLimit:
-                simSample = SimSample(mass,intens[idx],scan.filterLine, scan.filterLine.mode() )
-                results.append(simSample)
-                found = True
-                break
-        if not found:
+        hasIntens = [inten >= intensLimit for inten in intens ]
+        
+        validMasses = list(compress(masses,hasIntens ))
+        validIntens = list(compress(intens,hasIntens ))
+        
+        hasMassesGap = [hasGap(mass, validMasses, mzGap) for mass in validMasses]
+        
+        gapMasses = list(compress(validMasses,hasMassesGap ))
+        gapIntens = list(compress(validIntens,hasMassesGap ))
+
+        sortedMasses = sorted(gapMasses, key= lambda mass: abs(mass-target))
+        
+        if not sortedMasses:
             log.error('no sample found for {}'.format(scan.filterLine))
+        else:
+            mass = sortedMasses[0] 
+            idx = gapMasses.index(mass)
+            simSample = SimSample(mass,intens[idx],scan.filterLine )
+            results.append(simSample)
+        
     return results
+
+
+def getMatchingMS(sampleSimPeaks, scans_ms):
+    results = []
+    for sample in sampleSimPeaks:
+        probalemMSfilterline = sample.filterLine._head().replace('SIM', 'Full') #dirty hack
+        scan_ms = [scan for scan in scans_ms if scan.filterLine._head() == probalemMSfilterline]
+        if not scan_ms:
+            log.error('no MS found for sample : {}'.format(sample))
+            continue
+        
+        masses, intenses = scan_ms[0].allPeaks()
+        target = sample.mass
+        
+        sortedMasses = sorted(masses, key=lambda mass: abs(mass-target))
+        idx = masses.index(sortedMasses[0])
+        results.append(sample+(masses[idx], intenses[idx], probalemMSfilterline))
+    return results
+        
+        
+        
+    
 
 
 def simStitcher(filePath = None):
@@ -190,13 +242,17 @@ def simStitcher(filePath = None):
     
     scans_ms =[Scan(*scan_xml) for scan_xml in scans_mzxml_ms]
     
+    log.info('get Valid sim samples')
     sampleSimPeaks = getSampleSimPeak(scans)
+    log.debug('\n'.join(map(str,sampleSimPeaks)))
+    
+    log.info('get matching ms peak')
     matchingSim = getMatchingMS(sampleSimPeaks, scans_ms)
+    log.debug('\n'.join(map(str,matchingSim)))
+    
     log.info('finish')
     
     
-    
-
 def outputFile(fileName):
     dir,file = os.path.split(fileName)
     if not os.path.exists(dir+'\\stitched'):
