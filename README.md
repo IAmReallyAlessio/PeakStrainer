@@ -3,7 +3,9 @@ PeakStrainer
 
 PeakStrainer is a tool to reduce the size of MS spectra,
 with the goal of removing inconsistent signals
-and combining the consistent signals.
+and combining 
+
+ the consistent signals.
 
 Quick Start
 -----------
