@@ -176,10 +176,6 @@ def getMatchingMS(sampleSimPeaks, scans_ms):
     return results
         
         
-        
-    
-
-
 def simStitcher(filePath = None):
     log.info('getMZXMLEncondedScans from'+ filePath)
     scans_mzxml = getMZXMLEncondedScanRows(filePath)
@@ -250,7 +246,7 @@ def simStitcher(filePath = None):
     matchingSim = getMatchingMS(sampleSimPeaks, scans_ms)
     log.debug('\n'.join(map(str,matchingSim)))
     
-    log.info('finish')
+    log.info('finished')
     
     
 def outputFile(fileName):
