@@ -48,8 +48,16 @@ class SimStitcherFrame ( wx.Frame ):
 		self.Layout()
 		
 		self.Centre( wx.BOTH )
+		
+		# Connect Events
+		self.m_filePicker1.Bind( wx.EVT_FILEPICKER_CHANGED, self.filecChanged )
 	
 	def __del__( self ):
 		pass
+	
+	
+	# Virtual event handlers, overide them in your derived class
+	def filecChanged( self, event ):
+		event.Skip()
 	
 

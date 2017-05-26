@@ -191,7 +191,7 @@ def toCSVFile(fileBaseName, dictOrList):
             
 
 
-def simStitcher(filePath = None):
+def simStitcher(filePath = None, doCompare = True):
     log.setLevel(logging.DEBUG)
     log.addHandler(logging.StreamHandler()) # log to console
     if log.level == logging.DEBUG: logging.basicConfig(filename='simSitcher.log',filemode='w')
@@ -252,6 +252,8 @@ def simStitcher(filePath = None):
     write2templateMzXML(outputFile(filePath), scans_stitched)      
     
     log.info('finish stitching')
+    
+    if not doCompare: raise SystemExit 
     
     log.info('start validation')
     
