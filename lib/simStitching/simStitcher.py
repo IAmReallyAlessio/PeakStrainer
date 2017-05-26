@@ -15,8 +15,6 @@ from itertools import compress
 
 class Scan(object):
     
-   
-    
     class FilterLine(object):
         MODE_POS = '+'
         MODE_NEG = '-'
@@ -176,6 +174,23 @@ def getMatchingMS(sampleSimPeaks, scans_ms):
     return results
         
         
+def toCSVFile(fileBaseName, dictOrList):
+    with file(fileBaseName+'.csv', 'wb') as outfile:
+        if type(dictOrList) is list:
+            string = '\n'.join(map(str,dictOrList))
+            string = string.replace('(','') 
+            string = string.replace(')','')
+            
+        elif type(dictOrList) is dict:
+            string = '\n'.join(map(str,dictOrList.items()))
+            string = string.replace(':',',')
+            string = string.replace('(','') 
+            string = string.replace(')','') 
+            
+        outfile.write(string)
+            
+
+
 def simStitcher(filePath = None):
     log.info('getMZXMLEncondedScans from'+ filePath)
     scans_mzxml = getMZXMLEncondedScanRows(filePath)
@@ -187,6 +202,7 @@ def simStitcher(filePath = None):
     log.info('get Sim scans')
     scans_mzxml_sim= [scan for scan in scans_mzxml if ' sim ' in scan[1].lower()]
     log.debug('\n'.join(map(str,scans_mzxml_sim)))
+    toCSVFile('scans_mzxml_sim',scans_mzxml_sim )
     
     scans =[Scan(*scan_xml) for scan_xml in scans_mzxml_sim]
     
@@ -194,6 +210,7 @@ def simStitcher(filePath = None):
     scans.sort(key=lambda scan: scan.filterLine.asTuple())
     
     log.debug('\n'.join(map(str,scans)))
+    toCSVFile('scans', scans)
     
     scans[0].next = scans[1] #previous is None
     for idx, scan in enumerate(scans):
@@ -213,6 +230,7 @@ def simStitcher(filePath = None):
     log.info('stitched scans:')
     log.info('\n'.join(scans_stitched.keys()))
     log.debug('\n'.join(map(str,scans_stitched.items())))
+    toCSVFile('scans_stitched', scans_stitched)
     names = scans_stitched.keys()
     # -- rename
     for stitched_Head in names:
@@ -235,17 +253,19 @@ def simStitcher(filePath = None):
     
     scans_mzxml_ms= [scan for scan in scans_mzxml if ' ms ' in scan[1].lower() and ' full ' in scan[1].lower()]
     log.debug('\n'.join(map(str,scans_mzxml_ms)))
+    toCSVFile('scans_mzxml_ms', scans_mzxml_ms)
     
     scans_ms =[Scan(*scan_xml) for scan_xml in scans_mzxml_ms]
     
     log.info('get Valid sim samples')
     sampleSimPeaks = getSampleSimPeak(scans)
     log.debug('\n'.join(map(str,sampleSimPeaks)))
+    toCSVFile('sampleSimPeaks', sampleSimPeaks)
     
     log.info('get matching ms peak')
     matchingSim = getMatchingMS(sampleSimPeaks, scans_ms)
     log.debug('\n'.join(map(str,matchingSim)))
-    
+    toCSVFile('matchingSim', matchingSim)
     log.info('finished')
     
     
