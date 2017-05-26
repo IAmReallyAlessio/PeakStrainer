@@ -192,6 +192,10 @@ def toCSVFile(fileBaseName, dictOrList):
 
 
 def simStitcher(filePath = None):
+    log.setLevel(logging.DEBUG)
+    log.addHandler(logging.StreamHandler()) # log to console
+    if log.level == logging.DEBUG: logging.basicConfig(filename='simSitcher.log',filemode='w')
+    
     log.info('getMZXMLEncondedScans from'+ filePath)
     scans_mzxml = getMZXMLEncondedScanRows(filePath)
     log.debug('\n'.join(map(str,scans_mzxml)))
