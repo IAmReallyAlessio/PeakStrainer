@@ -136,6 +136,9 @@ def simStitcher(filePath = None):
         scans_stitched.setdefault(head, ([],[]))[0].extend(masses)
         scans_stitched.setdefault(head, ([],[]))[1].extend(intens)
     
+    log.info('stitched scans:')
+    log.info('\n'.join(scans_stitched.keys()))
+    log.debug('\n'.join(map(str,scans_stitched.items())))
     names = scans_stitched.keys()
     # -- rename
     for stitched_Head in names:
@@ -144,10 +147,14 @@ def simStitcher(filePath = None):
         rename = stitched_Head +'['+str(min_head)+'-'+ str(max_head)+']'
         scans_stitched[rename] = scans_stitched[stitched_Head]
         del scans_stitched[stitched_Head]
+
+    log.info('renamed stitched scans:')
+    log.info('\n'.join(scans_stitched.keys()))
     
+    
+    log.info('writing to :'+outputFile(filePath))
     write2templateMzXML(outputFile(filePath), scans_stitched)      
     
-    print('\n'.join(map(str,scans)))
     log.info('finish')
 
 def outputFile(fileName):
