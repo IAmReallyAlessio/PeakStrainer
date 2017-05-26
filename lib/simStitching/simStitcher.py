@@ -5,12 +5,12 @@ Created on 24.05.2017
 '''
 import sys, os
 import logging
-from collections import namedtuple
 import re
 from base64 import b64decode
-import array
+from array import array
 log = logging.getLogger(os.path.basename(__file__))
-from utils.peakStrainer_util import getMZXMLEncondedScans, decode_mzXML_Peaks
+from utils.peakStrainer_util import getMZXMLEncondedScans, decode_mzXML_Peaks, write2templateMzXML
+from itertools import compress
 
 class Scan(object):
     
@@ -57,9 +57,18 @@ class Scan(object):
         if sys.byteorder != 'big':
             peaks.byteswap()
         
-        mass = peaks[::2]
+        masses = peaks[::2]
         intens = peaks[1::2]
-        return mass, intens
+        return masses, intens
+    
+    def allPeaks(self):
+        return self.decode_mzXML_Peaks(self.encodedPeaks)
+    
+    def nonOverlapPeaks(self):
+        masses, intens = self.allPeaks()
+        isNonOverlap = [mass >= self.overlapLow() and mass < self.overlapHigh() for mass in masses]
+        
+        return list(compress(masses, isNonOverlap)), list(compress(intens, isNonOverlap)) 
     
 
     def _getHighOverlap(self): # 3 cases either last one, or there is an overlap or there isn't
@@ -112,15 +121,41 @@ def simStitcher(filePath = None):
     
     log.debug('\n'.join(map(str,scans)))
     
-    scans[0].next = scans[1] #previous is none
+    scans[0].next = scans[1] #previous is None
     for idx, scan in enumerate(scans):
         if idx == 0 or idx >= len(scans)-1: continue
         scans[idx].previous = scans[idx-1]
         scans[idx].next = scans[idx+1]
-    scans[-1].previous = scans[-2] #next is none
+    scans[-1].previous = scans[-2] #next is None
+    
+    #-- build stitched scans
+    scans_stitched = {}
+    for scan in scans:
+        head = scan.filterLine._head()
+        masses, intens = scan.nonOverlapPeaks()
+        scans_stitched.setdefault(head, ([],[]))[0].extend(masses)
+        scans_stitched.setdefault(head, ([],[]))[1].extend(intens)
+    
+    names = scans_stitched.keys()
+    # -- rename
+    for stitched_Head in names:
+        min_head = min([scan.filterLine._low() for scan in scans if scan.filterLine._head() == stitched_Head])
+        max_head = max([scan.filterLine._high() for scan in scans if scan.filterLine._head() == stitched_Head])
+        rename = stitched_Head +'['+str(min_head)+'-'+ str(max_head)+']'
+        scans_stitched[rename] = scans_stitched[stitched_Head]
+        del scans_stitched[stitched_Head]
+    
+    write2templateMzXML(outputFile(filePath), scans_stitched)      
     
     print('\n'.join(map(str,scans)))
     log.info('finish')
+
+def outputFile(fileName):
+    dir,file = os.path.split(fileName)
+    if not os.path.exists(dir+'\\stitched'):
+        os.makedirs(dir+'\\stitched')
+    newfilename = dir+'\\stitched\\'+file[:-6]+'-s'+file[-6:]
+    return newfilename
     
 def getMZXMLEncondedScanRows(filePath):
     return zip(*getMZXMLEncondedScans(filePath)) 
@@ -131,4 +166,5 @@ if __name__ == '__main__':
         simStitcher(sys.argv[1])
     else:
         simStitcher()
+    
     
