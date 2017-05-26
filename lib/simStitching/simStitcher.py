@@ -8,6 +8,7 @@ import logging
 import re
 from base64 import b64decode
 from array import array
+from collections import namedtuple
 log = logging.getLogger(os.path.basename(__file__))
 from utils.peakStrainer_util import getMZXMLEncondedScans, decode_mzXML_Peaks, write2templateMzXML
 from itertools import compress
@@ -33,6 +34,10 @@ class Scan(object):
             return float(self.match.group(3))
         def asTuple(self):
             return (self._head(),self._low(),self._high())
+        def mode(self):
+            if ' + ' in self._head(): return  '+'
+            elif ' - '  in self._head(): return  '-'
+            else: return None
         
     def __init__(self, scanNo, filterLine, encodedPeaks, retTime = None):
         self.scanNo = scanNo
@@ -99,8 +104,29 @@ class Scan(object):
             return self.filterLine._high()-self._getLowOverlap()
         else:
             return self.filterLine._high()-self._getHighOverlap()
+  
+
+
+def getSampleSimPeak(scans):
+    SimSample =  namedtuple('SimSample', 'mass intens sim mode')
+    results = []
+    for scan in scans:
+        found =False
+        target = (scan.filterLine._high()+scan.filterLine._low())/2
+        masses, intens = scan.nonOverlapPeaks()
+        masses.sort(key= lambda mass: abs(mass-target))
+        intensLimit = max(intens) *0.05
         
-        
+        for idx, mass in enumerate(masses):
+            if intens[idx] >  intensLimit:
+                simSample = SimSample(mass,intens[idx],scan.filterLine, scan.filterLine.mode() )
+                results.append(simSample)
+                found = True
+                break
+        if not found:
+            log.error('no sample found for {}'.format(scan.filterLine))
+    return results
+
 
 def simStitcher(filePath = None):
     log.info('getMZXMLEncondedScans from'+ filePath)
@@ -155,7 +181,21 @@ def simStitcher(filePath = None):
     log.info('writing to :'+outputFile(filePath))
     write2templateMzXML(outputFile(filePath), scans_stitched)      
     
+    log.info('finish stitching')
+    
+    log.info('start validation')
+    
+    scans_mzxml_ms= [scan for scan in scans_mzxml if ' ms ' in scan[1].lower() and ' full ' in scan[1].lower()]
+    log.debug('\n'.join(map(str,scans_mzxml_ms)))
+    
+    scans_ms =[Scan(*scan_xml) for scan_xml in scans_mzxml_ms]
+    
+    sampleSimPeaks = getSampleSimPeak(scans)
+    matchingSim = getMatchingMS(sampleSimPeaks, scans_ms)
     log.info('finish')
+    
+    
+    
 
 def outputFile(fileName):
     dir,file = os.path.split(fileName)
