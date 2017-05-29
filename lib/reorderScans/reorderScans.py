@@ -108,9 +108,9 @@ def saveFile(filePath, targetOrder, includeSims=False):
 
     dir,file = os.path.split(filePath)
     
-    if not os.path.exists(dir+'\\organized'):
-        os.makedirs(dir+'\\organized')
-    newfilename = dir+'\\organized\\'+file
+    if not os.path.exists(dir+'\\ordered'):
+        os.makedirs(dir+'\\ordered')
+    newfilename = dir+'\\ordered\\'+file
     tree.write(newfilename, encoding='ISO-8859-1', xml_declaration=True)
 
 
