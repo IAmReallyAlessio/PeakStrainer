@@ -128,7 +128,6 @@ def getSampleSimPeak(scans, relintens= 0.05, mzGap = 0.5):
     SimSample =  namedtuple('SimSample', 'mass intens filterLine')
     results = []
     for scan in scans:
-        found =False
         target = (scan.filterLine._high()+scan.filterLine._low())/2
         masses, intens = scan.nonOverlapPeaks()
         intensLimit = max(intens) * relintens
@@ -150,7 +149,7 @@ def getSampleSimPeak(scans, relintens= 0.05, mzGap = 0.5):
         else:
             mass = sortedMasses[0] 
             idx = gapMasses.index(mass)
-            simSample = SimSample(mass,intens[idx],scan.filterLine )
+            simSample = SimSample(gapMasses[idx],gapIntens[idx],scan.filterLine )
             results.append(simSample)
         
     return results
