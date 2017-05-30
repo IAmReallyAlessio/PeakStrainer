@@ -314,7 +314,7 @@ def simStitcher(filePath = None, doCompare = True):
         scans_adjusted[scan] = (masses, intensAdjusted)
         
     log.debug('\n'.join(map(str,scans_adjusted.items())))
-    toCSVFile('scans_stitched', scans_adjusted)
+    toCSVFile('scans_adjusted', scans_adjusted)
     
     log.info('writing to :'+outputAdjustedFile(filePath))
     write2templateMzXML(outputAdjustedFile(filePath), scans_adjusted)
