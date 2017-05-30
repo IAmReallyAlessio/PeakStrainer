@@ -334,7 +334,7 @@ def outputAdjustedFile(fileName):
     dir,file = os.path.split(fileName)
     if not os.path.exists(dir+'\\adjusted'):
         os.makedirs(dir+'\\adjusted')
-    newfilename = dir+'\\adjusted\\'+file[:-6]+'-s'+file[-6:]
+    newfilename = dir+'\\adjusted\\'+file[:-6]+'-as'+file[-6:]
     return newfilename
 
     
