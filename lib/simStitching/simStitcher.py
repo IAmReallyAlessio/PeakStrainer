@@ -189,6 +189,31 @@ def toCSVFile(fileBaseName, dictOrList):
         outfile.write(string)
             
 
+def func(x, a, b):
+    return  a*(x**-b)
+
+
+def getFuncVariables(matchingSim):
+    log.info('curve fitting to generate projection')
+    from scipy.optimize import curve_fit
+    simMasses, simIntens, simHeads, msMasses, msIntens, msHeads = zip(*matchingSim)
+    sumSimIntens = sum(simIntens) # to normalize
+    simMsIntens = sum(msIntens)
+    simIntens_norm = [simInten / sumSimIntens for simInten in simIntens]
+    msIntens_norm = [msInten / simMsIntens for msInten in msIntens]
+    deviationFactors = [msIntens_norm[idx] / simIntens_norm[idx] for idx, _ in enumerate(msIntens_norm)]
+    popt, pconv = curve_fit(func, msMasses, deviationFactors)
+    log.info('function a*(x**-b) uses values: projection, %f, %f ', popt[0], popt[1])
+    
+    return popt
+
+def project_ms2sim(matchingSim, popt):
+    simMasses, simIntens, simHeads, msMasses, msIntens, msHeads = zip(*matchingSim)
+    
+    correctionFactors = [func(simMass, *popt) for simMass in simMasses]
+    
+    simIntens_Corrected = [simIntens[idx] * correctionFactors[idx] for idx, _ in enumerate(simIntens)]
+    return zip(simMasses, simIntens, simHeads, msMasses, msIntens, msHeads, simIntens_Corrected)
 
 def simStitcher(filePath = None, doCompare = True):
     log.setLevel(logging.DEBUG)
@@ -247,8 +272,8 @@ def simStitcher(filePath = None, doCompare = True):
     log.info('\n'.join(scans_stitched.keys()))
     
     
-    log.info('writing to :'+outputFile(filePath))
-    write2templateMzXML(outputFile(filePath), scans_stitched)      
+    log.info('writing to :'+outputStitchedFile(filePath))
+    write2templateMzXML(outputStitchedFile(filePath), scans_stitched)      
     
     log.info('finish stitching')
     
@@ -269,17 +294,49 @@ def simStitcher(filePath = None, doCompare = True):
     
     log.info('get matching ms peak')
     matchingSim = getMatchingMS(sampleSimPeaks, scans_ms)
-    log.debug('\n'.join(map(str,matchingSim)))
-    toCSVFile('matchingSim', matchingSim)
-    log.info('finished')
+    
+    popt = getFuncVariables(matchingSim)
+    
+    projected = project_ms2sim(matchingSim, popt)
+    log.debug('\n'.join(map(str,projected)))
+    toCSVFile('matchingSim', projected)
+    
+    log.info('finished comparing')
+    
+    log.info('start sim intens adjustment')
+    scans_adjusted={}
+    for idx, scan in enumerate(scans_stitched):
+        (masses, intens) = scans_stitched[scan]
+        
+        correctionFactors = [func(mass, *popt) for mass in masses]
+    
+        intensAdjusted = [intens[idx] * correctionFactors[idx] for idx, _ in enumerate(intens)]
+        scans_adjusted[scan] = (masses, intensAdjusted)
+        
+    log.debug('\n'.join(map(str,scans_adjusted.items())))
+    toCSVFile('scans_stitched', scans_adjusted)
+    
+    log.info('writing to :'+outputAdjustedFile(filePath))
+    write2templateMzXML(outputAdjustedFile(filePath), scans_adjusted)
+    
+    log.info('finish adjustment')
     
     
-def outputFile(fileName):
+    
+def outputStitchedFile(fileName):
     dir,file = os.path.split(fileName)
     if not os.path.exists(dir+'\\stitched'):
         os.makedirs(dir+'\\stitched')
     newfilename = dir+'\\stitched\\'+file[:-6]+'-s'+file[-6:]
     return newfilename
+
+def outputAdjustedFile(fileName):
+    dir,file = os.path.split(fileName)
+    if not os.path.exists(dir+'\\adjusted'):
+        os.makedirs(dir+'\\adjusted')
+    newfilename = dir+'\\adjusted\\'+file[:-6]+'-s'+file[-6:]
+    return newfilename
+
     
 def getMZXMLEncondedScanRows(filePath):
     return zip(*getMZXMLEncondedScans(filePath)) 
