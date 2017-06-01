@@ -201,6 +201,8 @@ def getFuncVariables(matchingSim):
     from scipy.optimize import curve_fit
     for uniqMShead in uniqMSHeads:
         matchingSimSelection = [line for line in matchingSim if line[5] == uniqMShead]
+#         minMSInten = max([line[4] for line in matchingSimSelection]) * 0.01 # only sample peaks with a minimum intensity for function, performs worse!!!!, dont do it
+#         validSimSelection = [line for line in matchingSimSelection if line[4] > minMSInten]
         simMasses, simIntens, simHeads, msMasses, msIntens, msHeads = zip(*matchingSimSelection)
         
         sumSimIntens = sum(simIntens) # to normalize
