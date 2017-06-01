@@ -83,6 +83,9 @@ class MyFrame2 ( wx.Frame ):
 		self.m_button3 = wx.Button( self.m_panel3, wx.ID_ANY, u"Spectra Reorder", wx.DefaultPosition, wx.DefaultSize, wx.NO_BORDER )
 		bSizer7.Add( self.m_button3, 0, wx.TOP|wx.BOTTOM|wx.RIGHT, 5 )
 		
+		self.m_button4 = wx.Button( self.m_panel3, wx.ID_ANY, u"simStitcher", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer7.Add( self.m_button4, 0, wx.ALL, 5 )
+		
 		
 		bSizer5.Add( bSizer7, 0, 0, 5 )
 		
@@ -546,6 +549,7 @@ class MyFrame2 ( wx.Frame ):
 		# Connect Events
 		self.m_buttonBrowse.Bind( wx.EVT_BUTTON, self.clickedBrowse )
 		self.m_button3.Bind( wx.EVT_BUTTON, self.clickOpenSpecReord )
+		self.m_button4.Bind( wx.EVT_BUTTON, self.clickedSimStitcher )
 		self.m_checkBox8.Bind( wx.EVT_CHECKBOX, self.checkOutcsv )
 		self.m_checkBox9.Bind( wx.EVT_CHECKBOX, self.checkoutLog )
 		self.m_checkBox10.Bind( wx.EVT_CHECKBOX, self.checkOutConf )
@@ -569,6 +573,9 @@ class MyFrame2 ( wx.Frame ):
 		event.Skip()
 	
 	def clickOpenSpecReord( self, event ):
+		event.Skip()
+	
+	def clickedSimStitcher( self, event ):
 		event.Skip()
 	
 	def checkOutcsv( self, event ):
