@@ -168,8 +168,9 @@ def getMatchingMS(sampleSimPeaks, scans_ms):
         target = sample.mass
         
         sortedMasses = sorted(masses, key=lambda mass: abs(mass-target))
-        idx = masses.index(sortedMasses[0])
-        results.append(sample+(masses[idx], intenses[idx], probalemMSfilterline))
+        if abs(sortedMasses[0]-target) < 0.01:
+            idx = masses.index(sortedMasses[0])
+            results.append(sample+(masses[idx], intenses[idx], probalemMSfilterline))
     return results
         
         
