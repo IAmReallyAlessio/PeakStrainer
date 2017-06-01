@@ -147,10 +147,10 @@ def getSampleSimPeak(scans, relintens= 0.05, mzGap = 0.5):
         if not sortedMasses:
             log.error('no sample found for {}'.format(scan.filterLine))
         else:
-            mass = sortedMasses[0] 
-            idx = gapMasses.index(mass)
-            simSample = SimSample(gapMasses[idx],gapIntens[idx],scan.filterLine )
-            results.append(simSample)
+            for mass in sortedMasses:
+                idx = gapMasses.index(mass)
+                simSample = SimSample(gapMasses[idx],gapIntens[idx],scan.filterLine )
+                results.append(simSample)
         
     return results
 
@@ -196,25 +196,35 @@ def func(x, a, b):
 
 def getFuncVariables(matchingSim):
     log.info('curve fitting to generate projection')
+    result = {}
+    uniqMSHeads = set([line[5] for line in matchingSim])
     from scipy.optimize import curve_fit
-    simMasses, simIntens, simHeads, msMasses, msIntens, msHeads = zip(*matchingSim)
-    sumSimIntens = sum(simIntens) # to normalize
-    simMsIntens = sum(msIntens)
-    simIntens_norm = [simInten / sumSimIntens for simInten in simIntens]
-    msIntens_norm = [msInten / simMsIntens for msInten in msIntens]
-    deviationFactors = [msIntens_norm[idx] / simIntens_norm[idx] for idx, _ in enumerate(msIntens_norm)]
-    popt, pconv = curve_fit(func, msMasses, deviationFactors)
-    log.info('function a*(x**-b) uses values: projection, %f, %f ', popt[0], popt[1])
-    
-    return popt
+    for uniqMShead in uniqMSHeads:
+        matchingSimSelection = [line for line in matchingSim if line[5] == uniqMShead]
+        simMasses, simIntens, simHeads, msMasses, msIntens, msHeads = zip(*matchingSimSelection)
+        
+        sumSimIntens = sum(simIntens) # to normalize
+        simMsIntens = sum(msIntens)
+        simIntens_norm = [simInten / sumSimIntens for simInten in simIntens]
+        msIntens_norm = [msInten / simMsIntens for msInten in msIntens]
+        deviationFactors = [msIntens_norm[idx] / simIntens_norm[idx] for idx, _ in enumerate(msIntens_norm)]
+        try:
+            popt, pconv = curve_fit(func, msMasses, deviationFactors)
+        except:
+            log.error('ERROR: Values do not fit a curve')
+            popt =  (0,0)
+        log.info('function a*(x**-b) uses values: projection, %f, %f for %s', popt[0], popt[1], uniqMShead)
+        result[uniqMShead] = popt
+    return result
 
-def project_ms2sim(matchingSim, popt):
-    simMasses, simIntens, simHeads, msMasses, msIntens, msHeads = zip(*matchingSim)
+def project_ms2sim(matchingSims, popts):
     
-    correctionFactors = [func(simMass, *popt) for simMass in simMasses]
+#     simMasses, simIntens, simHeads, msMasses, msIntens, msHeads = zip(*matchingSim)
     
-    simIntens_Corrected = [simIntens[idx] * correctionFactors[idx] for idx, _ in enumerate(simIntens)]
-    return zip(simMasses, simIntens, simHeads, msMasses, msIntens, msHeads, simIntens_Corrected)
+    correctionFactors = [func(simMass, *popts[msHead]) for simMass, simInten, simHead, msMass, msInten, msHead in matchingSims]
+    
+    simIntens_Corrected = [matchingSim[1] * correctionFactors[idx] for idx, matchingSim in enumerate(matchingSims)]
+    return [matchingSim + (simIntens_Corrected[idx],) for idx, matchingSim in enumerate(matchingSims)]
 
 def simStitcher(filePath = None, doCompare = True):
     log.setLevel(logging.DEBUG)
@@ -296,9 +306,9 @@ def simStitcher(filePath = None, doCompare = True):
     log.info('get matching ms peak')
     matchingSim = getMatchingMS(sampleSimPeaks, scans_ms)
     
-    popt = getFuncVariables(matchingSim)
+    popts = getFuncVariables(matchingSim)
     
-    projected = project_ms2sim(matchingSim, popt)
+    projected = project_ms2sim(matchingSim, popts)
     log.debug('\n'.join(map(str,projected)))
     toCSVFile('matchingSim', projected)
     
@@ -308,8 +318,10 @@ def simStitcher(filePath = None, doCompare = True):
     scans_adjusted={}
     for idx, scan in enumerate(scans_stitched):
         (masses, intens) = scans_stitched[scan]
-        
-        correctionFactors = [func(mass, *popt) for mass in masses]
+        probalemMSfilterline = scan.replace('SIM', 'Full') #dirty hack, second time!
+        upto=probalemMSfilterline.index('[')
+        maybeMSfilterline = probalemMSfilterline[:upto] 
+        correctionFactors = [func(mass, *popts[maybeMSfilterline]) for mass in masses]
     
         intensAdjusted = [intens[idx] * correctionFactors[idx] for idx, _ in enumerate(intens)]
         scans_adjusted[scan] = (masses, intensAdjusted)
