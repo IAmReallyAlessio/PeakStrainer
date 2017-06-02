@@ -368,7 +368,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer331.Add( self.m_staticText241, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
-		self.m_textCtrl61 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl61 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, u"5408000.0", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_textCtrl61.Enable( False )
 		
 		bSizer331.Add( self.m_textCtrl61, 0, wx.ALL, 5 )
@@ -380,7 +380,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer331.Add( self.m_staticText251, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
-		self.m_textCtrl71 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl71 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, u"0.5", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_textCtrl71.Enable( False )
 		
 		bSizer331.Add( self.m_textCtrl71, 0, wx.ALL, 5 )
@@ -403,7 +403,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer3311.Add( self.m_staticText2411, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
-		self.m_textCtrl611 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl611 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, u"5408000.0", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_textCtrl611.Enable( False )
 		
 		bSizer3311.Add( self.m_textCtrl611, 0, wx.ALL, 5 )
@@ -415,7 +415,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer3311.Add( self.m_staticText2511, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
-		self.m_textCtrl711 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl711 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, u"0.5", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_textCtrl711.Enable( False )
 		
 		bSizer3311.Add( self.m_textCtrl711, 0, wx.ALL, 5 )
@@ -426,14 +426,14 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer3311.Add( self.m_staticText381, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
+		self.m_staticline162 = wx.StaticLine( self.m_panel7, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+		bSizer3311.Add( self.m_staticline162, 0, wx.EXPAND |wx.ALL, 5 )
+		
 		
 		bSizer311.Add( bSizer3311, 0, wx.EXPAND, 5 )
 		
 		
 		bSizer34.Add( bSizer311, 0, wx.EXPAND, 5 )
-		
-		self.m_staticline162 = wx.StaticLine( self.m_panel7, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
-		bSizer34.Add( self.m_staticline162, 0, wx.EXPAND |wx.ALL, 5 )
 		
 		bSizer38 = wx.BoxSizer( wx.HORIZONTAL )
 		
