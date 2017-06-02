@@ -1,17 +1,34 @@
 PeakStrainer
 =============
 
-PeakStrainer is a tool to reduce the size of MS spectra,
-with the goal of removing inconsistent signals
-and combining 
+PeakStrainer is a tool to reduce the file size of MS spectra,
+it does this by removing signals that do not repeat,
+or do not repeat often enough, between spectra.
 
- the consistent signals.
+To define if a signal repeats we first define a threshold of signal similarity.
+similarity is based on scan settings, the settings must be the same, and m/z proximity.
+To illustrate consider two scans A and B, both have the same settings.
+Scan A contains a peak at m/z 123.0001 and scan B contains a peak at m/z 123.0002,
+if the threshold is set to 0.0001, then the peak m/z 123.0001 is considered repeated between scans.
+
+The threshold is adaptable across the m/z range of the scans 
+and can be estimated based on the peak-resolutions given as full width half maximum (FWHM).
+
+Peak repetition information is used to filter out peaks that are not repeated more than a preset threshold,
+called repetition rate, given as percentage of total max repetitions.
+
+The input to the application is a *.raw files and the output at intermediate stages are *.CSV 
+and final results are stored as *.mzXML files.
 
 Quick Start
 -----------
  - Download [PeakStrainer.zip](https://git.mpi-cbg.de/labShevchenko/PeakStrainer/blob/master/dist/peakStrainerApp.zip)
  - Unzip the file
- - run ```peakStrainerApp.bat```   
+ - run ```peakStrainerApp.bat```
+ - select one or more *.raw files
+ - click finish to process with default settings
+ 
+ After processing *.mzXML files will be created in the same directory as the *.raw files  
 
 Desktop Application
 ----
