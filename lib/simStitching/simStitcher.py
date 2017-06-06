@@ -194,7 +194,7 @@ def func(x, a, b):
     return  a*(x**-b)
 
 
-def getFuncVariables(matchingSim):
+def getDeviationTrend(matchingSim):
     log.info('curve fitting to generate projection')
     result = {}
     uniqMSHeads = set([line[5] for line in matchingSim])
@@ -205,11 +205,11 @@ def getFuncVariables(matchingSim):
 #         validSimSelection = [line for line in matchingSimSelection if line[4] > minMSInten]
         simMasses, simIntens, simHeads, msMasses, msIntens, msHeads = zip(*matchingSimSelection)
         
-        sumSimIntens = sum(simIntens) # to normalize
-        simMsIntens = sum(msIntens)
-        simIntens_norm = [simInten / sumSimIntens for simInten in simIntens]
-        msIntens_norm = [msInten / simMsIntens for msInten in msIntens]
-        deviationFactors = [msIntens_norm[idx] / simIntens_norm[idx] for idx, _ in enumerate(msIntens_norm)]
+#         sumSimIntens = sum(simIntens) # to normalize
+#         simMsIntens = sum(msIntens)
+#         simIntens_norm = [simInten / sumSimIntens for simInten in simIntens]
+#         msIntens_norm = [msInten / simMsIntens for msInten in msIntens]
+        deviationFactors = [msIntens[idx] / simIntens[idx] for idx, _ in enumerate(msIntens)]
         try:
             popt, pconv = curve_fit(func, msMasses, deviationFactors)
         except:
@@ -312,7 +312,8 @@ def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath =
     log.info('get matching ms peak')
     matchingSim = getMatchingMS(sampleSimPeaks, scans_ms)
     
-    popts = getFuncVariables(matchingSim)
+    log.info('get deviation trend')
+    popts = getDeviationTrend(matchingSim)
     
     projected = project_ms2sim(matchingSim, popts)
     log.debug('\n'.join(map(str,projected)))
@@ -334,6 +335,13 @@ def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath =
         
     log.debug('\n'.join(map(str,scans_adjusted.items())))
     if generateCSV: toCSVFile(csvPath+'scans_adjusted', scans_adjusted)
+    
+    log.info('get similarity measure: average of the nomalized eucledean distance')
+    
+    
+    
+    
+    
     
     log.info('writing to :'+outputAdjustedFile(filePath))
     write2templateMzXML(outputAdjustedFile(filePath), scans_adjusted)
