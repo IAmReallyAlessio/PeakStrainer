@@ -9,6 +9,7 @@ import re
 from base64 import b64decode
 from array import array
 from collections import namedtuple
+from math import sqrt
 log = logging.getLogger(os.path.basename(__file__))
 from utils.peakStrainer_util import getMZXMLEncondedScans, decode_mzXML_Peaks, write2templateMzXML
 from itertools import compress
@@ -226,7 +227,14 @@ def project_ms2sim(matchingSims, popts):
     correctionFactors = [func(simMass, *popts[msHead]) for simMass, simInten, simHead, msMass, msInten, msHead in matchingSims]
     
     simIntens_Corrected = [matchingSim[1] * correctionFactors[idx] for idx, matchingSim in enumerate(matchingSims)]
-    return [matchingSim + (simIntens_Corrected[idx],) for idx, matchingSim in enumerate(matchingSims)]
+    sqError = [(matchingSim[1] - simIntens_Corrected[idx])**2 for idx, matchingSim in enumerate(matchingSims)]
+    sumSqError = sum(sqError)
+    
+    l2norm = sqrt(sumSqError)
+    
+    log.info(' l2 norm {} from max {}, count = {}'.format(l2norm, max([msInten for simMass, simInten, simHead, msMass, msInten, msHead in matchingSims]),len(sqError) ))
+        
+    return [matchingSim + (simIntens_Corrected[idx], correctionFactors[idx]) for idx, matchingSim in enumerate(matchingSims)]
 
 
 def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath = None):
@@ -328,20 +336,17 @@ def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath =
         probalemMSfilterline = scan.replace('SIM', 'Full') #dirty hack, second time!
         upto=probalemMSfilterline.index('[')
         maybeMSfilterline = probalemMSfilterline[:upto] 
-        correctionFactors = [func(mass, *popts[maybeMSfilterline]) for mass in masses]
+        if maybeMSfilterline in popts.keys():
+            correctionFactors = [func(mass, *popts[maybeMSfilterline]) for mass in masses]
+        else:
+            log.error('headere {} not found, will try non lock'.format(maybeMSfilterline))
+            correctionFactors = [func(mass, *popts[maybeMSfilterline.replace('lock ','')]) for mass in masses]
     
         intensAdjusted = [intens[idx] * correctionFactors[idx] for idx, _ in enumerate(intens)]
         scans_adjusted[scan] = (masses, intensAdjusted)
         
     log.debug('\n'.join(map(str,scans_adjusted.items())))
     if generateCSV: toCSVFile(csvPath+'scans_adjusted', scans_adjusted)
-    
-    log.info('get similarity measure: average of the nomalized eucledean distance')
-    
-    
-    
-    
-    
     
     log.info('writing to :'+outputAdjustedFile(filePath))
     write2templateMzXML(outputAdjustedFile(filePath), scans_adjusted)
