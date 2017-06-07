@@ -78,7 +78,7 @@ class SimStitcherFrame ( wx.Frame ):
 		self.m_staticText4.Wrap( -1 )
 		bSizer4.Add( self.m_staticText4, 0, wx.ALL, 5 )
 		
-		self.m_textCtrl_a = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl_a = wx.TextCtrl( self, wx.ID_ANY, u"40.0", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_textCtrl_a.Enable( False )
 		
 		bSizer4.Add( self.m_textCtrl_a, 0, wx.ALL, 5 )
@@ -87,7 +87,7 @@ class SimStitcherFrame ( wx.Frame ):
 		self.m_staticText5.Wrap( -1 )
 		bSizer4.Add( self.m_staticText5, 0, wx.ALL, 5 )
 		
-		self.m_textCtrl_b = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl_b = wx.TextCtrl( self, wx.ID_ANY, u"0.5", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_textCtrl_b.Enable( False )
 		
 		bSizer4.Add( self.m_textCtrl_b, 0, wx.ALL, 5 )
