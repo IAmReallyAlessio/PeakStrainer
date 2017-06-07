@@ -7,6 +7,7 @@ from simStitcherGUI import SimStitcherFrame
 import wx
 from lib.simStitching.simStitcher import simStitcher
 import os
+from numpy.f2py.auxfuncs import throw_error
 
 class mySimStitcherFrame(SimStitcherFrame):
     def __init__(self,parent):
@@ -40,21 +41,44 @@ class mySimStitcherFrame(SimStitcherFrame):
         self.m_textCtrl_a.Enable(self.m_radioBtn4.GetValue())
         self.m_textCtrl_b.Enable(self.m_radioBtn4.GetValue())
 
+
+    def get_a(self):
+        if self.m_radioBtn3.GetValue(): return None # its default
+        try:
+            return float(self.m_textCtrl_a.GetValue())
+        except ValueError:
+            dlg = wx.MessageDialog(self, 'There was a problem with value a {} \n it will not be used'.format(self.m_textCtrl_a.GetValue()), 'Warning', wx.OK | wx.ICON_WARNING)
+            dlg.ShowModal()
+            dlg.Destroy()
+            raise ValueError('text must be a float')
+    
+    def get_b(self):
+        if self.m_radioBtn3.GetValue(): return None # its default
+        try:
+            return float(self.m_textCtrl_b.GetValue())
+        except ValueError:
+            dlg = wx.MessageDialog(self, 'There was a problem with value b {} \n it will not be used'.format(self.m_textCtrl_b.GetValue()), 'Warning', wx.OK | wx.ICON_WARNING)
+            dlg.ShowModal()
+            dlg.Destroy()
+            raise ValueError('text must be a float')
+    
     def run_all(self):
 #         self.path
 #         self.fileNames
-        gaugeStep = 100.0/(len(self.fileNames))
+        gaugeStep = 100.0/(len(self.fileNames)+1)
         doCompare = self.m_checkBox1.GetValue()
         
         for onefile in self.fileNames:
             filepath = str(self.path+'\\'+onefile)
             self.m_gauge1.SetValue(self.m_gauge1.GetValue() + gaugeStep)
             try:
-                simStitcher(filepath, doCompare)
+                simStitcher(filepath, doCompare, a=self.get_a(),b=self.get_b())
+                self.m_gauge1.SetValue(self.m_gauge1.GetValue() + gaugeStep)
             except :
                 dlg = wx.MessageDialog(self, 'There was a problem processing the file {}'.format(onefile), 'Warning', wx.OK | wx.ICON_WARNING)
                 dlg.ShowModal()
                 dlg.Destroy()
+                self.m_gauge1.SetValue(self.m_gauge1.GetValue() - gaugeStep)
             
     
 def main():

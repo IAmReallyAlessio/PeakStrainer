@@ -195,12 +195,16 @@ def func(x, a, b):
     return  a*(x**-b)
 
 
-def getDeviationTrend(matchingSim):
+def getDeviationTrend(matchingSim, a=None, b=None):
     log.info('curve fitting to generate projection')
+    log.info('given a:{} b:{}'.format(a,b))
     result = {}
     uniqMSHeads = set([line[5] for line in matchingSim])
     from scipy.optimize import curve_fit
     for uniqMShead in uniqMSHeads:
+        if a is not None and b is not None:  
+            result[uniqMShead] = (a,b)
+            continue
         matchingSimSelection = [line for line in matchingSim if line[5] == uniqMShead]
 #         minMSInten = max([line[4] for line in matchingSimSelection]) * 0.01 # only sample peaks with a minimum intensity for function, performs worse!!!!, dont do it
 #         validSimSelection = [line for line in matchingSimSelection if line[4] > minMSInten]
@@ -237,7 +241,7 @@ def project_ms2sim(matchingSims, popts):
     return [matchingSim + (simIntens_Corrected[idx], correctionFactors[idx]) for idx, matchingSim in enumerate(matchingSims)]
 
 
-def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath = None):
+def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath = None, a=None, b=None):
     log.setLevel(logging.DEBUG)
     log.addHandler(logging.StreamHandler()) # log to console
     dir,file = os.path.split(filePath)
@@ -302,7 +306,7 @@ def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath =
     
     log.info('finish stitching')
     
-    if not doCompare: raise SystemExit 
+    if not doCompare: return 
     
     log.info('start validation')
     
@@ -321,7 +325,7 @@ def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath =
     matchingSim = getMatchingMS(sampleSimPeaks, scans_ms)
     
     log.info('get deviation trend')
-    popts = getDeviationTrend(matchingSim)
+    popts = getDeviationTrend(matchingSim, a,b)
     
     projected = project_ms2sim(matchingSim, popts)
     log.debug('\n'.join(map(str,projected)))
