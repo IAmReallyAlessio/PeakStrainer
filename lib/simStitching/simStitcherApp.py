@@ -25,6 +25,7 @@ class mySimStitcherFrame(SimStitcherFrame):
                   
             self.m_textCtrl1.SetValue(str(self.path).replace('\\\\', '\\')+' '+ str(len(self.fileNames))+' files')
             self.m_button2.Enable(True)
+            self.m_gauge1.SetValue(0)
     
 
     def clickStart( self, event ):

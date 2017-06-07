@@ -17,7 +17,7 @@ import wx.xrc
 class SimStitcherFrame ( wx.Frame ):
 	
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 510,240 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 510,308 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 		
 		self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 		self.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_MENU ) )
@@ -94,6 +94,26 @@ class SimStitcherFrame ( wx.Frame ):
 		
 		
 		bSizer2.Add( bSizer4, 1, wx.EXPAND, 5 )
+		
+		bSizer5 = wx.BoxSizer( wx.HORIZONTAL )
+		
+		self.m_staticText51 = wx.StaticText( self, wx.ID_ANY, u"Log Level", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText51.Wrap( -1 )
+		bSizer5.Add( self.m_staticText51, 0, wx.ALL, 5 )
+		
+		self.m_staticText6 = wx.StaticText( self, wx.ID_ANY, u"low", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText6.Wrap( -1 )
+		bSizer5.Add( self.m_staticText6, 0, wx.TOP|wx.BOTTOM|wx.LEFT, 5 )
+		
+		self.m_slider1 = wx.Slider( self, wx.ID_ANY, 0, 0, 4, wx.DefaultPosition, wx.DefaultSize, wx.SL_HORIZONTAL )
+		bSizer5.Add( self.m_slider1, 0, wx.ALL, 5 )
+		
+		self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, u"high", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText7.Wrap( -1 )
+		bSizer5.Add( self.m_staticText7, 0, wx.TOP|wx.BOTTOM|wx.RIGHT, 5 )
+		
+		
+		bSizer2.Add( bSizer5, 1, wx.EXPAND, 5 )
 		
 		self.m_gauge1 = wx.Gauge( self, wx.ID_ANY, 100, wx.DefaultPosition, wx.DefaultSize, wx.GA_HORIZONTAL )
 		self.m_gauge1.SetValue( 0 ) 
