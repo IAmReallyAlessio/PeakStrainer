@@ -57,17 +57,17 @@ class SimStitcherFrame ( wx.Frame ):
 		
 		self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, u"Compare to MS", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_checkBox1.SetValue(True) 
-		bSizer6.Add( self.m_checkBox1, 0, wx.ALL, 5 )
+		bSizer6.Add( self.m_checkBox1, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 		
 		
 		bSizer6.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
 		
 		self.m_radioBtn3 = wx.RadioButton( self, wx.ID_ANY, u"Default", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_radioBtn3.SetValue( True ) 
-		bSizer6.Add( self.m_radioBtn3, 0, wx.ALL, 5 )
+		bSizer6.Add( self.m_radioBtn3, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 		
 		self.m_radioBtn4 = wx.RadioButton( self, wx.ID_ANY, u"Custom", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer6.Add( self.m_radioBtn4, 0, wx.ALL, 5 )
+		bSizer6.Add( self.m_radioBtn4, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 		
 		
 		bSizer2.Add( bSizer6, 1, wx.EXPAND, 5 )
@@ -99,18 +99,18 @@ class SimStitcherFrame ( wx.Frame ):
 		
 		self.m_staticText51 = wx.StaticText( self, wx.ID_ANY, u"Log Level", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText51.Wrap( -1 )
-		bSizer5.Add( self.m_staticText51, 0, wx.ALL, 5 )
+		bSizer5.Add( self.m_staticText51, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 		
 		self.m_staticText6 = wx.StaticText( self, wx.ID_ANY, u"low", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText6.Wrap( -1 )
-		bSizer5.Add( self.m_staticText6, 0, wx.TOP|wx.BOTTOM|wx.LEFT, 5 )
+		bSizer5.Add( self.m_staticText6, 0, wx.TOP|wx.BOTTOM|wx.LEFT|wx.ALIGN_BOTTOM, 5 )
 		
 		self.m_slider1 = wx.Slider( self, wx.ID_ANY, 0, 0, 4, wx.DefaultPosition, wx.DefaultSize, wx.SL_HORIZONTAL )
-		bSizer5.Add( self.m_slider1, 0, wx.ALL, 5 )
+		bSizer5.Add( self.m_slider1, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 		
 		self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, u"high", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText7.Wrap( -1 )
-		bSizer5.Add( self.m_staticText7, 0, wx.TOP|wx.BOTTOM|wx.RIGHT, 5 )
+		bSizer5.Add( self.m_staticText7, 0, wx.TOP|wx.BOTTOM|wx.RIGHT|wx.ALIGN_BOTTOM, 5 )
 		
 		
 		bSizer2.Add( bSizer5, 1, wx.EXPAND, 5 )

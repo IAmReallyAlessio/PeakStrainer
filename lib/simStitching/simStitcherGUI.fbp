@@ -629,7 +629,7 @@
                         <property name="permission">none</property>
                         <object class="sizeritem" expanded="1">
                             <property name="border">5</property>
-                            <property name="flag">wxALL</property>
+                            <property name="flag">wxALL|wxALIGN_BOTTOM</property>
                             <property name="proportion">0</property>
                             <object class="wxCheckBox" expanded="1">
                                 <property name="BottomDockable">1</property>
@@ -727,7 +727,7 @@
                         </object>
                         <object class="sizeritem" expanded="1">
                             <property name="border">5</property>
-                            <property name="flag">wxALL</property>
+                            <property name="flag">wxALL|wxALIGN_BOTTOM</property>
                             <property name="proportion">0</property>
                             <object class="wxRadioButton" expanded="1">
                                 <property name="BottomDockable">1</property>
@@ -815,7 +815,7 @@
                         </object>
                         <object class="sizeritem" expanded="1">
                             <property name="border">5</property>
-                            <property name="flag">wxALL</property>
+                            <property name="flag">wxALL|wxALIGN_BOTTOM</property>
                             <property name="proportion">0</property>
                             <object class="wxRadioButton" expanded="1">
                                 <property name="BottomDockable">1</property>
@@ -1273,7 +1273,7 @@
                         <property name="permission">none</property>
                         <object class="sizeritem" expanded="1">
                             <property name="border">5</property>
-                            <property name="flag">wxALL</property>
+                            <property name="flag">wxALL|wxALIGN_BOTTOM</property>
                             <property name="proportion">0</property>
                             <object class="wxStaticText" expanded="1">
                                 <property name="BottomDockable">1</property>
@@ -1356,7 +1356,7 @@
                         </object>
                         <object class="sizeritem" expanded="1">
                             <property name="border">5</property>
-                            <property name="flag">wxTOP|wxBOTTOM|wxLEFT</property>
+                            <property name="flag">wxTOP|wxBOTTOM|wxLEFT|wxALIGN_BOTTOM</property>
                             <property name="proportion">0</property>
                             <object class="wxStaticText" expanded="1">
                                 <property name="BottomDockable">1</property>
@@ -1439,7 +1439,7 @@
                         </object>
                         <object class="sizeritem" expanded="1">
                             <property name="border">5</property>
-                            <property name="flag">wxALL</property>
+                            <property name="flag">wxALL|wxALIGN_BOTTOM</property>
                             <property name="proportion">0</property>
                             <object class="wxSlider" expanded="1">
                                 <property name="BottomDockable">1</property>
@@ -1547,7 +1547,7 @@
                         </object>
                         <object class="sizeritem" expanded="1">
                             <property name="border">5</property>
-                            <property name="flag">wxTOP|wxBOTTOM|wxRIGHT</property>
+                            <property name="flag">wxTOP|wxBOTTOM|wxRIGHT|wxALIGN_BOTTOM</property>
                             <property name="proportion">0</property>
                             <object class="wxStaticText" expanded="1">
                                 <property name="BottomDockable">1</property>
