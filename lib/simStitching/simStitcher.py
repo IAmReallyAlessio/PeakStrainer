@@ -241,13 +241,28 @@ def project_ms2sim(matchingSims, popts):
     return [matchingSim + (simIntens_Corrected[idx], correctionFactors[idx]) for idx, matchingSim in enumerate(matchingSims)]
 
 
-def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath = None, a=None, b=None):
-    log.setLevel(logging.DEBUG)
-    log.addHandler(logging.StreamHandler()) # log to console
+def tr_loglevel(loglevel):
+    tr={0:logging.ERROR, 1:logging.INFO, 2:logging.DEBUG, 3:logging.DEBUG}
+    return tr[loglevel]
+
+
+def getCSVPath(csvPath, filePath):
     dir,file = os.path.split(filePath)
     if csvPath == None : csvPath = dir
-    if not csvPath.endswith('\\') : csvPath = csvPath +'\\'  
-    if generateCSV: logging.basicConfig(filename=csvPath+'simSitcher.log',filemode='w')
+    if not csvPath.endswith('\\') : csvPath = csvPath +'\\'
+    csvPath=csvPath+'logfiles\\'
+    if not os.path.exists(csvPath): os.makedirs(csvPath)
+    
+    baseName = file[:-6]
+    
+    return csvPath+baseName+'-'
+
+
+def simStitcher(filePath, doCompare = True, csvPath = None, a=None, b=None, loglevel = 0):
+    log.setLevel(tr_loglevel(loglevel))
+    log.addHandler(logging.StreamHandler()) # log to console
+    if loglevel>0: csvPath = getCSVPath(csvPath, filePath)
+    if loglevel>0: logging.basicConfig(filename=csvPath+'simSitcher.log',filemode='w')
     
     log.info('getMZXMLEncondedScans from'+ filePath)
     scans_mzxml = getMZXMLEncondedScanRows(filePath)
@@ -259,7 +274,7 @@ def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath =
     log.info('get Sim scans')
     scans_mzxml_sim= [scan for scan in scans_mzxml if ' sim ' in scan[1].lower()]
     log.debug('\n'.join(map(str,scans_mzxml_sim)))
-    if generateCSV: toCSVFile(csvPath+'scans_mzxml_sim',scans_mzxml_sim )
+    if loglevel>2: toCSVFile(csvPath+'scans_mzxml_sim',scans_mzxml_sim )
     
     scans =[Scan(*scan_xml) for scan_xml in scans_mzxml_sim]
     
@@ -267,7 +282,7 @@ def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath =
     scans.sort(key=lambda scan: scan.filterLine.asTuple())
     
     log.debug('\n'.join(map(str,scans)))
-    if generateCSV: toCSVFile(csvPath+'scans', scans)
+    if loglevel>2: toCSVFile(csvPath+'scans', scans)
     
     scans[0].next = scans[1] #previous is None
     for idx, scan in enumerate(scans):
@@ -287,7 +302,7 @@ def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath =
     log.info('stitched scans:')
     log.info('\n'.join(scans_stitched.keys()))
     log.debug('\n'.join(map(str,scans_stitched.items())))
-    if generateCSV: toCSVFile(csvPath+'scans_stitched', scans_stitched)
+    if loglevel>2: toCSVFile(csvPath+'scans_stitched', scans_stitched)
     names = scans_stitched.keys()
     # -- rename
     for stitched_Head in names:
@@ -312,14 +327,14 @@ def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath =
     
     scans_mzxml_ms= [scan for scan in scans_mzxml if ' ms ' in scan[1].lower() and ' full ' in scan[1].lower()]
     log.debug('\n'.join(map(str,scans_mzxml_ms)))
-    if generateCSV: toCSVFile(csvPath+'scans_mzxml_ms', scans_mzxml_ms)
+    if loglevel>2: toCSVFile(csvPath+'scans_mzxml_ms', scans_mzxml_ms)
     
     scans_ms =[Scan(*scan_xml) for scan_xml in scans_mzxml_ms]
     
     log.info('get Valid sim samples')
     sampleSimPeaks = getSampleSimPeak(scans)
     log.debug('\n'.join(map(str,sampleSimPeaks)))
-    if generateCSV: toCSVFile(csvPath+'sampleSimPeaks', sampleSimPeaks)
+    if loglevel>2: toCSVFile(csvPath+'sampleSimPeaks', sampleSimPeaks)
     
     log.info('get matching ms peak')
     matchingSim = getMatchingMS(sampleSimPeaks, scans_ms)
@@ -329,7 +344,7 @@ def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath =
     
     projected = project_ms2sim(matchingSim, popts)
     log.debug('\n'.join(map(str,projected)))
-    if generateCSV: toCSVFile(csvPath+'matchingSim', projected)
+    if loglevel>0: toCSVFile(csvPath+'matchingSim', projected)
     
     log.info('finished comparing')
     
@@ -350,12 +365,13 @@ def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath =
         scans_adjusted[scan] = (masses, intensAdjusted)
         
     log.debug('\n'.join(map(str,scans_adjusted.items())))
-    if generateCSV: toCSVFile(csvPath+'scans_adjusted', scans_adjusted)
+    if loglevel>2: toCSVFile(csvPath+'scans_adjusted', scans_adjusted)
     
     log.info('writing to :'+outputAdjustedFile(filePath))
     write2templateMzXML(outputAdjustedFile(filePath), scans_adjusted)
     
     log.info('finish adjustment')
+
     
     
     

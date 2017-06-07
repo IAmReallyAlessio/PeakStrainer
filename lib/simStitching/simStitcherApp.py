@@ -73,7 +73,7 @@ class mySimStitcherFrame(SimStitcherFrame):
             filepath = str(self.path+'\\'+onefile)
             self.m_gauge1.SetValue(self.m_gauge1.GetValue() + gaugeStep)
             try:
-                simStitcher(filepath, doCompare, a=self.get_a(),b=self.get_b())
+                simStitcher(filepath, doCompare, a=self.get_a(),b=self.get_b(), loglevel = int(self.m_slider1.GetValue()))
                 self.m_gauge1.SetValue(self.m_gauge1.GetValue() + gaugeStep)
             except :
                 dlg = wx.MessageDialog(self, 'There was a problem processing the file {}'.format(onefile), 'Warning', wx.OK | wx.ICON_WARNING)
