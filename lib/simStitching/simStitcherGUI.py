@@ -45,6 +45,11 @@ class SimStitcherFrame ( wx.Frame ):
 		self.BrowseBtn = wx.Button( self, wx.ID_ANY, u"Browse", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer3.Add( self.BrowseBtn, 0, wx.ALL, 5 )
 		
+		self.m_button2 = wx.Button( self, wx.ID_ANY, u"Start", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_button2.Enable( False )
+		
+		bSizer3.Add( self.m_button2, 0, wx.ALL, 5 )
+		
 		
 		bSizer2.Add( bSizer3, 1, wx.EXPAND, 5 )
 		
@@ -102,6 +107,7 @@ class SimStitcherFrame ( wx.Frame ):
 		
 		# Connect Events
 		self.BrowseBtn.Bind( wx.EVT_BUTTON, self.browseClicked )
+		self.m_button2.Bind( wx.EVT_BUTTON, self.clickStart )
 		self.m_checkBox1.Bind( wx.EVT_CHECKBOX, self.checkCompare )
 		self.m_radioBtn3.Bind( wx.EVT_RADIOBUTTON, self.radioDefault )
 		self.m_radioBtn4.Bind( wx.EVT_RADIOBUTTON, self.RadioCustom )
@@ -112,6 +118,9 @@ class SimStitcherFrame ( wx.Frame ):
 	
 	# Virtual event handlers, overide them in your derived class
 	def browseClicked( self, event ):
+		event.Skip()
+	
+	def clickStart( self, event ):
 		event.Skip()
 	
 	def checkCompare( self, event ):
