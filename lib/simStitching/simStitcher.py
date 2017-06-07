@@ -248,21 +248,27 @@ def tr_loglevel(loglevel):
 
 def getCSVPath(csvPath, filePath):
     dir,file = os.path.split(filePath)
+    
+    baseName = file[:-6]
+    
+    return getCSVPath1(csvPath, filePath)+baseName+'-'
+
+def getCSVPath1(csvPath, filePath):
+    dir,file = os.path.split(filePath)
     if csvPath == None : csvPath = dir
     if not csvPath.endswith('\\') : csvPath = csvPath +'\\'
     csvPath=csvPath+'logfiles\\'
     if not os.path.exists(csvPath): os.makedirs(csvPath)
     
-    baseName = file[:-6]
-    
-    return csvPath+baseName+'-'
+    return csvPath
 
 
-def simStitcher(filePath, doCompare = True, csvPath = None, a=None, b=None, loglevel = 0):
+
+def simStitcher(filePath, doCompare = True, csvPath1 = None, a=None, b=None, loglevel = 0):
     log.setLevel(tr_loglevel(loglevel))
     log.addHandler(logging.StreamHandler()) # log to console
-    if loglevel>0: csvPath = getCSVPath(csvPath, filePath)
-    if loglevel>0: logging.basicConfig(filename=csvPath+'simSitcher.log',filemode='w')
+    if loglevel>0: csvPath = getCSVPath(csvPath1, filePath)
+    if loglevel>0: logging.basicConfig(filename=getCSVPath1(csvPath1, filePath)+'simSitcher.log',filemode='w')
     
     log.info('getMZXMLEncondedScans from'+ filePath)
     scans_mzxml = getMZXMLEncondedScanRows(filePath)
@@ -321,7 +327,7 @@ def simStitcher(filePath, doCompare = True, csvPath = None, a=None, b=None, logl
     
     log.info('finish stitching')
     
-    if not doCompare: return 
+    if not doCompare:return 
     
     log.info('start validation')
     
@@ -371,7 +377,7 @@ def simStitcher(filePath, doCompare = True, csvPath = None, a=None, b=None, logl
     write2templateMzXML(outputAdjustedFile(filePath), scans_adjusted)
     
     log.info('finish adjustment')
-
+    
     
     
     
