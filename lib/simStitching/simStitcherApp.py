@@ -7,7 +7,6 @@ from simStitcherGUI import SimStitcherFrame
 import wx
 from lib.simStitching.simStitcher import simStitcher
 import os
-from numpy.f2py.auxfuncs import throw_error
 
 class mySimStitcherFrame(SimStitcherFrame):
     def __init__(self,parent):
