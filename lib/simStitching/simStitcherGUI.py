@@ -51,12 +51,14 @@ class SimStitcherFrame ( wx.Frame ):
 		bSizer6 = wx.BoxSizer( wx.HORIZONTAL )
 		
 		self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, u"Compare to MS", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_checkBox1.SetValue(True) 
 		bSizer6.Add( self.m_checkBox1, 0, wx.ALL, 5 )
 		
 		
 		bSizer6.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
 		
 		self.m_radioBtn3 = wx.RadioButton( self, wx.ID_ANY, u"Default", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_radioBtn3.SetValue( True ) 
 		bSizer6.Add( self.m_radioBtn3, 0, wx.ALL, 5 )
 		
 		self.m_radioBtn4 = wx.RadioButton( self, wx.ID_ANY, u"Custom", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -71,15 +73,19 @@ class SimStitcherFrame ( wx.Frame ):
 		self.m_staticText4.Wrap( -1 )
 		bSizer4.Add( self.m_staticText4, 0, wx.ALL, 5 )
 		
-		self.m_textCtrl2 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer4.Add( self.m_textCtrl2, 0, wx.ALL, 5 )
+		self.m_textCtrl_a = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl_a.Enable( False )
+		
+		bSizer4.Add( self.m_textCtrl_a, 0, wx.ALL, 5 )
 		
 		self.m_staticText5 = wx.StaticText( self, wx.ID_ANY, u"b:", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText5.Wrap( -1 )
 		bSizer4.Add( self.m_staticText5, 0, wx.ALL, 5 )
 		
-		self.m_textCtrl3 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer4.Add( self.m_textCtrl3, 0, wx.ALL, 5 )
+		self.m_textCtrl_b = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl_b.Enable( False )
+		
+		bSizer4.Add( self.m_textCtrl_b, 0, wx.ALL, 5 )
 		
 		
 		bSizer2.Add( bSizer4, 1, wx.EXPAND, 5 )
@@ -97,6 +103,8 @@ class SimStitcherFrame ( wx.Frame ):
 		# Connect Events
 		self.BrowseBtn.Bind( wx.EVT_BUTTON, self.browseClicked )
 		self.m_checkBox1.Bind( wx.EVT_CHECKBOX, self.checkCompare )
+		self.m_radioBtn3.Bind( wx.EVT_RADIOBUTTON, self.radioDefault )
+		self.m_radioBtn4.Bind( wx.EVT_RADIOBUTTON, self.RadioCustom )
 	
 	def __del__( self ):
 		pass
@@ -107,6 +115,12 @@ class SimStitcherFrame ( wx.Frame ):
 		event.Skip()
 	
 	def checkCompare( self, event ):
+		event.Skip()
+	
+	def radioDefault( self, event ):
+		event.Skip()
+	
+	def RadioCustom( self, event ):
 		event.Skip()
 	
 
