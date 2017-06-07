@@ -243,7 +243,7 @@ def simStitcher(filePath = None, doCompare = True, generateCSV = True, csvPath =
     dir,file = os.path.split(filePath)
     if csvPath == None : csvPath = dir
     if not csvPath.endswith('\\') : csvPath = csvPath +'\\'  
-    if log.level == logging.DEBUG: logging.basicConfig(filename=csvPath+'simSitcher.log',filemode='w')
+    if generateCSV: logging.basicConfig(filename=csvPath+'simSitcher.log',filemode='w')
     
     log.info('getMZXMLEncondedScans from'+ filePath)
     scans_mzxml = getMZXMLEncondedScanRows(filePath)
