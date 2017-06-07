@@ -11,10 +11,10 @@ class mySimStitcherFrame(SimStitcherFrame):
     def __init__(self,parent):
         super(mySimStitcherFrame, self).__init__(parent)
     
-    def filecChanged( self, event ):
-        filepath  = self.m_filePicker1.GetPath()
-        doCompare = self.m_checkBox1.GetValue()
-        simStitcher(filepath, doCompare)
+#     def filecChanged( self, event ):
+#         filepath  = self.m_filePicker1.GetPath()
+#         doCompare = self.m_checkBox1.GetValue()
+#         simStitcher(filepath, doCompare)
         
     
 def main():
