@@ -105,7 +105,7 @@ class SimStitcherFrame ( wx.Frame ):
 		self.m_staticText6.Wrap( -1 )
 		bSizer5.Add( self.m_staticText6, 0, wx.TOP|wx.BOTTOM|wx.LEFT|wx.ALIGN_BOTTOM, 5 )
 		
-		self.m_slider1 = wx.Slider( self, wx.ID_ANY, 0, 0, 4, wx.DefaultPosition, wx.DefaultSize, wx.SL_HORIZONTAL )
+		self.m_slider1 = wx.Slider( self, wx.ID_ANY, 0, 0, 3, wx.DefaultPosition, wx.DefaultSize, wx.SL_HORIZONTAL )
 		bSizer5.Add( self.m_slider1, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 		
 		self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, u"high", wx.DefaultPosition, wx.DefaultSize, 0 )
