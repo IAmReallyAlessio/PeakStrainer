@@ -36,7 +36,7 @@ def main(file):
     if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
     
 #     scans = filterScanBy_first(scans)
-    scans = filterScanBy_filterline(scans)
+    scans = filterScanBy_filterline(scans) #only for testing
     ''' filtering by scan
     scans = filterScanBy_retentionTime(scans)
     scans = filterScanBy_filterline(scans)
@@ -130,11 +130,11 @@ def ThermoRawfile2Scans(file_path):
 def ThermoRawfile2Scans_csv(scans, filename='ThermoRawfile2Scans.csv'):
     with open(filename, "wb") as csv_file:
         writer = csv.writer(csv_file, delimiter=',')
-        writer.writerow(('scanNum', 'filterLine', 'retTime', 'row'))
+        writer.writerow(('scanNum', 'filterLine', 'retTime', 'charge state','row'))
         for scan in scans:
-            (scanNum, filterLine, peak_datas, retTime) = scan
+            (scanNum, filterLine, peak_datas, retTime, chargeState) = scan
             for row in zip(*peak_datas):
-                line = (scanNum, filterLine, retTime) + row
+                line = (scanNum, filterLine, retTime, chargeState) + row
                 writer.writerow(line)
 
 '''
@@ -150,7 +150,7 @@ def filterScanBy_retentionTime(scans, lowSeconds=0.5, highSeconds=float("inf")):
     log.info('filterScanBy_retentionTime %f to %f', lowSeconds, highSeconds)
     result = []
     for row in scans:
-        scanNum, filterLine, peak_datas, retTime = row 
+        scanNum, filterLine, peak_datas, retTime , chargeState = row 
         if retTime >+ lowSeconds and  retTime <= highSeconds:
             result.append(row)
     return result
@@ -160,7 +160,7 @@ def filterScanBy_filterline(scans, subtext = ' ms ', keep=False):
     log.info('filterScanBy_filterline %s filter keep: %s', subtext, keep)
     result=[]
     for row in scans:
-        scanNum, filterLine, peak_datas, retTime = row 
+        scanNum, filterLine, peak_datas, retTime , chargeState= row 
         if keep:
             if (subtext in filterLine):
                 result.append(row)
@@ -183,7 +183,7 @@ merge peaks and coarse grained filtering
 def mergePeaksOnFilterline(scans):
     log.info('Merging %d scans' , len(scans))
     
-    filterLines = set([filterLine for scanNo, filterLine, peakData, retTime in scans])
+    filterLines = set([filterLine for scanNo, filterLine, peakData, retTime , chargeState in scans])
     log.info('found %d uniqe filterlines', len(filterLines))
     
     # create dict
