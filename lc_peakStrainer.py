@@ -16,6 +16,7 @@ import itertools
 import math
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
+import numpy as np
 
 __version__ = "17.06.08.0"
 
@@ -242,34 +243,15 @@ def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionR
     minRepetitionRate_bin = {bin:count for bin,count in minCount_bin.iteritems() if (count/minCount_bin_max) > minRepetitionRate }
     sorted_minRepetitionRate_bin = minRepetitionRate_bin.keys()
     sorted_minRepetitionRate_bin.sort()
+    np_minRepetitionRate_bin = np.array(sorted_minRepetitionRate_bin)
+    np_roundeds = np.array(roundeds)
     log.debug('groups with minRepetitionRate %f: %d', minRepetitionRate,len(minRepetitionRate_bin))
     
     
 #     -------------------
-    start = time.time()
-    interm = start
-    preFilterPass = []
-    
-    def chunks(l, n):
-        """Yield successive n-sized chunks from l."""
-        for i in range(0, len(l), n):
-            yield l[i:i + n]
-    
-    for roundeds_batch in chunks(roundeds, 10000): 
-#         minn = min(roundeds_batch)
-#         maxx = max(roundeds_batch)
-#         sorted_minRepetitionRate_bin_batch = [s for s in sorted_minRepetitionRate_bin if s >= minn and s <= maxx]
-        for idx, rounded in enumerate(roundeds_batch):
-#             preFilterPass.append(rounded in sorted_minRepetitionRate_bin_batch)
-            pass
-            
+    start = time.time()     
         
-        print 'at {} from {} lag = {}'.format(len(preFilterPass), len(roundeds),(time.time()-interm))
-        interm = time.time()
-            
-        
-#     preFilterPass = [rounded in sorted_minRepetitionRate_bin for rounded in roundeds] # this is the bottle neck
-    
+    preFilterPass = np.in1d(np_roundeds, np_minRepetitionRate_bin)
     
     log.debug(time.time()-start)
 #     -------------------
