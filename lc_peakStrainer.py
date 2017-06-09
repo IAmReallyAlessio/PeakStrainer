@@ -114,7 +114,7 @@ def ThermoRawfile2Scans(file_path):
         filterLine = rawfile.GetFilterForScanNum(scanNum)
         retTime =  rawfile.RTFromScanNum(scanNum)*60
         chargeState= rawfile.GetTrailerExtraForScanNum(scanNum)['Charge State']
-        isolationMass = rawfile.GetPrecursorInfoFromScanNum(scanNum).isolationMass # or monoIsoMass
+        isolationMass = rawfile.GetPrecursorInfoFromScanNum(scanNum).isolationMass if  rawfile.GetPrecursorInfoFromScanNum(scanNum) is not None else 0.0# or monoIsoMass
         row = (scanNum, filterLine, peak_datas, retTime, chargeState, isolationMass)
         MSrawscans.append(row)
     
@@ -193,7 +193,7 @@ def mergePeaksOnFilterline(scans):
         mergedPeaks[filterLine]=([],[],[])
         
 #     populate dict
-    for scanNo, filterLine, peakData, retTime in scans:
+    for scanNo, filterLine, peakData, retTime , chargeState, isolationMass in scans:
         (zmass, abunds, resols, baseline , noise, charge) = peakData
         mergedPeaks[filterLine][0].extend(zmass)
         mergedPeaks[filterLine][1].extend(abunds)
