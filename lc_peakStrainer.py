@@ -2,8 +2,8 @@
 # encoding: utf-8
 '''
 Created on 29.03.2017
-PeakStrainer is a tool to reduce the size of an MS spectra,
-usage: peakStrainer spectra_file.raw
+lc_PeakStrainer is a tool to reduce the size of an MS spectra,
+usage: lc_peakStrainer spectra_file.raw
 @author: mirandaa
 '''
 import sys
@@ -17,7 +17,7 @@ import math
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
-__version__ = "17.03.29.0"
+__version__ = "17.06.08.0"
 
 
 def main(file):
@@ -34,20 +34,21 @@ def main(file):
     scans = ThermoRawfile2Scans(filename)
     if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
     
-    scans = filterScanBy_first(scans)
+#     scans = filterScanBy_first(scans)
     ''' filtering by scan
     scans = filterScanBy_retentionTime(scans)
     scans = filterScanBy_filterline(scans)
     scans = filterScanBy_samples(scans, step_size = 3)
     '''
     
-    #Note: mergePeaksOnFilterline_withRandom to generate testing data
     filterLines = mergePeaksOnFilterline(scans)
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
     
     preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
     #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
-    if log.level == logging.DEBUG: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')    
+    if log.level == logging.DEBUG: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')
+    
+    raise SystemExit    
     
     ''' create bins for peaks
     filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
@@ -239,9 +240,41 @@ def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionR
     log.debug('groups with minCount %d: %d', minCount,len(minCount_bin))
     minCount_bin_max = float(max(minCount_bin.values())) if len(minCount_bin) is not 0 else 0 
     minRepetitionRate_bin = {bin:count for bin,count in minCount_bin.iteritems() if (count/minCount_bin_max) > minRepetitionRate }
+    sorted_minRepetitionRate_bin = minRepetitionRate_bin.keys()
+    sorted_minRepetitionRate_bin.sort()
     log.debug('groups with minRepetitionRate %f: %d', minRepetitionRate,len(minRepetitionRate_bin))
     
-    preFilterPass = [rounded in minRepetitionRate_bin.keys() for rounded in roundeds]
+    
+#     -------------------
+    start = time.time()
+    interm = start
+    preFilterPass = []
+    
+    def chunks(l, n):
+        """Yield successive n-sized chunks from l."""
+        for i in range(0, len(l), n):
+            yield l[i:i + n]
+    
+    for roundeds_batch in chunks(roundeds, 10000): 
+#         minn = min(roundeds_batch)
+#         maxx = max(roundeds_batch)
+#         sorted_minRepetitionRate_bin_batch = [s for s in sorted_minRepetitionRate_bin if s >= minn and s <= maxx]
+        for idx, rounded in enumerate(roundeds_batch):
+#             preFilterPass.append(rounded in sorted_minRepetitionRate_bin_batch)
+            pass
+            
+        
+        print 'at {} from {} lag = {}'.format(len(preFilterPass), len(roundeds),(time.time()-interm))
+        interm = time.time()
+            
+        
+#     preFilterPass = [rounded in sorted_minRepetitionRate_bin for rounded in roundeds] # this is the bottle neck
+    
+    
+    log.debug(time.time()-start)
+#     -------------------
+
+    
     compressedPeakData = list(itertools.compress(zip(*peakData), preFilterPass))
     compressedPeakData = zip(*compressedPeakData)
     log.debug('final peak count %d',len(compressedPeakData))
