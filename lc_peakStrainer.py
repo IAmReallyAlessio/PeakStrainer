@@ -36,6 +36,7 @@ def main(file):
     if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
     
 #     scans = filterScanBy_first(scans)
+    scans = filterScanBy_filterline(scans)
     ''' filtering by scan
     scans = filterScanBy_retentionTime(scans)
     scans = filterScanBy_filterline(scans)
@@ -112,7 +113,8 @@ def ThermoRawfile2Scans(file_path):
         peak_datas = rawfile.GetLabelData(scanNum)[0]
         filterLine = rawfile.GetFilterForScanNum(scanNum)
         retTime =  rawfile.RTFromScanNum(scanNum)*60
-        row = (scanNum, filterLine, peak_datas, retTime)
+        chargeState= rawfile.GetTrailerExtraForScanNum(scanNum)['Charge State']
+        row = (scanNum, filterLine, peak_datas, retTime, chargeState)
         MSrawscans.append(row)
     
     log.info('Scan Count is %d', len(MSrawscans))
@@ -250,8 +252,11 @@ def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionR
     
 #     -------------------
     start = time.time()     
-        
+#     preFilterPass = [rounded in sorted_minRepetitionRate_bin for rounded in roundeds] # this is the bottle neck
     preFilterPass = np.in1d(np_roundeds, np_minRepetitionRate_bin)
+    for e in preFilterPass:
+        if e is True:
+            print  preFilterPass
     
     log.debug(time.time()-start)
 #     -------------------
