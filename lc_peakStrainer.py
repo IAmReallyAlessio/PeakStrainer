@@ -11,7 +11,7 @@ import os
 import time
 import logging
 import csv
-from utils.peakStrainer_util import write2templateMzXML
+from utils.peakStrainer_util import write2templateMzXML, generatePsudoMGF
 import itertools
 import math
 log = logging.getLogger(os.path.basename(__file__))
@@ -46,9 +46,16 @@ def main(file):
     filterLines = mergePeaksOnFilterline(scans)
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
     
-    preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
+    preFiltered_filterlines = {k: preliminaryFilter(v,minCount = 1) for k, v in filterLines.iteritems()}
     #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')
+    
+    
+    newfilename = filename[:-4]+ '-f.mgf'
+    log.info('Writing results to %s', newfilename)
+    generatePsudoMGF(newfilename, preFiltered_filterlines)
+    
+    log.debug('finish %f',  time.clock())
     
     raise SystemExit    
     
@@ -184,7 +191,10 @@ merge peaks and coarse grained filtering
 def mergePeaksOnFilterline(scans):
     log.info('Merging %d scans' , len(scans))
     
-    filterLines = set([filterLine for scanNo, filterLine, peakData, retTime , chargeState, isolationMass in scans])
+    def strCombine(filterLine, chargeState):
+        return str(filterLine)+' '+'{0:.0f}'.format(chargeState)
+    
+    filterLines = set([strCombine(filterLine, chargeState) for scanNo, filterLine, peakData, retTime , chargeState, isolationMass in scans])
     log.info('found %d uniqe filterlines', len(filterLines))
     
     # create dict
@@ -193,8 +203,9 @@ def mergePeaksOnFilterline(scans):
         mergedPeaks[filterLine]=([],[],[])
         
 #     populate dict
-    for scanNo, filterLine, peakData, retTime , chargeState, isolationMass in scans:
+    for scanNo, filterLineOG, peakData, retTime , chargeState, isolationMass in scans:
         (zmass, abunds, resols, baseline , noise, charge) = peakData
+        filterLine = strCombine(filterLineOG, chargeState)
         mergedPeaks[filterLine][0].extend(zmass)
         mergedPeaks[filterLine][1].extend(abunds)
         mergedPeaks[filterLine][2].extend(resols)
