@@ -46,7 +46,7 @@ def main(file):
     filterLines = mergePeaksOnFilterline(scans)
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
     
-    preFiltered_filterlines = {k: preliminaryFilter(v,minCount = 1) for k, v in filterLines.iteritems()}
+    preFiltered_filterlines = {k: preliminaryFilter(v,minCount = 1 ) for k, v in filterLines.iteritems()}
     #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')
     
