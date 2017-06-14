@@ -27,21 +27,11 @@ def main(file):
     if log.level == logging.DEBUG:logging.basicConfig(filename='peakStrainer.log',filemode='w')
     
     log.debug('Start %f', time.clock())
-#     if len(sys.argv) == 1:
-#         print("A filename must be provided")
-#         raise SystemExit
     
     filename = file #" ".join(sys.argv[1:])
-    scans = ThermoRawfile2Scans(filename)
-    if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
+    scans = ThermoRawfile2Scans(filename, onlyMS=True)
+    if log.level == logging.NOTSET: ThermoRawfile2Scans_csv(scans)
     
-#     scans = filterScanBy_first(scans)
-    scans = filterScanBy_filterline(scans) #only for testing
-    ''' filtering by scan
-    scans = filterScanBy_retentionTime(scans)
-    scans = filterScanBy_filterline(scans)
-    scans = filterScanBy_samples(scans, step_size = 3)
-    '''
     
     filterLines = mergePeaksOnFilterline(scans)
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
@@ -107,7 +97,7 @@ def main(file):
     log.debug('finish %f',  time.clock())
     
 
-def ThermoRawfile2Scans(file_path):
+def ThermoRawfile2Scans(file_path, onlyMS = False):
     # NOTE: for testing use ThermoRawfile2Scans_sample instead
     log.info('file: %s', file_path)
     rawfile = MSFileReader.ThermoRawfile(file_path)
@@ -117,8 +107,10 @@ def ThermoRawfile2Scans(file_path):
  
     MSrawscans = []
     for scanNum in range(start, end+1):
-        peak_datas = rawfile.GetLabelData(scanNum)[0]
         filterLine = rawfile.GetFilterForScanNum(scanNum)
+        if onlyMS and ' ms2 ' in  filterLine: continue
+        
+        peak_datas = rawfile.GetLabelData(scanNum)[0]
         retTime =  rawfile.RTFromScanNum(scanNum)*60
         chargeState= rawfile.GetTrailerExtraForScanNum(scanNum)['Charge State']
         isolationMass = rawfile.GetPrecursorInfoFromScanNum(scanNum).isolationMass if  rawfile.GetPrecursorInfoFromScanNum(scanNum) is not None else 0.0# or monoIsoMass
@@ -138,7 +130,7 @@ def ThermoRawfile2Scans(file_path):
 def ThermoRawfile2Scans_csv(scans, filename='ThermoRawfile2Scans.csv'):
     with open(filename, "wb") as csv_file:
         writer = csv.writer(csv_file, delimiter=',')
-        writer.writerow(('scanNum', 'filterLine', 'retTime', 'charge state','row'))
+        writer.writerow(('scanNum', 'filterLine', 'retTime', 'charge state','row', 'isolationMass'))
         for scan in scans:
             (scanNum, filterLine, peak_datas, retTime, chargeState, isolationMass) = scan
             for row in zip(*peak_datas):
