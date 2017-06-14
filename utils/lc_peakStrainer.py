@@ -4,7 +4,7 @@ Created on 16.05.2017
 @author: mirandaa
 '''
 
-from peakStrainer import ThermoRawfile2Scans, preliminaryFilter
+from peakStrainer import ThermoRawfile2DataFrame, preliminaryFilter
 from utils.peakStrainer_util import decode_mzXML_Peaks, encodePeaks, setLogger
 from collections import OrderedDict
 import xml.etree.ElementTree as ET
@@ -18,7 +18,7 @@ def main():
     fileName = r'C:\apps\eclipseRCP\workspace\PeakStrainer\resources\qc3_01.raw'
     step=3
     
-    scans = ThermoRawfile2Scans(fileName)
+    scans = ThermoRawfile2DataFrame(fileName)
     print 'og scans '+str(len(scans))
     ms_scans = [scan for scan in scans if ' ms ' in scan[1]]
     '''for msms get filterline, get offset, remove offset from filterline

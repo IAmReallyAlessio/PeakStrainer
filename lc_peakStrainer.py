@@ -14,11 +14,22 @@ import csv
 from utils.peakStrainer_util import write2templateMzXML, generatePsudoMGF
 import itertools
 import math
+from collections import namedtuple
+from nltk.sem.chat80 import continent
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 import numpy as np
+import pandas as pd
 
 __version__ = "17.06.08.0"
+
+
+# def makeBatchs(iterable, width=10):
+#     #https://stackoverflow.com/questions/8290397/how-to-split-an-iterable-in-constant-size-chunks
+#     l = len(iterable)
+#     for ndx in range(0, l, width):
+#         yield iterable[ndx:min(ndx + width, l)]
+            
 
 
 def main(file):
@@ -29,75 +40,58 @@ def main(file):
     log.debug('Start %f', time.clock())
     
     filename = file #" ".join(sys.argv[1:])
-    scans = ThermoRawfile2Scans(filename, onlyMS=True)
-    if log.level == logging.NOTSET: ThermoRawfile2Scans_csv(scans)
+    scansDF = ThermoRawfile2DataFrame(filename)
+    if log.level == logging.DEBUG: scansDF[[u'scanNum', u'filterLine', u'retTime', u'chargeState',u'isolationMass']].to_csv('out.csv')
     
     
-    filterLines = mergePeaksOnFilterline(scans)
-    if log.level == logging.DEBUG: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
+    
+    ScanTuple = namedtuple('ScanTuple', 'scanNum filterLine peak_datas retTime chargeState isolationMass')
+    
+    batchSize = 10
+    maxDuration = 10
+#     update the filterline with batch number
+    base = None
+    batchIdx = 0 
+    batchList = []
+    for idx, scan in enumerate(ms_scans):
+        tuple = ScanTuple(*scan)
+        if base is None: 
+            base = tuple
+            batchList.append(tuple)
+            continue
+        if tuple.filterLine == base.filterLine and tuple.retTime < base.retTime +  maxDuration:
+            batchList.append(batchIdx)
+            continue
+        
+            
+            
+            
+            
+        
+        
+         
+        
+    
+    
+    if log.level == logging.DEBUG: filterlinePeaks_csv(batches, 'mergePeaksOnBatch.csv')
+    preFiltered_filterBatch = {k: preliminaryFilter(v,minCount = 1 ) for k, v in batches.iteritems()}
     
     preFiltered_filterlines = {k: preliminaryFilter(v,minCount = 1 ) for k, v in filterLines.iteritems()}
-    #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
+    
     if log.level == logging.DEBUG: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')
     
     
-    newfilename = filename[:-4]+ '-f.mgf'
-    log.info('Writing results to %s', newfilename)
-    generatePsudoMGF(newfilename, preFiltered_filterlines)
+#     newfilename = filename[:-4]+ '-f.mgf'
+#     log.info('Writing results to %s', newfilename)
+#     generatePsudoMGF(newfilename, preFiltered_filterlines)
+#     
+#     log.debug('finish %f',  time.clock())
+#     
+    return    
     
-    log.debug('finish %f',  time.clock())
-    
-    raise SystemExit    
-    
-    ''' create bins for peaks
-    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
-    filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
-    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
-    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.iteritems()} # 5408000.0, 2096000.0
-    '''
-    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.iteritems()}
-    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
-    
-#     filterlines_withBins_ms = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.iteritems() if ' ms ' in k }
-#     filterlines_withBins_msms = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.iteritems() if ' ms ' not in k}
-#     filterlines_withBins = filterlines_withBins_ms.update(filterlines_withBins_msms)
-#     for different function for ms and for msms
-    
-    filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
-    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'mergeBins.csv')
-    
-    
-    ''' put each mass in a bin
-    filterlines_inBins = {k: sortMassIn_sortWindow(v) for k, v in filterlines_withBins.iteritems()}
-    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
-    filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
-    '''
-    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
-    if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_inBins,'sortMassIn.csv')
-    
-    filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
-    if log.level == logging.DEBUG: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
-    
-    filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
-    if log.level == logging.DEBUG: filterlineBins_csv(filterlines_filtered,'filteredBins.csv')
-    
-    filtered_peaks = {k: bins2Peaks(v, filterlines_inBins[k]) for k, v in filterlines_filtered.iteritems()}
-    if log.level == logging.DEBUG: filterlinePeaks_csv(filtered_peaks,'mzXMLdata.csv')
-       
-    # can't use filtered bins in mzxml because it is not readable by seems
-    filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
-    
-#     order = [' ms ', '.33-', ' ms ']
-#     filtered_bins = reorderScans(filtered_bins, order)
-    
-    newfilename = filename[:-4]+ '.mzXML'
-    log.info('Writing results to %s', newfilename)
-    write2templateMzXML(newfilename, filtered_bins)
-    
-    log.debug('finish %f',  time.clock())
     
 
-def ThermoRawfile2Scans(file_path, onlyMS = False):
+def ThermoRawfile2DataFrame(file_path):
     # NOTE: for testing use ThermoRawfile2Scans_sample instead
     log.info('file: %s', file_path)
     rawfile = MSFileReader.ThermoRawfile(file_path)
@@ -105,19 +99,19 @@ def ThermoRawfile2Scans(file_path, onlyMS = False):
     start = rawfile.FirstSpectrumNumber
     end = rawfile.GetLastSpectrumNumber()
  
-    MSrawscans = []
-    for scanNum in range(start, end+1):
+    MSrawscansDF = pd.DataFrame(index = np.arange(start, end+1), columns=['scanNum', 'filterLine', 'peak_datas', 'retTime', 'chargeState', 'isolationMass'])
+    for scanNum in np.arange(start, end+1):
         filterLine = rawfile.GetFilterForScanNum(scanNum)
-        if onlyMS and ' ms2 ' in  filterLine: continue
-        
         peak_datas = rawfile.GetLabelData(scanNum)[0]
         retTime =  rawfile.RTFromScanNum(scanNum)*60
         chargeState= rawfile.GetTrailerExtraForScanNum(scanNum)['Charge State']
         isolationMass = rawfile.GetPrecursorInfoFromScanNum(scanNum).isolationMass if  rawfile.GetPrecursorInfoFromScanNum(scanNum) is not None else 0.0# or monoIsoMass
-        row = (scanNum, filterLine, peak_datas, retTime, chargeState, isolationMass)
-        MSrawscans.append(row)
+        row = [scanNum, filterLine, None, retTime, chargeState, isolationMass]
+        MSrawscansDF.loc[scanNum] = row
+        MSrawscansDF.loc[scanNum].peak_datas = peak_datas
     
-    log.info('Scan Count is %d', len(MSrawscans))
+    
+    log.info('Scan Count is %d', len(MSrawscansDF))
     #Note: to reshape into lists use 
     #scanNum, filterLine, peak_datas, retTime = zip(*MSrawscans)
     
@@ -125,17 +119,18 @@ def ThermoRawfile2Scans(file_path, onlyMS = False):
     # peak_data = peak_datas[0]
     # peak_data.mass
     
-    return MSrawscans
+    return MSrawscansDF
 
-def ThermoRawfile2Scans_csv(scans, filename='ThermoRawfile2Scans.csv'):
+
+def ThermoRawfile2Scans_csv(scans, filename='ThermoRawfile2DataFrame.csv'):
     with open(filename, "wb") as csv_file:
         writer = csv.writer(csv_file, delimiter=',')
         writer.writerow(('scanNum', 'filterLine', 'retTime', 'charge state','row', 'isolationMass'))
         for scan in scans:
             (scanNum, filterLine, peak_datas, retTime, chargeState, isolationMass) = scan
-            for row in zip(*peak_datas):
-                line = (scanNum, filterLine, retTime, chargeState, isolationMass) + row
-                writer.writerow(line)
+#             for row in zip(*peak_datas):
+#                 line = (scanNum, filterLine, retTime, chargeState, isolationMass) + row
+            writer.writerow((scanNum, filterLine, retTime, chargeState, isolationMass))
 
 '''
 Filter on scans
