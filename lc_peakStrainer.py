@@ -15,7 +15,6 @@ from utils.peakStrainer_util import write2templateMzXML, generatePsudoMGF
 import itertools
 import math
 from collections import namedtuple
-from nltk.sem.chat80 import continent
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 import numpy as np
