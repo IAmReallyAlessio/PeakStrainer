@@ -40,7 +40,7 @@ def main(file):
     
     filename = file #" ".join(sys.argv[1:])
     scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
-    if log.level == logging.DEBUG: scansDF[[u'scanNum', u'filterLine', u'retTime', u'chargeState',u'isolationMass']].to_csv('out.csv') #'peak_datas' removed
+    if log.level == logging.DEBUG: scansDF.to_csv('msScans.csv') #'peak_datas' removed
     
     # only ms scans
     msDF = scansDF[scansDF.filterLine.str.contains(' ms ')]
@@ -53,11 +53,30 @@ def main(file):
     
     batchSize = 10
     maxDuration = 10
+    repetitonRate = 0.70
+    minFreq = batchSize * repetitonRate 
     
     base = filterline1DF.loc[filterline1DF.index.min()] 
     
     batch = filterline1DF[filterline1DF.retTime < base.retTime + maxDuration].head(batchSize)
     #TODO try groupby
+    batchPeaks = batch.join(peaksDF) # this is faster than peaksDF.join(batch)
+    batchPeaks['rounddMass'] = batchPeaks.mass.round(2)
+    
+    batchPeaks['scanPeakStr'] = batchPeaks.scanNum.map(str) + '-' + batchPeaks.rounddMass.map(str)
+    uniqScanPeakStr = batchPeaks.scanPeakStr.unique()
+    uniqBatchPeaks = batchPeaks.loc[batchPeaks.scanPeakStr.isin(uniqScanPeakStr)]
+    #https://stackoverflow.com/questions/22391433/count-the-frequency-that-a-value-occurs-in-a-dataframe-column
+    batchPeaks['freq'] = batchPeaks.groupby('rounddMass')['rounddMass'].transform('count')
+    
+    #always present
+    batchPeaks.loc[batchPeaks.freq == batchSize]
+    
+    batchPeaks.loc[batchPeaks.freq > minFreq]
+    
+    
+    
+    #round in  
     
     
     #merge peaks
@@ -127,7 +146,7 @@ def ThermoRawfile2DataFrames(file_path):
     MSrawscansDF = pd.DataFrame(index = np.arange(start, end+1),columns=['scanNum', 'filterLine', 'retTime', 'chargeState', 'isolationMass'])
     peak_datasDF_list =[]
     startTime = time.time()
-    for scanNum in np.arange(start, 10000):#end+1):
+    for scanNum in np.arange(start, end+1):
         filterLine = rawfile.GetFilterForScanNum(scanNum)
         peak_datas = rawfile.GetLabelData(scanNum)[0]
         retTime =  rawfile.RTFromScanNum(scanNum)*60
