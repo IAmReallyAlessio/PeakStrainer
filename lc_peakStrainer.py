@@ -39,15 +39,40 @@ def main(file):
     log.debug('Start %f', time.clock())
     
     filename = file #" ".join(sys.argv[1:])
-    scansDF = ThermoRawfile2DataFrame(filename)
-    if log.level == logging.DEBUG: scansDF[[u'scanNum', u'filterLine', u'retTime', u'chargeState',u'isolationMass']].to_csv('out.csv')
+    scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
+    if log.level == logging.DEBUG: scansDF[[u'scanNum', u'filterLine', u'retTime', u'chargeState',u'isolationMass']].to_csv('out.csv') #'peak_datas' removed
     
+    # only ms scans
+    msDF = scansDF[scansDF.filterLine.str.contains(' ms ')]
     
+    # uniq filterlines
+    uniqFilterlines = msDF.filterLine.unique()
     
-    ScanTuple = namedtuple('ScanTuple', 'scanNum filterLine peak_datas retTime chargeState isolationMass')
+    # scans with uniq filterline
+    filterline1DF = msDF[msDF.filterLine == uniqFilterlines[0]]
     
     batchSize = 10
     maxDuration = 10
+    
+    base = filterline1DF.loc[filterline1DF.index.min()] 
+    
+    batch = filterline1DF[filterline1DF.retTime < base.retTime + maxDuration].head(batchSize)
+    #TODO try groupby
+    
+    
+    #merge peaks
+    #TODO different datatable for peakdata
+    batchMasses = []
+    batchIntens = []
+    for e in batch.itertuples():
+        print(batchMasses.__len__())
+        print(e.peak_datas.mass.__len__())
+        batchMasses.extend(e.peak_datas.mass)
+        batchIntens.extend(e.peak_datas.intesity)
+    
+    
+    
+    
 #     update the filterline with batch number
     base = None
     batchIdx = 0 
@@ -90,7 +115,7 @@ def main(file):
     
     
 
-def ThermoRawfile2DataFrame(file_path):
+def ThermoRawfile2DataFrames(file_path):
     # NOTE: for testing use ThermoRawfile2Scans_sample instead
     log.info('file: %s', file_path)
     rawfile = MSFileReader.ThermoRawfile(file_path)
@@ -98,27 +123,26 @@ def ThermoRawfile2DataFrame(file_path):
     start = rawfile.FirstSpectrumNumber
     end = rawfile.GetLastSpectrumNumber()
  
-    MSrawscansDF = pd.DataFrame(index = np.arange(start, end+1), columns=['scanNum', 'filterLine', 'peak_datas', 'retTime', 'chargeState', 'isolationMass'])
-    for scanNum in np.arange(start, end+1):
+#     MSrawscansDF = pd.DataFrame(index = np.arange(start, end+1), columns=['scanNum', 'filterLine', 'retTime', 'chargeState', 'isolationMass'])
+    MSrawscansDF = pd.DataFrame(index = np.arange(start, end+1),columns=['scanNum', 'filterLine', 'retTime', 'chargeState', 'isolationMass'])
+    peak_datasDF_list =[]
+    startTime = time.time()
+    for scanNum in np.arange(start, 10000):#end+1):
         filterLine = rawfile.GetFilterForScanNum(scanNum)
         peak_datas = rawfile.GetLabelData(scanNum)[0]
         retTime =  rawfile.RTFromScanNum(scanNum)*60
         chargeState= rawfile.GetTrailerExtraForScanNum(scanNum)['Charge State']
         isolationMass = rawfile.GetPrecursorInfoFromScanNum(scanNum).isolationMass if  rawfile.GetPrecursorInfoFromScanNum(scanNum) is not None else 0.0# or monoIsoMass
-        row = [scanNum, filterLine, None, retTime, chargeState, isolationMass]
+        row = [scanNum, filterLine, retTime, chargeState, isolationMass]
         MSrawscansDF.loc[scanNum] = row
-        MSrawscansDF.loc[scanNum].peak_datas = peak_datas
-    
-    
+        peak_datasT = zip(*peak_datas)
+        peak_datasDF = pd.DataFrame(peak_datasT, index = [scanNum]*len(peak_datasT), columns=['mass', 'intensity', 'resolution', 'baseline', 'noise', 'charge'])
+        peak_datasDF_list.append(peak_datasDF)
+    MSPeakDatasDF=pd.concat(peak_datasDF_list) # concat is expensive so just once
+    log.info('File Read time %f s', time.time()-startTime)
     log.info('Scan Count is %d', len(MSrawscansDF))
-    #Note: to reshape into lists use 
-    #scanNum, filterLine, peak_datas, retTime = zip(*MSrawscans)
     
-    #Note: to get list of mass use 
-    # peak_data = peak_datas[0]
-    # peak_data.mass
-    
-    return MSrawscansDF
+    return MSrawscansDF, MSPeakDatasDF
 
 
 def ThermoRawfile2Scans_csv(scans, filename='ThermoRawfile2DataFrame.csv'):
