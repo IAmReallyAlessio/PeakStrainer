@@ -48,88 +48,63 @@ def main(file):
     # uniq filterlines
     uniqFilterlines = msDF.filterLine.unique()
     
-    # scans with uniq filterline
-    filterline1DF = msDF[msDF.filterLine == uniqFilterlines[0]]
+    batchSize = 10 # scans
+    maxDuration = 10 # seconds
+    minRepetitonRate = 0.70 # percent
+    minDifference = 0.00019 # peak is the same if diff < minDifference
+    minFreq = batchSize * minRepetitonRate 
     
-    batchSize = 10
-    maxDuration = 10
-    repetitonRate = 0.70
-    minFreq = batchSize * repetitonRate 
-    
-    base = filterline1DF.loc[filterline1DF.index.min()] 
-    
-    batch = filterline1DF[filterline1DF.retTime < base.retTime + maxDuration].head(batchSize)
-    #TODO try groupby
-    batchPeaks = batch.join(peaksDF) # this is faster than peaksDF.join(batch)
-    batchPeaks['rounddMass'] = batchPeaks.mass.round(2)
-    
-    batchPeaks['scanPeakStr'] = batchPeaks.scanNum.map(str) + '-' + batchPeaks.rounddMass.map(str)
-    uniqScanPeakStr = batchPeaks.scanPeakStr.unique()
-    uniqBatchPeaks = batchPeaks.loc[batchPeaks.scanPeakStr.isin(uniqScanPeakStr)]
-    #https://stackoverflow.com/questions/22391433/count-the-frequency-that-a-value-occurs-in-a-dataframe-column
-    batchPeaks['freq'] = batchPeaks.groupby('rounddMass')['rounddMass'].transform('count')
-    
-    #always present
-    batchPeaks.loc[batchPeaks.freq == batchSize]
-    
-    batchPeaks.loc[batchPeaks.freq > minFreq]
-    
-    
-    
-    #round in  
-    
-    
-    #merge peaks
-    #TODO different datatable for peakdata
-    batchMasses = []
-    batchIntens = []
-    for e in batch.itertuples():
-        print(batchMasses.__len__())
-        print(e.peak_datas.mass.__len__())
-        batchMasses.extend(e.peak_datas.mass)
-        batchIntens.extend(e.peak_datas.intesity)
-    
-    
-    
-    
-#     update the filterline with batch number
-    base = None
-    batchIdx = 0 
-    batchList = []
-    for idx, scan in enumerate(ms_scans):
-        tuple = ScanTuple(*scan)
-        if base is None: 
-            base = tuple
-            batchList.append(tuple)
-            continue
-        if tuple.filterLine == base.filterLine and tuple.retTime < base.retTime +  maxDuration:
-            batchList.append(batchIdx)
-            continue
+    filtered_scans = {}
+    for uniqFilterline in uniqFilterlines:
+        # scans with uniq filterline
+        filterline1DF = msDF[msDF.filterLine == uniqFilterline]
         
-            
-            
-            
-            
+        for scanTuple in filterline1DF.itertuples():
         
+            base = filterline1DF.loc[scanTuple.Index] 
+            
+            batch = filterline1DF[(filterline1DF.retTime < base.retTime + maxDuration) & (filterline1DF.scanNum >= base.scanNum) ].head(batchSize)
+            
+            for idx, scan in batch.iterrows():
+                scanPeaks = peaksDF.loc[scan.scanNum]
+                if scanPeaks.mass.diff(1).min() < minDifference:
+                    log.error('peaks are too close in scan {}'.format(scan.scanNum))
+            
+            batchPeaks = batch.join(peaksDF)
+            batchPeaks.sort_values(by='mass', inplace=True)
+            
+            batchPeaks['gap'] = batchPeaks.mass.diff(1)
+            
+            batchPeaks['isSmallGap'] = batchPeaks['gap'] < minDifference\
+            
+            bins = []
+            count = 0
+            for idx, peak in batchPeaks.iterrows():
+                if peak.isSmallGap: # its the same group
+                    bins.append(count)
+                else:
+                    count = count+1
+                    bins.append(count)
+                
+                prevGap = peak.isSmallGap
+            batchPeaks['bin'] = bins
+            batchPeaks['freq'] = batchPeaks.groupby('bin')['bin'].transform('count')     
+            
+            filtered = batchPeaks[batchPeaks.freq >= minFreq ]
+            
+            if not filtered.empty : # dont add empties
+                header = filtered.filterLine.unique()[0] + filtered.scanNum.unique().tolist().__str__().replace(',', ';')
+                filtered_scans[header]= (filtered.mass, filtered.intensity, filtered.resolution)
+             
+        #---end scans
+    #----end filterlines
         
-         
-        
-    
-    
-    if log.level == logging.DEBUG: filterlinePeaks_csv(batches, 'mergePeaksOnBatch.csv')
-    preFiltered_filterBatch = {k: preliminaryFilter(v,minCount = 1 ) for k, v in batches.iteritems()}
-    
-    preFiltered_filterlines = {k: preliminaryFilter(v,minCount = 1 ) for k, v in filterLines.iteritems()}
-    
-    if log.level == logging.DEBUG: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')
-    
-    
-#     newfilename = filename[:-4]+ '-f.mgf'
-#     log.info('Writing results to %s', newfilename)
-#     generatePsudoMGF(newfilename, preFiltered_filterlines)
-#     
-#     log.debug('finish %f',  time.clock())
-#     
+    newfilename = filename[:-4]+ '-f.mgf'
+    log.info('Writing results to %s', newfilename)
+    generatePsudoMGF(newfilename, filtered_scans)
+     
+    log.debug('finish %f',  time.clock())
+     
     return    
     
     
