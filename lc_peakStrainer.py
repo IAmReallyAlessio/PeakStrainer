@@ -2,7 +2,7 @@
 # encoding: utf-8
 '''
 Created on 29.03.2017
-lc_PeakStrainer is a tool to reduce the size of an MS spectra,
+lc_PeakStrainer is a tool to reduce the size of lc MS spectra,
 usage: lc_peakStrainer spectra_file.raw
 @author: mirandaa
 '''
@@ -20,44 +20,34 @@ from lib import MSFileReader
 import numpy as np
 import pandas as pd
 
-__version__ = "17.06.08.0"
-
-
-# def makeBatchs(iterable, width=10):
-#     #https://stackoverflow.com/questions/8290397/how-to-split-an-iterable-in-constant-size-chunks
-#     l = len(iterable)
-#     for ndx in range(0, l, width):
-#         yield iterable[ndx:min(ndx + width, l)]
+__version__ = "17.07.03.0"
             
-
-
-def main(file):
+#@profile for line_profiler 2.0, see https://psteinb.github.io/hpc-in-a-day/
+def main(file, validate =False):
     log.setLevel(logging.DEBUG)
     if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
-    if log.level == logging.DEBUG:logging.basicConfig(filename='peakStrainer.log',filemode='w')
+    if log.level == logging.DEBUG:logging.basicConfig(filename='lcpeakStrainer.log',filemode='w')
     
     log.debug('Start %f', time.clock())
     
     filename = file #" ".join(sys.argv[1:])
     scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
-    if log.level == logging.DEBUG: scansDF.to_csv('msScans.csv') #'peak_datas' removed
-    
-    # only ms scans
-    msDF = scansDF[scansDF.filterLine.str.contains(' ms ')]
+    if log.level == logging.DEBUG: scansDF.to_csv('msScans.csv') 
     
     # uniq filterlines
-    uniqFilterlines = msDF.filterLine.unique()
+    uniqFilterlines = scansDF.filterLine.unique()
     
-    batchSize = 10 # scans
+    batchSize = 3 # scans
+    log.info('size off scan groups {}'.format(batchSize))
     maxDuration = 10 # seconds
-    minRepetitonRate = 0.70 # percent
-    minDifference = 0.00019 # peak is the same if diff < minDifference
-    minFreq = batchSize * minRepetitonRate 
+    log.info('max time between scans to be grouped {}'.format(maxDuration))
+    maxGap = 0.001 # max distance between peak to still be the same
+    log.info('max distance between peaks before thes are counted as same {}'.format(maxGap))
     
     filtered_scans = {}
     for uniqFilterline in uniqFilterlines:
         # scans with uniq filterline
-        filterline1DF = msDF[msDF.filterLine == uniqFilterline]
+        filterline1DF = scansDF[scansDF.filterLine == uniqFilterline]
         
         for scanTuple in filterline1DF.itertuples():
         
@@ -65,43 +55,49 @@ def main(file):
             
             batch = filterline1DF[(filterline1DF.retTime < base.retTime + maxDuration) & (filterline1DF.scanNum >= base.scanNum) ].head(batchSize)
             
-            for idx, scan in batch.iterrows():
-                scanPeaks = peaksDF.loc[scan.scanNum]
-                if scanPeaks.mass.diff(1).min() < minDifference:
-                    log.error('peaks are too close in scan {}'.format(scan.scanNum))
+            scanPeaks = None
+            if validate:
+                for idx, scan in batch.iterrows():
+                    scanPeaks = peaksDF.loc[scan.scanNum]
+                    if scanPeaks.mass.diff(1).min() < maxGap:
+                        log.error('peaks are too close in single scan {}, make maxGap larger!'.format(scan.scanNum))
+                        log.error('code does not filter for uniq peaks, so these peaks in one scan will binIdx as two, distance {} '.format(scanPeaks.mass.diff(1).min()))
             
             batchPeaks = batch.join(peaksDF)
             batchPeaks.sort_values(by='mass', inplace=True)
             
-            batchPeaks['gap'] = batchPeaks.mass.diff(1)
+            batchPeaks['gap'] = batchPeaks.mass.diff(1)# gives difference between current rown and previos
             
-            batchPeaks['isSmallGap'] = batchPeaks['gap'] < minDifference\
+            batchPeaks['isSmallGap'] = batchPeaks['gap'] < maxGap
             
             bins = []
-            count = 0
-            for idx, peak in batchPeaks.iterrows():
-                if peak.isSmallGap: # its the same group
-                    bins.append(count)
+            binIdx = 0
+            for isSmallGap in batchPeaks.isSmallGap:
+                if isSmallGap: # its the same group
+                    bins.append(binIdx)
                 else:
-                    count = count+1
-                    bins.append(count)
+                    binIdx += 1
+                    bins.append(binIdx)
                 
-                prevGap = peak.isSmallGap
             batchPeaks['bin'] = bins
             batchPeaks['freq'] = batchPeaks.groupby('bin')['bin'].transform('count')     
             
-            filtered = batchPeaks[batchPeaks.freq >= minFreq ]
+            filtered = batchPeaks[batchPeaks.freq != 1 ]
+            
+            log.info('filtered {} of {}'.format(filtered.__len__(), batchPeaks.__len__()))
             
             if not filtered.empty : # dont add empties
                 header = filtered.filterLine.unique()[0] + filtered.scanNum.unique().tolist().__str__().replace(',', ';')
-                filtered_scans[header]= (filtered.mass, filtered.intensity, filtered.resolution)
+                filtered_scans[header]= (filtered.mass, filtered.intensity)
              
         #---end scans
     #----end filterlines
-        
-    newfilename = filename[:-4]+ '-f.mgf'
+
+    newfilename = filename[:-4]+ '-f.mzxml'
     log.info('Writing results to %s', newfilename)
-    generatePsudoMGF(newfilename, filtered_scans)
+    write2templateMzXML(newfilename, filtered_scans)
+
+#     generatePsudoMGF(newfilename, filtered_scans)
      
     log.debug('finish %f',  time.clock())
      
@@ -117,7 +113,6 @@ def ThermoRawfile2DataFrames(file_path):
     start = rawfile.FirstSpectrumNumber
     end = rawfile.GetLastSpectrumNumber()
  
-#     MSrawscansDF = pd.DataFrame(index = np.arange(start, end+1), columns=['scanNum', 'filterLine', 'retTime', 'chargeState', 'isolationMass'])
     MSrawscansDF = pd.DataFrame(index = np.arange(start, end+1),columns=['scanNum', 'filterLine', 'retTime', 'chargeState', 'isolationMass'])
     peak_datasDF_list =[]
     startTime = time.time()
@@ -757,6 +752,7 @@ def bins2Peaks(binsData, peakData):
 
 
 if __name__ == '__main__':
+    
     if len(sys.argv) == 1:
         print("A filename must be provided")
         raise SystemExit
