@@ -44,6 +44,8 @@ def main(file, validate =False):
     maxGap = 0.001 # max distance between peak to still be the same
     log.info('max distance between peaks before thes are counted as same {}'.format(maxGap))
     
+    filteredmass = []
+    filteredintensity = []
     filtered_scans = {}
     for uniqFilterline in uniqFilterlines:
         # scans with uniq filterline
@@ -66,6 +68,7 @@ def main(file, validate =False):
             batchPeaks = batch.join(peaksDF)
             batchPeaks.sort_values(by='mass', inplace=True)
             
+
             batchPeaks['gap'] = batchPeaks.mass.diff(1)# gives difference between current rown and previos
             
             batchPeaks['isSmallGap'] = batchPeaks['gap'] < maxGap
@@ -81,23 +84,30 @@ def main(file, validate =False):
                 
             batchPeaks['bin'] = bins
             batchPeaks['freq'] = batchPeaks.groupby('bin')['bin'].transform('count')     
-            
-            filtered = batchPeaks[batchPeaks.freq != 1 ]
+            filtered = batchPeaks[(batchPeaks.freq != 1) & (batchPeaks.scanNum == batch.scanNum.median())] #dont keep all the peaks from all the scans, only the ones from the center scan
+            # this will sacrifice the first and last scan but it avoids duplicate peaks in filtered scans,
+            # first scan is not trusted anyway, because its first and things not really setup
             
             log.info('filtered {} of {}'.format(filtered.__len__(), batchPeaks.__len__()))
             
             if not filtered.empty : # dont add empties
-                header = filtered.filterLine.unique()[0] + filtered.scanNum.unique().tolist().__str__().replace(',', ';')
+                header = filtered.filterLine.unique()[0] + batchPeaks.scanNum.unique().tolist().__str__().replace(',', ';')
                 filtered_scans[header]= (filtered.mass, filtered.intensity)
+                if ' ms ' in header:
+                    filteredmass.extend(filtered.mass)
+                    filteredintensity.extend(filtered.intensity)
+                    print filtered.filterLine.unique()[0]
+                
              
         #---end scans
     #----end filterlines
+
 
     newfilename = filename[:-4]+ '-f.mzxml'
     log.info('Writing results to %s', newfilename)
     write2templateMzXML(newfilename, filtered_scans)
 
-#     generatePsudoMGF(newfilename, filtered_scans)
+    generatePsudoMGF(filename[:-4]+ '-f.mgf', filtered_scans)
      
     log.debug('finish %f',  time.clock())
      
@@ -105,13 +115,13 @@ def main(file, validate =False):
     
     
 
-def ThermoRawfile2DataFrames(file_path):
+def ThermoRawfile2DataFrames(file_path, head = None):
     # NOTE: for testing use ThermoRawfile2Scans_sample instead
     log.info('file: %s', file_path)
     rawfile = MSFileReader.ThermoRawfile(file_path)
     
     start = rawfile.FirstSpectrumNumber
-    end = rawfile.GetLastSpectrumNumber()
+    end = rawfile.GetLastSpectrumNumber() if head == None else head
  
     MSrawscansDF = pd.DataFrame(index = np.arange(start, end+1),columns=['scanNum', 'filterLine', 'retTime', 'chargeState', 'isolationMass'])
     peak_datasDF_list =[]
