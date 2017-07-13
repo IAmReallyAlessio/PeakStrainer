@@ -149,7 +149,7 @@ def generatePsudoMGF(newfilename, preFiltered_filterlines):
 #             outfile.write('CHARGE='+getCharge(title)+'\n')
 #             outfile.write('PEPMASS='+getPepMass(title)+'\n')
 #         
-            masses, intens, resols = preFiltered_filterlines[title]
+            masses, intens = preFiltered_filterlines[title]
             for mass, inten in zip(masses, intens):
                 outfile.write("{0:.4f} {0:.0f}".format(mass, inten)+'\n')
         
