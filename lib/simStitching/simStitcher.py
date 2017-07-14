@@ -13,6 +13,7 @@ from math import sqrt
 log = logging.getLogger(os.path.basename(__file__))
 from utils.peakStrainer_util import getMZXMLEncondedScans, decode_mzXML_Peaks, write2templateMzXML
 from itertools import compress
+import numpy as np
 
 class Scan(object):
     
@@ -200,6 +201,12 @@ def func(mass, totIonCount, C):
     Y = totIonCount
     return  C[4]*X**2. + C[5]*Y**2. + C[3]*X*Y + C[1]*X + C[2]*Y + C[0]
 
+def fun(C, mass, totIonCount, deviationFactor):
+    X= np.array(mass)
+    Y = np.array(totIonCount)
+    offset = np.array(deviationFactor)
+    return  (C[4]*np.power(X,2.) + C[5]*np.power(Y,2.) + C[3]*X*Y + C[1]*X + C[2]*Y + C[0])-offset
+
 
 def getDeviationTrend(matchingSim, C=None):
     log.info('curve fitting to generate projection')
@@ -209,12 +216,12 @@ def getDeviationTrend(matchingSim, C=None):
     #from scipy.optimize import  curve_fit use for linear regresion 
     #import scipy.linalg # used for surface
     import scipy.optimize
-    import numpy as np
+    
     
     for uniqMShead in uniqMSHeads:
-        if C is not None:  
-            result[uniqMShead] = C
-            continue
+#         if C is not None:  
+#             result[uniqMShead] = C
+#             continue
         matchingSimSelection = [line for line in matchingSim if line[6] == uniqMShead]
 #         minMSInten = max([line[4] for line in matchingSimSelection]) * 0.01 # only sample peaks with a minimum intensity for function, performs worse!!!!, dont do it
 #         validSimSelection = [line for line in matchingSimSelection if line[4] > minMSInten]
@@ -234,7 +241,12 @@ def getDeviationTrend(matchingSim, C=None):
         
             A = np.c_[np.ones(data.shape[0]), data[:,:2], np.prod(data[:,:2], axis=1), data[:,:2]**2] # C[0] + C[1]*X+C[2]*Y + C[3]*X*Y + C[4]*X**2.+C[5]*Y**2.
             #C,_,_,_ = scipy.linalg.lstsq(A, data[:,2]) returns negatives
-            C,_ = scipy.optimize.nnls(A, data[:,2])
+            #C,_ = scipy.optimize.nnls(A, data[:,2]) #linear
+            
+            #from http://scipy-cookbook.readthedocs.io/items/robust_regression.html
+            x0 = np.ones(6)
+            C = scipy.optimize.least_squares(fun, x0, args=(simMasses, simIntens, deviationFactors))
+            
         
             # evaluate it on a grid
             #Z = np.dot(np.c_[np.ones(XX.shape), XX, YY, XX*YY, XX**2, YY**2], C).reshape(X.shape)
@@ -242,8 +254,8 @@ def getDeviationTrend(matchingSim, C=None):
         except:
             log.error('ERROR: Values do not fit a surface')
             popt =  (0,0,0,0,0,0)
-        log.info('function lstsq uses values: projection, %s for %s', str(C), uniqMShead)
-        result[uniqMShead] = C
+        log.info('function lstsq uses values: projection, %s for %s', str(C.x), uniqMShead)
+        result[uniqMShead] = C.x
     return result
 
 def project_ms2sim(matchingSims, popts):
@@ -286,7 +298,7 @@ def getCSVPath1(csvPath, filePath):
 
 
 
-def simStitcher(filePath, doCompare = True, csvPath1 = None, a=None, b=None, loglevel = 0):
+def simStitcher(filePath, doCompare = True, csvPath1 = None, a=None, b=None, loglevel = 3):
     log.setLevel(tr_loglevel(loglevel))
     log.addHandler(logging.StreamHandler()) # log to console
     if loglevel>0: csvPath = getCSVPath(csvPath1, filePath)
