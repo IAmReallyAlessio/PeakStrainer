@@ -37,6 +37,8 @@ class Scan(object):
             return float(self.match.group(2))
         def _high(self):
             return float(self.match.group(3))
+        def _center(self):
+            return ( float(self.match.group(2)) + float(self.match.group(3)) ) /2
         def asTuple(self):
             return (self._head(),self._low(),self._high())
         def mode(self):
@@ -53,6 +55,7 @@ class Scan(object):
         self.masses, self.intens = decode_mzXML_Peaks(self.encodedPeaks)
         self.previous = None
         self.next = None
+        self.centreCorrectionFactor = None # correction factor for the center peak
         
         
     def __str__(self):
@@ -207,6 +210,29 @@ def fun(C, mass, totIonCount, deviationFactor):
     offset = np.array(deviationFactor)
     return  (C[4]*np.power(X,2.) + C[5]*np.power(Y,2.) + C[3]*X*Y + C[1]*X + C[2]*Y + C[0])-offset
 
+def idealFunc(C, centerfactor, startOffset, mass, deviationFactor=0):
+    cf = np.array(centerfactor)
+    so = np.array(startOffset)
+    m= np.array(mass)
+    df = np.array(deviationFactor)
+    
+    return (cf + (C[0]*np.exp(C[1]*so)) * (C[2]*m)+C[3] ) - df
+
+
+def getCenterFactors(simMasses, deviationFactors, simHeads):
+    import pandas as pd 
+    centers = [simHead._center() for simHead in simHeads]
+    dfcf = pd.DataFrame({'simMasses':simMasses, 'deviationFactors':deviationFactors, 'simHeads':simHeads, 'centers':centers})
+    dfcf['distances']=abs(dfcf.simMasses - dfcf.centers)
+    dfcf['mini'] = dfcf.groupby('simHeads')['distances'].transform('min')
+    
+    selectDF = dfcf[dfcf.distances == dfcf.mini ]
+    result = (selectDF.simHeads.tolist(), selectDF.deviationFactors.tolist())
+    dictRes = dict(zip(*result))
+    return dictRes
+    
+        
+
 
 def getDeviationTrend(matchingSim, C=None):
     log.info('curve fitting to generate projection')
@@ -217,8 +243,8 @@ def getDeviationTrend(matchingSim, C=None):
     #import scipy.linalg # used for surface
     import scipy.optimize
     
-    
-    for uniqMShead in uniqMSHeads:
+    print 'change this to only positive and negative'
+    for uniqMShead in uniqMSHeads: #TODO one for positive and one for negavite
 #         if C is not None:  
 #             result[uniqMShead] = C
 #             continue
@@ -232,22 +258,23 @@ def getDeviationTrend(matchingSim, C=None):
 #         simIntens_norm = [simInten / sumSimIntens for simInten in simIntens]
 #         msIntens_norm = [msInten / simMsIntens for msInten in msIntens]
         deviationFactors = [msIntens[idx] / simIntens[idx] for idx, _ in enumerate(msIntens)]
-        
+        centerfactorsDict =  getCenterFactors(simMasses, deviationFactors, simHeads)
+        centerfactorsList = [centerfactorsDict[simHead] for simHead in simHeads]
+        startOffsets = [ simMass - simhead._low() for simMass, simhead in zip(simMasses, simHeads)]
         try:
         #    popt, pconv = curve_fit(func, msMasses, deviationFactors)
         # as per https://gist.github.com/amroamroamro/1db8d69b4b65e8bc66a6
-            data = np.array([simMasses, simTotalIonCount, deviationFactors])
-            data= data.T
-        
-            A = np.c_[np.ones(data.shape[0]), data[:,:2], np.prod(data[:,:2], axis=1), data[:,:2]**2] # C[0] + C[1]*X+C[2]*Y + C[3]*X*Y + C[4]*X**2.+C[5]*Y**2.
+#             data = np.array([simMasses, simTotalIonCount, deviationFactors])
+#             data= data.T
+#         
+#             A = np.c_[np.ones(data.shape[0]), data[:,:2], np.prod(data[:,:2], axis=1), data[:,:2]**2] # C[0] + C[1]*X+C[2]*Y + C[3]*X*Y + C[4]*X**2.+C[5]*Y**2.
             #C,_,_,_ = scipy.linalg.lstsq(A, data[:,2]) returns negatives
             #C,_ = scipy.optimize.nnls(A, data[:,2]) #linear
             
             #from http://scipy-cookbook.readthedocs.io/items/robust_regression.html
-            x0 = np.ones(6)
-            C = scipy.optimize.least_squares(fun, x0, args=(simMasses, simIntens, deviationFactors))
+            x0 = np.ones(4)
+            C = scipy.optimize.least_squares(idealFunc, x0, args=(centerfactorsList, startOffsets, simMasses, deviationFactors))
             
-        
             # evaluate it on a grid
             #Z = np.dot(np.c_[np.ones(XX.shape), XX, YY, XX*YY, XX**2, YY**2], C).reshape(X.shape)
             # Z = C[4]*X**2. + C[5]*Y**2. + C[3]*X*Y + C[1]*X + C[2]*Y + C[0]
@@ -255,14 +282,15 @@ def getDeviationTrend(matchingSim, C=None):
             log.error('ERROR: Values do not fit a surface')
             popt =  (0,0,0,0,0,0)
         log.info('function lstsq uses values: projection, %s for %s', str(C.x), uniqMShead)
-        result[uniqMShead] = C.x
+        result[uniqMShead] = (C.x, centerfactorsDict)
     return result
 
 def project_ms2sim(matchingSims, popts):
     
-#     simMasses, simIntens, simHeads, msMasses, msIntens, msHeads = zip(*matchingSim)
+    simMasses, simIntens, simHeads, simTotalIonCounts, msMasses, msIntens, msHeads = zip(*matchingSims)
+    startOffsets = [ simMass - simhead._low() for simMass, simhead in zip(simMasses, simHeads)]
     
-    correctionFactors = [func(simMass,simTotalIonCount ,popts[msHead]) for simMass, simInten, simHead, simTotalIonCount, msMass, msInten, msHead in matchingSims]
+    correctionFactors = [idealFunc(popts[msHead][0], popts[msHead][1][simHead], startOffset, simMass) for msHead, simHead, startOffset, simMass in zip(msHeads, simHeads, startOffsets,simMasses )]
     
     simIntens_Corrected = [matchingSim[1] * correctionFactors[idx] for idx, matchingSim in enumerate(matchingSims)]
     sqError = [(matchingSim[1] - simIntens_Corrected[idx])**2 for idx, matchingSim in enumerate(matchingSims)]
@@ -296,6 +324,23 @@ def getCSVPath1(csvPath, filePath):
     
     return csvPath
 
+
+
+def getSelectedMatchingSim(matchingSim):
+#     simMass, simInten, simHead, simTotalIonCount, msMass,msInten, msHead = zip(*matchingSim)
+    
+    sortedMatchingSim = sorted(matchingSim, key=lambda e: abs(e[0]-e[2]._center()))
+    
+    first = set()
+    selected = []
+
+    for e in sortedMatchingSim:
+        if e[2].filterline in first: continue
+        first.add(e[2].filterline)
+        selected.append(e)
+    
+         
+    return selected
 
 
 def simStitcher(filePath, doCompare = True, csvPath1 = None, a=None, b=None, loglevel = 3):
@@ -380,6 +425,9 @@ def simStitcher(filePath, doCompare = True, csvPath1 = None, a=None, b=None, log
     
     log.info('get matching ms peak')
     matchingSim = getMatchingMS(sampleSimPeaks, scans_ms)
+
+    
+#     tightSelection = getSelectedMatchingSim(matchingSim)
     
     log.info('get deviation trend')
     popts = getDeviationTrend(matchingSim)
