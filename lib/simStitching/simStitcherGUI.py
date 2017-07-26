@@ -17,7 +17,7 @@ import wx.xrc
 class SimStitcherFrame ( wx.Frame ):
 	
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 510,308 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 600,480 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 		
 		self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 		self.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_MENU ) )
@@ -53,47 +53,63 @@ class SimStitcherFrame ( wx.Frame ):
 		
 		bSizer2.Add( bSizer3, 1, wx.EXPAND, 5 )
 		
+		bSizer61 = wx.BoxSizer( wx.HORIZONTAL )
+		
+		self.m_checkBox11 = wx.CheckBox( self, wx.ID_ANY, u"Cut SIM edges", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_checkBox11.SetValue(True) 
+		self.m_checkBox11.SetToolTipString( u"Remove peaks that overlap and peaks close to the edge" )
+		
+		bSizer61.Add( self.m_checkBox11, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
+		
+		self.m_textCtrl4 = wx.TextCtrl( self, wx.ID_ANY, u"5.0", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl4.Enable( False )
+		self.m_textCtrl4.SetToolTipString( u"Daltons to from the edge" )
+		
+		bSizer61.Add( self.m_textCtrl4, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
+		
+		self.m_staticText8 = wx.StaticText( self, wx.ID_ANY, u"Da.", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText8.Wrap( -1 )
+		bSizer61.Add( self.m_staticText8, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
+		
+		
+		bSizer61.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
+		
+		self.m_radioBtn31 = wx.RadioButton( self, wx.ID_ANY, u"Default", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_radioBtn31.SetValue( True ) 
+		bSizer61.Add( self.m_radioBtn31, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
+		
+		self.m_radioBtn41 = wx.RadioButton( self, wx.ID_ANY, u"Custom", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer61.Add( self.m_radioBtn41, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
+		
+		
+		bSizer2.Add( bSizer61, 1, wx.EXPAND, 5 )
+		
 		bSizer6 = wx.BoxSizer( wx.HORIZONTAL )
 		
-		self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, u"Compare to MS", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, u"Scale SIM to FT", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_checkBox1.SetValue(True) 
+		self.m_checkBox1.SetToolTipString( u"Scale the intensity such that the center SIM mass is the same as the corresponding FT mass" )
+		
 		bSizer6.Add( self.m_checkBox1, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 		
 		
 		bSizer6.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
 		
-		self.m_radioBtn3 = wx.RadioButton( self, wx.ID_ANY, u"Default", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_radioBtn3.SetValue( True ) 
-		bSizer6.Add( self.m_radioBtn3, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
-		
-		self.m_radioBtn4 = wx.RadioButton( self, wx.ID_ANY, u"Custom", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer6.Add( self.m_radioBtn4, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
-		
 		
 		bSizer2.Add( bSizer6, 1, wx.EXPAND, 5 )
 		
-		bSizer4 = wx.BoxSizer( wx.HORIZONTAL )
+		bSizer62 = wx.BoxSizer( wx.HORIZONTAL )
 		
-		self.m_staticText4 = wx.StaticText( self, wx.ID_ANY, u"Correction Function: a*X^-b; where a:", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_staticText4.Wrap( -1 )
-		bSizer4.Add( self.m_staticText4, 0, wx.ALL, 5 )
+		self.m_checkBox12 = wx.CheckBox( self, wx.ID_ANY, u"Adapt SIM to FT", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_checkBox12.SetToolTipString( u"Change the intensity of the SIM peaks based on trend of matchin FT peaks" )
 		
-		self.m_textCtrl_a = wx.TextCtrl( self, wx.ID_ANY, u"40.0", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_textCtrl_a.Enable( False )
-		
-		bSizer4.Add( self.m_textCtrl_a, 0, wx.ALL, 5 )
-		
-		self.m_staticText5 = wx.StaticText( self, wx.ID_ANY, u"b:", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_staticText5.Wrap( -1 )
-		bSizer4.Add( self.m_staticText5, 0, wx.ALL, 5 )
-		
-		self.m_textCtrl_b = wx.TextCtrl( self, wx.ID_ANY, u"0.5", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_textCtrl_b.Enable( False )
-		
-		bSizer4.Add( self.m_textCtrl_b, 0, wx.ALL, 5 )
+		bSizer62.Add( self.m_checkBox12, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 		
 		
-		bSizer2.Add( bSizer4, 1, wx.EXPAND, 5 )
+		bSizer62.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
+		
+		
+		bSizer2.Add( bSizer62, 1, wx.EXPAND, 5 )
 		
 		bSizer5 = wx.BoxSizer( wx.HORIZONTAL )
 		
@@ -128,9 +144,11 @@ class SimStitcherFrame ( wx.Frame ):
 		# Connect Events
 		self.BrowseBtn.Bind( wx.EVT_BUTTON, self.browseClicked )
 		self.m_button2.Bind( wx.EVT_BUTTON, self.clickStart )
-		self.m_checkBox1.Bind( wx.EVT_CHECKBOX, self.checkCompare )
-		self.m_radioBtn3.Bind( wx.EVT_RADIOBUTTON, self.radioDefault )
-		self.m_radioBtn4.Bind( wx.EVT_RADIOBUTTON, self.RadioCustom )
+		self.m_checkBox11.Bind( wx.EVT_CHECKBOX, self.checkCut )
+		self.m_radioBtn31.Bind( wx.EVT_RADIOBUTTON, self.radioDefault )
+		self.m_radioBtn41.Bind( wx.EVT_RADIOBUTTON, self.RadioCustom )
+		self.m_checkBox1.Bind( wx.EVT_CHECKBOX, self.checkScale )
+		self.m_checkBox12.Bind( wx.EVT_CHECKBOX, self.checkAdapt )
 	
 	def __del__( self ):
 		pass
@@ -143,13 +161,19 @@ class SimStitcherFrame ( wx.Frame ):
 	def clickStart( self, event ):
 		event.Skip()
 	
-	def checkCompare( self, event ):
+	def checkCut( self, event ):
 		event.Skip()
 	
 	def radioDefault( self, event ):
 		event.Skip()
 	
 	def RadioCustom( self, event ):
+		event.Skip()
+	
+	def checkScale( self, event ):
+		event.Skip()
+	
+	def checkAdapt( self, event ):
 		event.Skip()
 	
 
