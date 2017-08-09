@@ -32,8 +32,123 @@ def main(file, validate =False):
     
     filename = file #" ".join(sys.argv[1:])
     scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
+    
+    lastMS = None
+    secondLastMS = None
+    thirdLastMS = None
+#     TODO use recusrion because this is silly
+    tmpMSList = []
+    tmpMSList2 = []
+    tmpMSList3 = []
+    
+    for row in scansDF.itertuples():
+        if ' ms ' in row.filterLine:
+            tmpMSList.append(None)
+            tmpMSList2.append(None)
+            tmpMSList3.append(None)
+            thirdLastMS = secondLastMS 
+            secondLastMS = lastMS
+            lastMS = row.scanNum
+             
+        else:
+            tmpMSList.append(lastMS)
+            tmpMSList2.append(secondLastMS)
+            tmpMSList3.append(thirdLastMS)
+            
+            
+    scansDF['LastMS'] = tmpMSList
+    scansDF['LastMS2'] = tmpMSList2
+    scansDF['LastMS3'] = tmpMSList3
+    
+    scansDF['targetPeak'] = scansDF.filterLine.str.extract(' ms2 (.*)@')
+    
+    ms2TriggerPeaks = scansDF[~scansDF.targetPeak.isnull()]
+ 
+    trigerPeaksList=[]
+    trigerPeaksList2=[]
+    trigerPeaksList3=[]
+    twoOfThreePass = []
+    minDistance = 0.01
+    ms2ScanNum = []
+    for row in ms2TriggerPeaks.itertuples():
+    # find the peak in the scan
+        targetPeak = float(row.targetPeak)
+        peaks1 =  peaksDF.loc[row.LastMS]
+        peaks2 =  peaksDF.loc[row.LastMS2]
+        peaks3 =  peaksDF.loc[row.LastMS3]
+        
+        peaks1['toTarget'] = peaks1.mass - targetPeak
+        peaks1['toTarget'] = peaks1['toTarget'].abs()
+        min = peaks1['toTarget'].min()  
+        closest = peaks1[peaks1['toTarget'] == min]
+
+        peaks2['toTarget'] = peaks2.mass - targetPeak
+        peaks2['toTarget'] = peaks2['toTarget'].abs()
+        min2 = peaks2['toTarget'].min()  
+        closest2 = peaks2[peaks2['toTarget'] == min2]
+                
+        peaks3['toTarget'] = peaks3.mass - targetPeak
+        peaks3['toTarget'] = peaks3['toTarget'].abs()
+        min3 = peaks3['toTarget'].min()  
+        closest3 = peaks3[peaks3['toTarget'] == min3]
+        
+        trigerPeaksList.append(closest)
+        trigerPeaksList2.append(closest2)
+        trigerPeaksList3.append(closest3)
+        count = 0
+        if min < minDistance : count += 1
+        if min2 < minDistance : count += 1
+        if min3 < minDistance : count += 1
+        
+        twoOfThreePass.append(count >= 2)
+        ms2ScanNum.append(row.scanNum)
+        print str(row.scanNum) +' pass '+ str(count >= 2)
+    
+    trigerPeaks = pd.concat(trigerPeaksList)
+    trigerPeaks2 = pd.concat(trigerPeaksList2)
+    trigerPeaks3 = pd.concat(trigerPeaksList3)
+    #are these in the filtered results?
+    trigerPeaks['twoOfTree']=twoOfThreePass
+    trigerPeaks['ms2ScanNum']=ms2ScanNum
+    trigerPeaks['toTarget2'] = trigerPeaks2['toTarget'].tolist()
+    trigerPeaks['secondMS'] = trigerPeaks2.index.tolist()
+    
+    trigerPeaks['toTarget3'] = trigerPeaks3['toTarget'].tolist()
+    trigerPeaks['thirdMS'] = trigerPeaks3.index.tolist()
+    
     if log.level == logging.DEBUG: scansDF.to_csv('msScans.csv') 
     
+    #generate allscans and selectscans
+    allScans = {}
+    selectScans = {}
+    unselectedScan ={}
+    for row in trigerPeaks.itertuples():
+        scanN = row.ms2ScanNum
+        filterLine = scansDF.loc[scanN].filterLine
+        charge  = int(row.charge)
+        masses = peaksDF.loc[scanN]['mass'].tolist()
+        intens = peaksDF.loc[scanN]['intensity'].tolist()
+        
+        if not isinstance(masses, list):
+            masses = [masses] # because if there is one element its not a list
+        if not isinstance(intens, list): 
+            intens = [intens] 
+        
+        
+        header  = '{} {} {}'.format(scanN, filterLine, charge)
+        allScans[header] = masses,intens
+        if row.twoOfTree : selectScans[header] = (masses,intens)
+        else: unselectedScan[header] = (masses,intens)
+        
+    
+    generatePsudoMGF(filename[:-4]+ '-og.mgf', allScans)
+    generatePsudoMGF(filename[:-4]+ '-s.mgf', selectScans)
+    generatePsudoMGF(filename[:-4]+ '-us.mgf', unselectedScan)
+    
+    return
+
+
+
     # uniq filterlines
     uniqFilterlines = scansDF.filterLine.unique()
     

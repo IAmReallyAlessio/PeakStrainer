@@ -131,7 +131,7 @@ def getMZXMLEncondedScans(filePath):
 def generatePsudoMGF(newfilename, preFiltered_filterlines):
     def getCharge(title):
         charge =title.split()[-1]
-        mode = title.split()[1]
+        mode = title.split()[2]
         return charge+mode 
     
     def getPepMass(title):
@@ -146,8 +146,8 @@ def generatePsudoMGF(newfilename, preFiltered_filterlines):
             outfile.write('BEGIN IONS'+'\n')
             
             outfile.write('TITLE='+title+'\n')
-#             outfile.write('CHARGE='+getCharge(title)+'\n')
-#             outfile.write('PEPMASS='+getPepMass(title)+'\n')
+            outfile.write('CHARGE='+getCharge(title)+'\n')
+            outfile.write('PEPMASS='+getPepMass(title)+'\n')
 #         
             masses, intens = preFiltered_filterlines[title]
             for mass, inten in zip(masses, intens):
