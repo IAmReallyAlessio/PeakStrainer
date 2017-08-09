@@ -22,6 +22,24 @@ import pandas as pd
 
 __version__ = "17.07.03.0"
             
+
+def hasIsotope(refPeak, peaks):
+    centre = refPeak.iloc[0].mass
+    wiggle = 0.01
+    isotopDistances = [0.5, 0.33, 0.25, 0.20]
+    
+    for dist in isotopDistances:
+        targetPost = centre + dist
+        targetPre = centre - dist
+        
+        if peaks['mass'].between(targetPost-wiggle,targetPost + wiggle).any(): 
+            return True
+        if peaks['mass'].between(targetPre-wiggle,targetPre + wiggle).any(): 
+            return True
+    
+    return False
+
+
 #@profile for line_profiler 2.0, see https://psteinb.github.io/hpc-in-a-day/
 def main(file, validate =False):
     log.setLevel(logging.DEBUG)
@@ -81,24 +99,29 @@ def main(file, validate =False):
         peaks1['toTarget'] = peaks1['toTarget'].abs()
         min = peaks1['toTarget'].min()  
         closest = peaks1[peaks1['toTarget'] == min]
+        hasIsotope1 = hasIsotope(closest, peaks1)
 
         peaks2['toTarget'] = peaks2.mass - targetPeak
         peaks2['toTarget'] = peaks2['toTarget'].abs()
         min2 = peaks2['toTarget'].min()  
         closest2 = peaks2[peaks2['toTarget'] == min2]
+        hasIsotope2 = hasIsotope(closest2, peaks2)
+
                 
         peaks3['toTarget'] = peaks3.mass - targetPeak
         peaks3['toTarget'] = peaks3['toTarget'].abs()
         min3 = peaks3['toTarget'].min()  
         closest3 = peaks3[peaks3['toTarget'] == min3]
+        hasIsotope3 = hasIsotope(closest3, peaks3)
+
         
         trigerPeaksList.append(closest)
         trigerPeaksList2.append(closest2)
         trigerPeaksList3.append(closest3)
         count = 0
-        if min < minDistance : count += 1
-        if min2 < minDistance : count += 1
-        if min3 < minDistance : count += 1
+        if min < minDistance and hasIsotope1: count += 1
+        if min2 < minDistance and hasIsotope2: count += 1
+        if min3 < minDistance and hasIsotope3: count += 1
         
         twoOfThreePass.append(count >= 2)
         ms2ScanNum.append(row.scanNum)
@@ -142,8 +165,8 @@ def main(file, validate =False):
         
     
     generatePsudoMGF(filename[:-4]+ '-og.mgf', allScans)
-    generatePsudoMGF(filename[:-4]+ '-s.mgf', selectScans)
-    generatePsudoMGF(filename[:-4]+ '-us.mgf', unselectedScan)
+    generatePsudoMGF(filename[:-4]+ '-s-iso.mgf', selectScans)
+    generatePsudoMGF(filename[:-4]+ '-us-iso.mgf', unselectedScan)
     
     return
 
