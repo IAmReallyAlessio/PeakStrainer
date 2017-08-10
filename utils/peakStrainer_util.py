@@ -151,7 +151,7 @@ def generatePsudoMGF(newfilename, preFiltered_filterlines):
 #         
             masses, intens = preFiltered_filterlines[title]
             for mass, inten in zip(masses, intens):
-                outfile.write("{0:.4f} {0:.0f}".format(mass, inten)+'\n')
+                outfile.write("{0:.4f} {1:.0f}".format(mass, inten)+'\n')
         
             outfile.write('END IONS\n\n')
         
