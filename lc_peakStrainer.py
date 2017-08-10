@@ -167,89 +167,90 @@ def main(file, validate =False):
     generatePsudoMGF(filename[:-4]+ '-og.mgf', allScans)
     generatePsudoMGF(filename[:-4]+ '-s-iso.mgf', selectScans)
     generatePsudoMGF(filename[:-4]+ '-us-iso.mgf', unselectedScan)
-    
+
+    log.debug('finish %f',  time.clock())
     return
 
 
-
+    #TODO clean up this legacy code below !!!!
     # uniq filterlines
-    uniqFilterlines = scansDF.filterLine.unique()
-    
-    batchSize = 3 # scans
-    log.info('size off scan groups {}'.format(batchSize))
-    maxDuration = 10 # seconds
-    log.info('max time between scans to be grouped {}'.format(maxDuration))
-    maxGap = 0.001 # max distance between peak to still be the same
-    log.info('max distance between peaks before thes are counted as same {}'.format(maxGap))
-    
-    filteredmass = []
-    filteredintensity = []
-    filtered_scans = {}
-    for uniqFilterline in uniqFilterlines:
-        # scans with uniq filterline
-        filterline1DF = scansDF[scansDF.filterLine == uniqFilterline]
-        
-        for scanTuple in filterline1DF.itertuples():
-        
-            base = filterline1DF.loc[scanTuple.Index] 
-            
-            batch = filterline1DF[(filterline1DF.retTime < base.retTime + maxDuration) & (filterline1DF.scanNum >= base.scanNum) ].head(batchSize)
-            
-            scanPeaks = None
-            if validate:
-                for idx, scan in batch.iterrows():
-                    scanPeaks = peaksDF.loc[scan.scanNum]
-                    if scanPeaks.mass.diff(1).min() < maxGap:
-                        log.error('peaks are too close in single scan {}, make maxGap larger!'.format(scan.scanNum))
-                        log.error('code does not filter for uniq peaks, so these peaks in one scan will binIdx as two, distance {} '.format(scanPeaks.mass.diff(1).min()))
-            
-            batchPeaks = batch.join(peaksDF)
-            batchPeaks.sort_values(by='mass', inplace=True)
-            
-
-            batchPeaks['gap'] = batchPeaks.mass.diff(1)# gives difference between current rown and previos
-            
-            batchPeaks['isSmallGap'] = batchPeaks['gap'] < maxGap
-            
-            bins = []
-            binIdx = 0
-            for isSmallGap in batchPeaks.isSmallGap:
-                if isSmallGap: # its the same group
-                    bins.append(binIdx)
-                else:
-                    binIdx += 1
-                    bins.append(binIdx)
-                
-            batchPeaks['bin'] = bins
-            batchPeaks['freq'] = batchPeaks.groupby('bin')['bin'].transform('count')     
-            filtered = batchPeaks[(batchPeaks.freq != 1) & (batchPeaks.scanNum == batch.scanNum.median())] #dont keep all the peaks from all the scans, only the ones from the center scan
-            # this will sacrifice the first and last scan but it avoids duplicate peaks in filtered scans,
-            # first scan is not trusted anyway, because its first and things not really setup
-            
-            log.info('filtered {} of {}'.format(filtered.__len__(), batchPeaks.__len__()))
-            
-            if not filtered.empty : # dont add empties
-                header = filtered.filterLine.unique()[0] + batchPeaks.scanNum.unique().tolist().__str__().replace(',', ';')
-                filtered_scans[header]= (filtered.mass, filtered.intensity)
-                if ' ms ' in header:
-                    filteredmass.extend(filtered.mass)
-                    filteredintensity.extend(filtered.intensity)
-                    print filtered.filterLine.unique()[0]
-                
-             
-        #---end scans
-    #----end filterlines
-
-
-    newfilename = filename[:-4]+ '-f.mzxml'
-    log.info('Writing results to %s', newfilename)
-    write2templateMzXML(newfilename, filtered_scans)
-
-    generatePsudoMGF(filename[:-4]+ '-f.mgf', filtered_scans)
-     
-    log.debug('finish %f',  time.clock())
-     
-    return    
+#     uniqFilterlines = scansDF.filterLine.unique()
+#     
+#     batchSize = 3 # scans
+#     log.info('size off scan groups {}'.format(batchSize))
+#     maxDuration = 10 # seconds
+#     log.info('max time between scans to be grouped {}'.format(maxDuration))
+#     maxGap = 0.001 # max distance between peak to still be the same
+#     log.info('max distance between peaks before thes are counted as same {}'.format(maxGap))
+#     
+#     filteredmass = []
+#     filteredintensity = []
+#     filtered_scans = {}
+#     for uniqFilterline in uniqFilterlines:
+#         # scans with uniq filterline
+#         filterline1DF = scansDF[scansDF.filterLine == uniqFilterline]
+#         
+#         for scanTuple in filterline1DF.itertuples():
+#         
+#             base = filterline1DF.loc[scanTuple.Index] 
+#             
+#             batch = filterline1DF[(filterline1DF.retTime < base.retTime + maxDuration) & (filterline1DF.scanNum >= base.scanNum) ].head(batchSize)
+#             
+#             scanPeaks = None
+#             if validate:
+#                 for idx, scan in batch.iterrows():
+#                     scanPeaks = peaksDF.loc[scan.scanNum]
+#                     if scanPeaks.mass.diff(1).min() < maxGap:
+#                         log.error('peaks are too close in single scan {}, make maxGap larger!'.format(scan.scanNum))
+#                         log.error('code does not filter for uniq peaks, so these peaks in one scan will binIdx as two, distance {} '.format(scanPeaks.mass.diff(1).min()))
+#             
+#             batchPeaks = batch.join(peaksDF)
+#             batchPeaks.sort_values(by='mass', inplace=True)
+#             
+# 
+#             batchPeaks['gap'] = batchPeaks.mass.diff(1)# gives difference between current rown and previos
+#             
+#             batchPeaks['isSmallGap'] = batchPeaks['gap'] < maxGap
+#             
+#             bins = []
+#             binIdx = 0
+#             for isSmallGap in batchPeaks.isSmallGap:
+#                 if isSmallGap: # its the same group
+#                     bins.append(binIdx)
+#                 else:
+#                     binIdx += 1
+#                     bins.append(binIdx)
+#                 
+#             batchPeaks['bin'] = bins
+#             batchPeaks['freq'] = batchPeaks.groupby('bin')['bin'].transform('count')     
+#             filtered = batchPeaks[(batchPeaks.freq != 1) & (batchPeaks.scanNum == batch.scanNum.median())] #dont keep all the peaks from all the scans, only the ones from the center scan
+#             # this will sacrifice the first and last scan but it avoids duplicate peaks in filtered scans,
+#             # first scan is not trusted anyway, because its first and things not really setup
+#             
+#             log.info('filtered {} of {}'.format(filtered.__len__(), batchPeaks.__len__()))
+#             
+#             if not filtered.empty : # dont add empties
+#                 header = filtered.filterLine.unique()[0] + batchPeaks.scanNum.unique().tolist().__str__().replace(',', ';')
+#                 filtered_scans[header]= (filtered.mass, filtered.intensity)
+#                 if ' ms ' in header:
+#                     filteredmass.extend(filtered.mass)
+#                     filteredintensity.extend(filtered.intensity)
+#                     print filtered.filterLine.unique()[0]
+#                 
+#              
+#         #---end scans
+#     #----end filterlines
+# 
+# 
+#     newfilename = filename[:-4]+ '-f.mzxml'
+#     log.info('Writing results to %s', newfilename)
+#     write2templateMzXML(newfilename, filtered_scans)
+# 
+#     generatePsudoMGF(filename[:-4]+ '-f.mgf', filtered_scans)
+#      
+#     log.debug('finish %f',  time.clock())
+#      
+#     return    
     
     
 
