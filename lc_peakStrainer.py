@@ -51,9 +51,9 @@ def main(file, validate =False):
     filename = file #" ".join(sys.argv[1:])
     scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
     
-    lastMS = None
-    secondLastMS = None
-    thirdLastMS = None
+    lastMS = 1
+    secondLastMS = 1
+    thirdLastMS = 1 
 #     TODO use recusrion because this is silly
     tmpMSList = []
     tmpMSList2 = []
