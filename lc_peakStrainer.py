@@ -98,20 +98,20 @@ def main(file, validate =False):
         peaks1['toTarget'] = peaks1.mass - targetPeak
         peaks1['toTarget'] = peaks1['toTarget'].abs()
         min = peaks1['toTarget'].min()  
-        closest = peaks1[peaks1['toTarget'] == min]
+        closest = peaks1[peaks1['toTarget'] == min].head(1) # TODO select the one with highest instensity insted of first
         hasIsotope1 = hasIsotope(closest, peaks1)
 
         peaks2['toTarget'] = peaks2.mass - targetPeak
         peaks2['toTarget'] = peaks2['toTarget'].abs()
         min2 = peaks2['toTarget'].min()  
-        closest2 = peaks2[peaks2['toTarget'] == min2]
+        closest2 = peaks2[peaks2['toTarget'] == min2].head(1)
         hasIsotope2 = hasIsotope(closest2, peaks2)
 
                 
         peaks3['toTarget'] = peaks3.mass - targetPeak
         peaks3['toTarget'] = peaks3['toTarget'].abs()
         min3 = peaks3['toTarget'].min()  
-        closest3 = peaks3[peaks3['toTarget'] == min3]
+        closest3 = peaks3[peaks3['toTarget'] == min3].head(1)
         hasIsotope3 = hasIsotope(closest3, peaks3)
 
         
