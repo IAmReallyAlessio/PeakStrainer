@@ -86,6 +86,7 @@ def main(file, validate =False):
     trigerPeaksList2=[]
     trigerPeaksList3=[]
     twoOfThreePass = []
+    nexttwoOfThreePass = []
     minDistance = 0.01
     ms2ScanNum = []
     for row in ms2TriggerPeaks.itertuples():
@@ -95,6 +96,8 @@ def main(file, validate =False):
         peaks2 =  peaksDF.loc[row.LastMS2]
         peaks3 =  peaksDF.loc[row.LastMS3]
         
+        
+                
         peaks1['toTarget'] = peaks1.mass - targetPeak
         peaks1['toTarget'] = peaks1['toTarget'].abs()
         min = peaks1['toTarget'].min()  
@@ -126,12 +129,47 @@ def main(file, validate =False):
         twoOfThreePass.append(count >= 2)
         ms2ScanNum.append(row.scanNum)
         print str(row.scanNum) +' pass '+ str(count >= 2)
+        
+        # get following ms
+        next3ms = scansDF[(scansDF.filterLine.str.contains(' ms ') ) & (scansDF.scanNum > row.scanNum) ].head(3)
+        nextpeaks1 = peaksDF.loc[next3ms.head(1).scanNum]
+        nextpeaks2 = peaksDF.loc[next3ms.head(2).scanNum]
+        nextpeaks3 = peaksDF.loc[next3ms.head(3).scanNum]
+        
+        nextpeaks1['toTarget'] = nextpeaks1.mass - targetPeak
+        nextpeaks1['toTarget'] = nextpeaks1['toTarget'].abs()
+        nmin1 = nextpeaks1['toTarget'].min()  
+        nclosest1 = nextpeaks1[nextpeaks1['toTarget'] == nmin1].head(1)
+        nhasIsotope1 = hasIsotope(nclosest1, nextpeaks1)
+        
+        nextpeaks2['toTarget'] = nextpeaks2.mass - targetPeak
+        nextpeaks2['toTarget'] = nextpeaks2['toTarget'].abs()
+        nmin2 = nextpeaks2['toTarget'].min()  
+        nclosest2 = nextpeaks2[nextpeaks2['toTarget'] == nmin2].head(1)
+        nhasIsotope2 = hasIsotope(nclosest2, nextpeaks2)
+        
+        nextpeaks3['toTarget'] = nextpeaks3.mass - targetPeak
+        nextpeaks3['toTarget'] = nextpeaks3['toTarget'].abs()
+        nmin3 = nextpeaks3['toTarget'].min()  
+        nclosest3 = nextpeaks3[nextpeaks3['toTarget'] == nmin3].head(1)
+        nhasIsotope3 = hasIsotope(nclosest3, nextpeaks3)
+       
+        ncount = 0
+        if nmin1 < minDistance and nhasIsotope1: ncount += 1
+        if nmin2 < minDistance and nhasIsotope2: ncount += 1
+        if nmin3 < minDistance and nhasIsotope3: ncount += 1
+        
+        nexttwoOfThreePass.append(ncount >= 2)
+        
+        
+            
     
     trigerPeaks = pd.concat(trigerPeaksList)
     trigerPeaks2 = pd.concat(trigerPeaksList2)
     trigerPeaks3 = pd.concat(trigerPeaksList3)
     #are these in the filtered results?
     trigerPeaks['twoOfTree']=twoOfThreePass
+    trigerPeaks['nexttwoOfTree']=nexttwoOfThreePass
     trigerPeaks['ms2ScanNum']=ms2ScanNum
     trigerPeaks['toTarget2'] = trigerPeaks2['toTarget'].tolist()
     trigerPeaks['secondMS'] = trigerPeaks2.index.tolist()
@@ -139,6 +177,7 @@ def main(file, validate =False):
     trigerPeaks['toTarget3'] = trigerPeaks3['toTarget'].tolist()
     trigerPeaks['thirdMS'] = trigerPeaks3.index.tolist()
     
+    trigerPeaks.to_csv('trigerPeaks.csv')
     if log.level == logging.DEBUG: scansDF.to_csv('msScans.csv') 
     
     #generate allscans and selectscans
@@ -160,7 +199,7 @@ def main(file, validate =False):
         
         header  = '{} {} {}'.format(scanN, filterLine, charge)
         allScans[header] = masses,intens
-        if row.twoOfTree : selectScans[header] = (masses,intens)
+        if row.twoOfTree or row.nexttwoOfTree : selectScans[header] = (masses,intens)
         else: unselectedScan[header] = (masses,intens)
         
     
