@@ -23,18 +23,17 @@ import pandas as pd
 __version__ = "17.07.03.0"
             
 
-def hasIsotope(refPeak, peaks):
+def hasIsotope(refPeak, peaks, tolerance = 0.01):
     centre = refPeak.iloc[0].mass
-    wiggle = 0.01
     isotopDistances = [0.5, 0.33, 0.25, 0.20]
     
     for dist in isotopDistances:
         targetPost = centre + dist
         targetPre = centre - dist
         
-        if peaks['mass'].between(targetPost-wiggle,targetPost + wiggle).any(): 
+        if peaks['mass'].between(targetPost-tolerance,targetPost + tolerance).any(): 
             return True
-        if peaks['mass'].between(targetPre-wiggle,targetPre + wiggle).any(): 
+        if peaks['mass'].between(targetPre-tolerance,targetPre + tolerance).any(): 
             return True
     
     return False
@@ -85,8 +84,15 @@ def main(file, validate =False):
     trigerPeaksList=[]
     trigerPeaksList2=[]
     trigerPeaksList3=[]
+    trigerPeaksListmin=[]
+    trigerPeaksList2min=[]
+    trigerPeaksList3min=[]
+    ntrigerPeaksListmin=[]
+    ntrigerPeaksList2min=[]
+    ntrigerPeaksList3min=[]
     twoOfThreePass = []
     nexttwoOfThreePass = []
+    preorpostpass = []
     minDistance = 0.01
     ms2ScanNum = []
     for row in ms2TriggerPeaks.itertuples():
@@ -121,6 +127,9 @@ def main(file, validate =False):
         trigerPeaksList.append(closest)
         trigerPeaksList2.append(closest2)
         trigerPeaksList3.append(closest3)
+        trigerPeaksListmin.append(min)
+        trigerPeaksList2min.append(min2)
+        trigerPeaksList3min.append(min3)
         count = 0
         if min < minDistance and hasIsotope1: count += 1
         if min2 < minDistance and hasIsotope2: count += 1
@@ -132,9 +141,9 @@ def main(file, validate =False):
         
         # get following ms
         next3ms = scansDF[(scansDF.filterLine.str.contains(' ms ') ) & (scansDF.scanNum > row.scanNum) ].head(3)
-        nextpeaks1 = peaksDF.loc[next3ms.head(1).scanNum]
-        nextpeaks2 = peaksDF.loc[next3ms.head(2).scanNum]
-        nextpeaks3 = peaksDF.loc[next3ms.head(3).scanNum]
+        nextpeaks1 = peaksDF.loc[next3ms.iloc[0].scanNum]
+        nextpeaks2 = peaksDF.loc[next3ms.iloc[1].scanNum]
+        nextpeaks3 = peaksDF.loc[next3ms.iloc[2].scanNum]
         
         nextpeaks1['toTarget'] = nextpeaks1.mass - targetPeak
         nextpeaks1['toTarget'] = nextpeaks1['toTarget'].abs()
@@ -153,14 +162,18 @@ def main(file, validate =False):
         nmin3 = nextpeaks3['toTarget'].min()  
         nclosest3 = nextpeaks3[nextpeaks3['toTarget'] == nmin3].head(1)
         nhasIsotope3 = hasIsotope(nclosest3, nextpeaks3)
-       
+     
+     
+        ntrigerPeaksListmin.append(nmin1)
+        ntrigerPeaksList2min.append(nmin2)
+        ntrigerPeaksList3min.append(nmin3)
         ncount = 0
         if nmin1 < minDistance and nhasIsotope1: ncount += 1
         if nmin2 < minDistance and nhasIsotope2: ncount += 1
         if nmin3 < minDistance and nhasIsotope3: ncount += 1
         
         nexttwoOfThreePass.append(ncount >= 2)
-        
+        preorpostpass.append((ncount + count)>=2 )
         
             
     
@@ -177,9 +190,19 @@ def main(file, validate =False):
     trigerPeaks['toTarget3'] = trigerPeaks3['toTarget'].tolist()
     trigerPeaks['thirdMS'] = trigerPeaks3.index.tolist()
     
+    trigerPeaks['pre1'] = trigerPeaksListmin
+    trigerPeaks['pre2'] = trigerPeaksList2min
+    trigerPeaks['pre3'] = trigerPeaksList3min
+    trigerPeaks['post1'] = ntrigerPeaksListmin
+    trigerPeaks['post2'] = ntrigerPeaksList2min
+    trigerPeaks['post3'] = ntrigerPeaksList3min
+    trigerPeaks['preorpostpass'] = preorpostpass
+    
     trigerPeaks.to_csv('trigerPeaks.csv')
     if log.level == logging.DEBUG: scansDF.to_csv('msScans.csv') 
     
+    
+#     trigerPeaks are in a pickle
     #generate allscans and selectscans
     allScans = {}
     selectScans = {}
@@ -187,7 +210,7 @@ def main(file, validate =False):
     for row in trigerPeaks.itertuples():
         scanN = row.ms2ScanNum
         filterLine = scansDF.loc[scanN].filterLine
-        charge  = int(row.charge)
+        charge  = int(scansDF.loc[scanN].chargeState)
         masses = peaksDF.loc[scanN]['mass'].tolist()
         intens = peaksDF.loc[scanN]['intensity'].tolist()
         
@@ -199,13 +222,14 @@ def main(file, validate =False):
         
         header  = '{} {} {}'.format(scanN, filterLine, charge)
         allScans[header] = masses,intens
-        if row.twoOfTree or row.nexttwoOfTree : selectScans[header] = (masses,intens)
+#         if row.twoOfTree or row.nexttwoOfTree : selectScans[header] = (masses,intens)
+        if row.preorpostpass : selectScans[header] = (masses,intens)
         else: unselectedScan[header] = (masses,intens)
         
     
     generatePsudoMGF(filename[:-4]+ '-og.mgf', allScans)
-    generatePsudoMGF(filename[:-4]+ '-s-iso.mgf', selectScans)
-    generatePsudoMGF(filename[:-4]+ '-us-iso.mgf', unselectedScan)
+    generatePsudoMGF(filename[:-4]+ '-s-iso-prepost.mgf', selectScans)
+    generatePsudoMGF(filename[:-4]+ '-us-iso-prepost.mgf', unselectedScan)
 
     log.debug('finish %f',  time.clock())
     return
