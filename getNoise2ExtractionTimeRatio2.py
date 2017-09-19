@@ -3,6 +3,7 @@ Created on 16.08.2017
 
 @author: mirandaa
 '''
+# todo: generate csv, change regression to lowess and use median instead of max
 import time
 import os
 import logging
