@@ -6,6 +6,7 @@ Created on 16.08.2017
 import time
 import os
 import logging
+from collections import namedtuple
 log = logging.getLogger(os.path.basename(__file__))
 import pickle
 
@@ -24,7 +25,8 @@ def main(isolation_dist = 0.01):
 #  # or DataFrame.to_hdf
         
     scansDF = pd.read_pickle('scansDF.pkl')
-    peaksDF = pd.read_pickle('peaksDF.pkl')
+    peaksDF = pd.read_pickle('peaksDF.pkl') # if there are no peaks in the scan then the index is not there 
+    scansDF = scansDF.loc[peaksDF.index.unique()]
     scansDF = scansDF[(scansDF.filterLine.str.contains(' ms2 '))]
       
     print('get repeated min 10 times')
@@ -32,17 +34,18 @@ def main(isolation_dist = 0.01):
     selectFilterLines = scansDF[scansDF['count'] >= 10]['filterLine'].unique()
     
     print(' get description of non-repeating peaks')
-#     selectPeaksList=[]
-#     for idx, selectFilterLine in np.ndenumerate(selectFilterLines):
-#         selectScanNums = scansDF[scansDF['filterLine'] == selectFilterLine]['scanNum']
-#         selectPeaks = peaksDF.loc[selectScanNums]
-#         selectPeaks.sort_values('mass',inplace=True)
-#         selectPeaks['diff'] = selectPeaks['mass'].diff()  
-#         selectPeaks['diff1'] = selectPeaks['diff'].shift(-1) 
-#         selectPeaks['isolated'] = (selectPeaks['diff'] > isolation_dist) & (selectPeaks['diff1'] > isolation_dist)
-#         selectPeaksList.append(selectPeaks)
-#     selectPeaksDF = pd.concat(selectPeaksList)
-    selectPeaksDF = pd.read_pickle('selectPeaks10DF.pkl')
+    selectPeaksList=[]
+    for idx, selectFilterLine in np.ndenumerate(selectFilterLines):
+        selectScanNums = scansDF[scansDF['filterLine'] == selectFilterLine]['scanNum']
+        selectPeaks = peaksDF.loc[selectScanNums]
+        selectPeaks.sort_values('mass',inplace=True)
+        selectPeaks['diff'] = selectPeaks['mass'].diff()  
+        selectPeaks['diff1'] = selectPeaks['diff'].shift(-1) 
+        selectPeaks['isolated'] = (selectPeaks['diff'] > isolation_dist) & (selectPeaks['diff1'] > isolation_dist)
+        selectPeaksList.append(selectPeaks)
+    if selectPeaksList : 
+        selectPeaksDF = pd.concat(selectPeaksList)
+#     selectPeaksDF = pd.read_pickle('selectPeaks4DF.pkl')
    
     print(' get description of repeating peaks')
     selectPeaksDF[selectPeaksDF['isolated']].describe()
@@ -91,6 +94,8 @@ def main(isolation_dist = 0.01):
 #     (masses, intens) = scanPeaksAll[scan]
     scanPeaksAll = {}
     scanPeaks_thresh= {}
+    allc = 0
+    filc = 0
     for scan in scansDF.itertuples():
         scanNum = scan.scanNum
         filterLine = scan.filterLine
@@ -99,12 +104,14 @@ def main(isolation_dist = 0.01):
         masses = peaksDF[peaksDF['scanNum'] == scanNum].mass.tolist()
         intens = peaksDF[peaksDF['scanNum'] == scanNum].intensity.tolist()
         scanPeaksAll[header] = (masses,intens)
+        allc += len(masses)
         masses_fil = peaksDF[(peaksDF['pass']) & (peaksDF['scanNum'] == scanNum)].mass.tolist()
         intens_fil = peaksDF[(peaksDF['pass']) & (peaksDF['scanNum'] == scanNum)].intensity.tolist()
+        filc += len(masses_fil)
         scanPeaks_thresh[header] = (masses_fil, intens_fil)
     
-    generatePsudoMGF('qc_02_QC04_reprateThresh-all.mgf', scanPeaksAll)
-    generatePsudoMGF('qc_02_QC04_reprateThresh-thre.mgf', scanPeaks_thresh)
+    generatePsudoMGF('liver_albert_50ug_50ul-all.mgf', scanPeaksAll)
+    generatePsudoMGF('liver_albert_50ug_50ul-thre.mgf', scanPeaks_thresh)
     
 
 def ThermoRawfile2DataFrames(file_path, head = None):
@@ -121,6 +128,15 @@ def ThermoRawfile2DataFrames(file_path, head = None):
     for scanNum in np.arange(start, end+1):
         filterLine = rawfile.GetFilterForScanNum(scanNum)
         peak_datas = rawfile.GetLabelData(scanNum)[0]
+        if not peak_datas.mass:# there was no data
+            myLabels = namedtuple('Labels', 'mass intensity resolution baseline noise charge')
+            alternate = myLabels(mass = rawfile.GetMassListFromScanNum(scanNum)[0][0],
+                               intensity = rawfile.GetMassListFromScanNum(scanNum)[0][1],
+                               resolution = (),
+                               baseline = (),
+                               noise = (),
+                               charge = ())
+            
         retTime =  rawfile.RTFromScanNum(scanNum)*60
         chargeState= rawfile.GetTrailerExtraForScanNum(scanNum)['Charge State']
         isolationMass = rawfile.GetPrecursorInfoFromScanNum(scanNum).isolationMass if  rawfile.GetPrecursorInfoFromScanNum(scanNum) is not None else 0.0# or monoIsoMass
