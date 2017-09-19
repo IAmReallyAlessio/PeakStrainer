@@ -20,7 +20,7 @@ from utils.peakStrainer_util import generatePsudoMGF
 def main(isolation_dist = 0.01):
     print('find ms2 scans')
     filename = r'C:\apps\eclipseRCP\workspace\PeakStrainer\tmp\qc_02_QC04_.raw'
-#     scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
+    scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
 #     scansDF.to_pickle('scansDF.pkl')
 #     peaksDF.to_pickle('peaksDF.pkl')
 #  # or DataFrame.to_hdf
