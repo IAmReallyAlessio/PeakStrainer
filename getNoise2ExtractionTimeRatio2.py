@@ -20,7 +20,7 @@ from utils.peakStrainer_util import generatePsudoMGF
 def main(isolation_dist = 0.01):
     print('find ms2 scans')
     filename = r'C:\apps\eclipseRCP\workspace\PeakStrainer\tmp\qc_02_QC04_.raw'
-    scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
+#     scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
 #     scansDF.to_pickle('scansDF.pkl')
 #     peaksDF.to_pickle('peaksDF.pkl')
 #  # or DataFrame.to_hdf
@@ -61,19 +61,28 @@ def main(isolation_dist = 0.01):
 #     selectPeaksDF['mean_i'] = selectPeaksDF.groupby(['scanNum','isolated'])['intensity'].transform('mean')
 
     q3_i_series= selectPeaksDF.groupby(['scanNum','isolated'])['intensity'].quantile(.75).rename("q3_i").reset_index()
-    q3_i_DF = selectPeaksDF.merge(q3_i_series)
+    selectPeaksDF = selectPeaksDF.merge(q3_i_series)
     
     
     print('regress descriminant to trigger TOI, central peak intensity, ')
 #     from sklearn.linear_model import LinearRegression
 #     lr = LinearRegression()
 #     X = selectPeaksDF[selectPeaksDF.isolated][[u'mass', u'intensity', u'resolution', u'baseline', u'noise', u'charge', u'TIC']]
-    X = q3_i_DF[q3_i_DF.isolated].TIC
-    y = q3_i_DF[q3_i_DF.isolated].q3_i
+    X = selectPeaksDF[selectPeaksDF.isolated].TIC
+    y = selectPeaksDF[selectPeaksDF.isolated].q3_i
 #     lr.fit(X, y)
 #     predictions = lr.predict(X)
     import statsmodels.api as sm
     model = sm.OLS(y, X).fit()
+    
+    from scipy.interpolate import interp1d
+    import statsmodels.api as sm
+    
+    lowess = sm.nonparametric.lowess(y, X, frac=.3)
+    lowess_x = list(zip(*lowess))[0]
+    lowess_y = list(zip(*lowess))[1]
+    f = interp1d(lowess_x, lowess_y, bounds_error=False)
+    
 #     see https://stackoverflow.com/questions/36252434/predicting-on-new-data-using-locally-weighted-regression-loess-lowess
 #     predictions = model.predict(X)
 #     predictionsDF = selectPeaksDF[selectPeaksDF.isolated]
@@ -82,12 +91,16 @@ def main(isolation_dist = 0.01):
     peaksDF['scanNum'] = peaksDF.index
     peaksDF['TIC'] = peaksDF.groupby('scanNum')['intensity'].transform('sum')
     peaksDF['prediction_q3'] = model.predict(peaksDF['TIC'])
-    peaksDF['pass_q3'] = peaksDF['intensity'] > peaksDF['prediction_q3'] 
+    peaksDF['lowess_q3'] = f(peaksDF['TIC'])
+    peaksDF['pass_q3'] = peaksDF['intensity'] > peaksDF['prediction_q3']
+    peaksDF['pass_lowess_q3'] = peaksDF['intensity'] > peaksDF['lowess_q3'] 
     
     #peaksDF.loc[scansDF[scansDF['count'] < 10].index]
     print('evaluate filter efficiency')
     selectPeaksDF['prediction_q3_i'] = model.predict(selectPeaksDF['TIC'])
+    selectPeaksDF['lowess_q3_i'] = f(selectPeaksDF['TIC'])
     selectPeaksDF['pass_q3_i'] = selectPeaksDF['intensity'] > selectPeaksDF['prediction_q3_i']
+    selectPeaksDF['pass_lowess_q3_i'] = selectPeaksDF['intensity'] > selectPeaksDF['lowess_q3_i']
     
     
 #                 no pass    pass    
@@ -110,13 +123,13 @@ def main(isolation_dist = 0.01):
         intens = peaksDF[peaksDF['scanNum'] == scanNum].intensity.tolist()
         scanPeaksAll[header] = (masses,intens)
         allc += len(masses)
-        masses_fil = peaksDF[(peaksDF['pass_q3']) & (peaksDF['scanNum'] == scanNum)].mass.tolist()
-        intens_fil = peaksDF[(peaksDF['pass_q3']) & (peaksDF['scanNum'] == scanNum)].intensity.tolist()
+        masses_fil = peaksDF[(peaksDF['pass_lowess_q3']) & (peaksDF['scanNum'] == scanNum)].mass.tolist()
+        intens_fil = peaksDF[(peaksDF['pass_lowess_q3']) & (peaksDF['scanNum'] == scanNum)].intensity.tolist()
         filc += len(masses_fil)
         scanPeaks_thresh[header] = (masses_fil, intens_fil)
     
-    generatePsudoMGF('qc_02_QC04_-all_q3.mgf', scanPeaksAll)
-    generatePsudoMGF('qc_02_QC04_-thre_q3.mgf', scanPeaks_thresh)
+    generatePsudoMGF('qc_02_QC04_-all_q3_lowess.mgf', scanPeaksAll)
+    generatePsudoMGF('qc_02_QC04_-thre_q3_lowess.mgf', scanPeaks_thresh)
     peaksDF.to_csv('qc_02_QC04_-thre_q3.csv')
 
 def ThermoRawfile2DataFrames(file_path, head = None):
