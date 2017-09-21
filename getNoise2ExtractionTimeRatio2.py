@@ -20,13 +20,13 @@ from utils.peakStrainer_util import generatePsudoMGF
 def main(isolation_dist = 0.01):
     print('find ms2 scans')
     filename = r'C:\apps\eclipseRCP\workspace\PeakStrainer\tmp\qc_02_QC04_.raw'
-#     scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
+    scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
 #     scansDF.to_pickle('scansDF.pkl')
 #     peaksDF.to_pickle('peaksDF.pkl')
 #  # or DataFrame.to_hdf
         
-    scansDF = pd.read_pickle('scansDF.pkl')
-    peaksDF = pd.read_pickle('peaksDF.pkl') # if there are no peaks in the scan then the index is not there 
+#     scansDF = pd.read_pickle('scansDF.pkl')
+#     peaksDF = pd.read_pickle('peaksDF.pkl') # if there are no peaks in the scan then the index is not there 
     scansDF = scansDF.loc[peaksDF.index.unique()]
     scansDF = scansDF[(scansDF.filterLine.str.contains(' ms2 '))]
       
@@ -140,7 +140,7 @@ def ThermoRawfile2DataFrames(file_path, head = None):
     start = rawfile.FirstSpectrumNumber
     end = rawfile.GetLastSpectrumNumber() if head == None else head
  
-    MSrawscansDF = pd.DataFrame(index = np.arange(start, end+1),columns=['scanNum', 'filterLine', 'retTime', 'chargeState', 'isolationMass'])
+    MSrawscansDF = pd.DataFrame(index = np.arange(start, end+1),columns=['scanNum', 'filterLine', 'retTime', 'chargeState', 'isolationMass', 'TIC', 'Monoisotopic M/Z'])
     peak_datasDF_list =[]
     startTime = time.time()
     for scanNum in np.arange(start, end+1):
@@ -157,8 +157,10 @@ def ThermoRawfile2DataFrames(file_path, head = None):
             
         retTime =  rawfile.RTFromScanNum(scanNum)*60
         chargeState= rawfile.GetTrailerExtraForScanNum(scanNum)['Charge State']
+        monoisotopic_mass= rawfile.GetTrailerExtraForScanNum(scanNum)['Monoisotopic M/Z']
+        TIC = rawfile.GetScanHeaderInfoForScanNum(scanNum)['TIC']
         isolationMass = rawfile.GetPrecursorInfoFromScanNum(scanNum).isolationMass if  rawfile.GetPrecursorInfoFromScanNum(scanNum) is not None else 0.0# or monoIsoMass
-        row = [scanNum, filterLine, retTime, chargeState, isolationMass]
+        row = [scanNum, filterLine, retTime, chargeState, isolationMass, TIC, monoisotopic_mass]
         MSrawscansDF.loc[scanNum] = row
         peak_datasT = zip(*peak_datas)
         peak_datasDF = pd.DataFrame(peak_datasT, index = [scanNum]*len(peak_datasT), columns=['mass', 'intensity', 'resolution', 'baseline', 'noise', 'charge'])
