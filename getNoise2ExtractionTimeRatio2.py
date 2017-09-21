@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 from lib import MSFileReader
-from utils.peakStrainer_util import generatePsudoMGF 
+#from utils.peakStrainer_util import local_generatePsudoMGF now use local for custom pepmass
 
 def main(isolation_dist = 0.01):
     print('find ms2 scans')
@@ -119,7 +119,8 @@ def main(isolation_dist = 0.01):
         scanNum = scan.scanNum
         filterLine = scan.filterLine
         charge = int(scansDF.loc[scanNum].chargeState)
-        header  = '{} {} {}'.format(scanNum, filterLine, charge)
+        Monoisotopic_Mass = scan.Monoisotopic_Mass
+        header  = '{} {} {} {}'.format(scanNum, filterLine, charge, Monoisotopic_Mass)
         masses = peaksDF[peaksDF['scanNum'] == scanNum].mass.tolist()
         intens = peaksDF[peaksDF['scanNum'] == scanNum].intensity.tolist()
         scanPeaksAll[header] = (masses,intens)
@@ -129,9 +130,39 @@ def main(isolation_dist = 0.01):
         filc += len(masses_fil)
         scanPeaks_thresh[header] = (masses_fil, intens_fil)
     
-    generatePsudoMGF('qc_02_QC04_-all_q3_lowess_tic.mgf', scanPeaksAll)
-    generatePsudoMGF('qc_02_QC04_-thre_q3_lowess_tic.mgf', scanPeaks_thresh)
-    peaksDF.to_csv('qc_02_QC04_-thre_q3_tic.csv')
+    local_generatePsudoMGF('qc_02_QC04_-all_q3_lowess_tic_mim.mgf', scanPeaksAll)
+    local_generatePsudoMGF('qc_02_QC04_-thre_q3_lowess_tic_mim.mgf', scanPeaks_thresh)
+    peaksDF.to_csv('qc_02_QC04_-thre_q3_tic_mim.csv')
+    
+def local_generatePsudoMGF(newfilename, preFiltered_filterlines):
+    def getCharge(title):
+        charge =title.split()[-2]
+        mode = title.split()[2]
+        return charge+mode 
+    
+    def getPepMass(title):
+        monoisotopicMass = title.split()[-1]
+        if monoisotopicMass != '0.0' : 
+            return monoisotopicMass 
+        combined = title.split()[-4]
+        return combined.split('@')[0]
+    
+    with file(newfilename, 'w') as outfile:
+        for title in preFiltered_filterlines:
+            if not preFiltered_filterlines[title]:
+                log.info('no Data for {}'.format(title)) 
+                continue
+            outfile.write('BEGIN IONS'+'\n')
+            
+            outfile.write('TITLE='+title+'\n')
+            outfile.write('CHARGE='+getCharge(title)+'\n')
+            outfile.write('PEPMASS='+getPepMass(title)+'\n')
+#         
+            masses, intens = preFiltered_filterlines[title]
+            for mass, inten in zip(masses, intens):
+                outfile.write("{0:.4f} {1:.0f}".format(mass, inten)+'\n')
+        
+            outfile.write('END IONS\n\n')
 
 def ThermoRawfile2DataFrames(file_path, head = None):
     # NOTE: for testing use ThermoRawfile2Scans_sample instead
@@ -141,7 +172,7 @@ def ThermoRawfile2DataFrames(file_path, head = None):
     start = rawfile.FirstSpectrumNumber
     end = rawfile.GetLastSpectrumNumber() if head == None else head
  
-    MSrawscansDF = pd.DataFrame(index = np.arange(start, end+1),columns=['scanNum', 'filterLine', 'retTime', 'chargeState', 'isolationMass', 'TIC', 'Monoisotopic M/Z'])
+    MSrawscansDF = pd.DataFrame(index = np.arange(start, end+1),columns=['scanNum', 'filterLine', 'retTime', 'chargeState', 'isolationMass', 'TIC', 'Monoisotopic_Mass'])
     peak_datasDF_list =[]
     startTime = time.time()
     for scanNum in np.arange(start, end+1):
