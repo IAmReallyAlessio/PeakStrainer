@@ -17,17 +17,18 @@ import pandas as pd
 from lib import MSFileReader
 from utils.peakStrainer_util import generatePsudoMGF 
 
-def main(isolation_dist = 0.01):
+def main(isolation_dist = 0.2):
     print('find ms2 scans')
-    filename = r'C:\apps\eclipseRCP\workspace\PeakStrainer\tmp\qc_02_QC04_.raw'
+    filename = r'C:\apps\eclipseRCP\workspace\PeakStrainer\tmp\liver_albert_50ug_50ul.raw'
 #     scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
 #     scansDF.to_pickle('scansDF.pkl')
 #     peaksDF.to_pickle('peaksDF.pkl')
 #  # or DataFrame.to_hdf
         
-    scansDF = pd.read_pickle('scansDF.pkl')
-    peaksDF = pd.read_pickle('peaksDF.pkl') # if there are no peaks in the scan then the index is not there 
-    scansDF = scansDF.loc[peaksDF.index.unique()]
+    scansDF = pd.read_pickle('liver_albert_50ug_50ul_scansDF.pkl')
+    peaksDF = pd.read_pickle('liver_albert_50ug_50ul_peaksDF.pkl') # if there are no peaks in the scan then the index is not there 
+    peaksDF['scanNum'] =  peaksDF.index
+#     scansDF = scansDF.loc[peaksDF.index.unique()]
     scansDF = scansDF[(scansDF.filterLine.str.contains(' ms2 '))]
       
     print('get repeated min 10 times')
@@ -147,13 +148,8 @@ def ThermoRawfile2DataFrames(file_path, head = None):
         filterLine = rawfile.GetFilterForScanNum(scanNum)
         peak_datas = rawfile.GetLabelData(scanNum)[0]
         if not peak_datas.mass:# there was no data
-            myLabels = namedtuple('Labels', 'mass intensity resolution baseline noise charge')
-            alternate = myLabels(mass = rawfile.GetMassListFromScanNum(scanNum)[0][0],
-                               intensity = rawfile.GetMassListFromScanNum(scanNum)[0][1],
-                               resolution = (),
-                               baseline = (),
-                               noise = (),
-                               charge = ())
+            peak_datas = (rawfile.GetMassListFromScanNum(scanNum)[0][0],
+                               rawfile.GetMassListFromScanNum(scanNum)[0][1])
             
         retTime =  rawfile.RTFromScanNum(scanNum)*60
         chargeState= rawfile.GetTrailerExtraForScanNum(scanNum)['Charge State']
@@ -161,7 +157,10 @@ def ThermoRawfile2DataFrames(file_path, head = None):
         row = [scanNum, filterLine, retTime, chargeState, isolationMass]
         MSrawscansDF.loc[scanNum] = row
         peak_datasT = zip(*peak_datas)
-        peak_datasDF = pd.DataFrame(peak_datasT, index = [scanNum]*len(peak_datasT), columns=['mass', 'intensity', 'resolution', 'baseline', 'noise', 'charge'])
+        if len(peak_datas)>2:
+            peak_datasDF = pd.DataFrame(peak_datasT, index = [scanNum]*len(peak_datasT), columns=['mass', 'intensity', 'resolution', 'baseline', 'noise', 'charge'])
+        else:
+            peak_datasDF = pd.DataFrame(peak_datasT, index = [scanNum]*len(peak_datasT), columns=['mass', 'intensity'])
         peak_datasDF_list.append(peak_datasDF)
     MSPeakDatasDF=pd.concat(peak_datasDF_list) # concat is expensive so just once
     log.info('File Read time %f s', time.time()-startTime)
