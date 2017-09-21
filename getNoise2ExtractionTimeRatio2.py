@@ -20,13 +20,13 @@ from utils.peakStrainer_util import generatePsudoMGF
 def main(isolation_dist = 0.01):
     print('find ms2 scans')
     filename = r'C:\apps\eclipseRCP\workspace\PeakStrainer\tmp\qc_02_QC04_.raw'
-    scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
-#     scansDF.to_pickle('scansDF.pkl')
-#     peaksDF.to_pickle('peaksDF.pkl')
+#     scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
+#     scansDF.to_pickle('qc_02_QC04_scansDF.pkl')
+#     peaksDF.to_pickle('qc_02_QC04_peaksDF.pkl')
 #  # or DataFrame.to_hdf
         
-#     scansDF = pd.read_pickle('scansDF.pkl')
-#     peaksDF = pd.read_pickle('peaksDF.pkl') # if there are no peaks in the scan then the index is not there 
+    scansDF = pd.read_pickle('qc_02_QC04_scansDF.pkl')
+    peaksDF = pd.read_pickle('qc_02_QC04_peaksDF.pkl') # if there are no peaks in the scan then the index is not there 
     scansDF = scansDF.loc[peaksDF.index.unique()]
     scansDF = scansDF[(scansDF.filterLine.str.contains(' ms2 '))]
       
@@ -54,8 +54,9 @@ def main(isolation_dist = 0.01):
     
     print('find descriminanat')
     selectPeaksDF['scanNum'] = selectPeaksDF.index
-    selectPeaksDF['TIC'] = selectPeaksDF.groupby('scanNum')['intensity'].transform('sum')
-#     selectPeaksDF['min_i'] = selectPeaksDF.groupby(['scanNum','isolated'])['intensity'].transform('min')
+    selectPeaksDF['TIC_sum'] = selectPeaksDF.groupby('scanNum')['intensity'].transform('sum')
+    selectPeaksDF['TIC'] = selectPeaksDF['scanNum'].map(scansDF['TIC'])
+ #     selectPeaksDF['min_i'] = selectPeaksDF.groupby(['scanNum','isolated'])['intensity'].transform('min')
     selectPeaksDF['max_i'] = selectPeaksDF.groupby(['scanNum','isolated'])['intensity'].transform('max')
 #     selectPeaksDF['median_i'] = selectPeaksDF.groupby(['scanNum','isolated'])['intensity'].transform('median')
 #     selectPeaksDF['mean_i'] = selectPeaksDF.groupby(['scanNum','isolated'])['intensity'].transform('mean')
@@ -73,7 +74,7 @@ def main(isolation_dist = 0.01):
 #     lr.fit(X, y)
 #     predictions = lr.predict(X)
     import statsmodels.api as sm
-    model = sm.OLS(y, X).fit()
+    model = sm.OLS(y, X.astype(float)).fit()
     
     from scipy.interpolate import interp1d
     import statsmodels.api as sm
@@ -128,9 +129,9 @@ def main(isolation_dist = 0.01):
         filc += len(masses_fil)
         scanPeaks_thresh[header] = (masses_fil, intens_fil)
     
-    generatePsudoMGF('qc_02_QC04_-all_q3_lowess.mgf', scanPeaksAll)
-    generatePsudoMGF('qc_02_QC04_-thre_q3_lowess.mgf', scanPeaks_thresh)
-    peaksDF.to_csv('qc_02_QC04_-thre_q3.csv')
+    generatePsudoMGF('qc_02_QC04_-all_q3_lowess_tic.mgf', scanPeaksAll)
+    generatePsudoMGF('qc_02_QC04_-thre_q3_lowess_tic.mgf', scanPeaks_thresh)
+    peaksDF.to_csv('qc_02_QC04_-thre_q3_tic.csv')
 
 def ThermoRawfile2DataFrames(file_path, head = None):
     # NOTE: for testing use ThermoRawfile2Scans_sample instead
