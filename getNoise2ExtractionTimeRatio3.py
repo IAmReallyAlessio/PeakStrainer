@@ -17,7 +17,7 @@ import pandas as pd
 from lib import MSFileReader
 from utils.peakStrainer_util import generatePsudoMGF 
 
-def main(isolation_dist = 0.2):
+def main(isolation_dist = 0.01):
     print('find ms2 scans')
     filename = r'C:\apps\eclipseRCP\workspace\PeakStrainer\tmp\liver_albert_50ug_50ul.raw'
 #     scansDF, peaksDF = ThermoRawfile2DataFrames(filename)
