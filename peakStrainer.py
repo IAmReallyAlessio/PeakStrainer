@@ -14,6 +14,7 @@ import csv
 from utils.peakStrainer_util import write2templateMzXML
 import itertools
 import math
+import collections
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -718,8 +719,12 @@ def bins2Peaks(binsData, peakData):
     result = zip(*filteredRowdata)
     return result
     
+def reorder4lipidxplorer(filtered_bins):
 
-
+     log.debug('reorder4lipidxplorer so it goes ms+, msms+,ms-, msms-')
+     filtered_bins1 = collections.OrderedDict(sorted(filtered_bins.items(), key=lambda t: t[0]))
+     return filtered_bins1
+     
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         print("A filename must be provided")
