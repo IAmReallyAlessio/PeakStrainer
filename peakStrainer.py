@@ -17,15 +17,16 @@ import itertools
 import math
 import re
 from _collections import defaultdict
+import collections
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 try:
     from lib import RawQuant
 except ImportError as error:
-    log.error("could not import RawQuant" ) 
+    log.error("could not import RawQuant" )
 from collections import namedtuple
 import numpy as np
-import glob, os   
+import glob, os
 from pyteomics import mzxml, mzml
 import argparse
 
@@ -41,7 +42,7 @@ def main(folder , technial_replicates =True, rcf_a=5408000.0, rcf_b=0.5):
 #     if len(sys.argv) == 1:
 #         print("A filename must be provided")
 #         raise SystemExit
- 
+
 #     filename = " ".join(sys.argv[1:])
 #     extension = os.path.splitext(filename)[1]
 #     if extension.lower() == '.raw':
@@ -50,8 +51,8 @@ def main(folder , technial_replicates =True, rcf_a=5408000.0, rcf_b=0.5):
     scans = mzXML2Scans(folder, technial_replicates = technial_replicates)
 #     elif extension.lower() == '.mzml':
 #         scans = mzML2Scans(filename)
-    
-    
+
+
     if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
     
     scans = filterScanBy_first(scans)
@@ -108,7 +109,7 @@ def main(folder , technial_replicates =True, rcf_a=5408000.0, rcf_b=0.5):
     # can't use filtered bins in mzxml because it is not readable by seems
 #     filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.items()}# this makes an average of the bin
     perFiles = make_perFile(filtered_peaks)
-      
+
     for perfile in perFiles:
         filtered_bins = perFiles[perfile]
         newfilename = perfile[:-4]+ '.mzXML'
@@ -116,15 +117,15 @@ def main(folder , technial_replicates =True, rcf_a=5408000.0, rcf_b=0.5):
         write2templateMzXML(newfilename, filtered_bins)
 #     order = [' ms ', '.33-', ' ms ']
 #     filtered_bins = reorderScans(filtered_bins, order)
-    
-    
+
+
     
     log.debug('finish %f',  time.clock())
     
 def make_perFile(filtered_peaks):
     log.info('split the fltered peaks into files from scans')
     # get the files
-    outfiles = defaultdict(dict) 
+    outfiles = defaultdict(dict)
     for filterline in filtered_peaks:
         masses, intens, files = filtered_peaks[filterline]
         uniqFiles =  set(files)
@@ -134,7 +135,7 @@ def make_perFile(filtered_peaks):
             fintens = [i for m,i,f in zip(masses, intens, files) if f == file]
             filterlines_of_file[filterline] = (fmass, fintens)
     return outfiles
-    
+
 
 def ThermoRawfile2Scans(file_path):
     if True:
@@ -168,17 +169,17 @@ def ThermoRawfile2Scans_RawQuant(file_path):
     log.info('raw file: %s', file_path)
     raw = RawQuant.RawFileReader.open_raw_file(file_path)
     raw.SelectInstrument(0, 1)  # needed by thermo
-    
+
     start = raw.RunHeaderEx.FirstSpectrum
     end = raw.RunHeaderEx.LastSpectrum
-    
+
     Labels = namedtuple('Labels', 'mass intensity resolution baseline noise charge')
     def get_out(raw, scan):
-        
+
         data = raw.GetCentroidStream(scan, None)
 
         out = np.empty((data.Length, 6))
-        
+
         asNumpyArray = RawQuant.RawFileReader.asNumpyArray
 
 #         out[:, 0] = asNumpyArray(data.Masses)
@@ -194,9 +195,9 @@ def ThermoRawfile2Scans_RawQuant(file_path):
                       tuple(asNumpyArray(data.Baselines)),
                       tuple(asNumpyArray(data.Noises)),
                       tuple(asNumpyArray(data.Charges)) )
- 
- 
- 
+
+
+
     MSrawscans = []
     for scanNum in range(start, end+1):
         data = raw.GetCentroidStream(scanNum, None)
@@ -205,22 +206,22 @@ def ThermoRawfile2Scans_RawQuant(file_path):
         retTime =  raw.RetentionTimeFromScanNumber(scanNum)*60
         row = (scanNum, filterLine, peak_datas, retTime, file_path)
         MSrawscans.append(row)
-    
+
     log.info('Scan Count is %d', len(MSrawscans))
-    #Note: to reshape into lists use 
+    #Note: to reshape into lists use
     #scanNum, filterLine, peak_datas, retTime = list(zip(*MSrawscans)
-    #retTime, file_name   #Note: to get list of mass use 
+    #retTime, file_name   #Note: to get list of mass use
     # peak_data = peak_datas[0]
     # peak_data.mass
-    
+
     return MSrawscans
 
 def mzXML2Scans(file_path, add_file_name = False, technial_replicates= False):
     if technial_replicates:
         return mzXML2Scans_technical_replacates(file_path)
-    
+
     log.info('mzXML file: %s', file_path)
-    
+
     MSrawscans = []
     with mzxml.read(file_path) as reader:
         for spectrum in reader:
@@ -235,8 +236,8 @@ def mzXML2Scans(file_path, add_file_name = False, technial_replicates= False):
             else:
                 row = (scanNum, filterLine, peak_datas, retTime)
             MSrawscans.append(row)
-        
-    
+
+
     log.info('Scan Count is %d', len(MSrawscans))
     return MSrawscans
 
@@ -244,14 +245,14 @@ def mzXML2Scans_technical_replacates(file_path):
     log.info('techical replicates mzXML files at: %s', file_path)
     files = glob.glob(file_path+'/*.mzxml')
     log.info('processing {} files'.format(len(files)))
-    
+
     MSrawscans_fromReplicates = []
     for file in files:
         MSrawscans = mzXML2Scans(file, add_file_name = True)
-        MSrawscans_fromReplicates.extend(MSrawscans)  
-        
-    
-    return  MSrawscans_fromReplicates   
+        MSrawscans_fromReplicates.extend(MSrawscans)
+
+
+    return  MSrawscans_fromReplicates
 
 def mzML2Scans(file_path):
     log.info('mzML file: %s', file_path)
@@ -262,18 +263,18 @@ def mzML2Scans(file_path):
             id = spectrum['id']
             m = re.match(r'.* scan=(\d)', id)
             scanNum = int(m.groups()[0])
-            
+
             if len(spectrum['scanList']['scan']) > 1:
                 log.error('scanList for single scan is more than 1 for: {}'.format(id))
-                
+
             count = len(spectrum['m/z array'])
             peak_datas = (spectrum['m/z array'], spectrum['intensity array'], [None]*count,[None]*count,[None]*count,[None]*count)
             filterLine = spectrum['scanList']['scan'][0]['filter string']
             retTime =  spectrum['scanList']['scan'][0]['scan start time']*60
             row = (scanNum, filterLine, peak_datas, retTime, file_path)
             MSrawscans.append(row)
-        
-    
+
+
     log.info('Scan Count is %d', len(MSrawscans))
     return MSrawscans
 
@@ -300,7 +301,7 @@ def roundCollisionEnergy(scans, decimal_places = 6):
     log.info('roundCollisionEnergy in header to merge scans to %d decimal places', decimal_places)
     result = []
     for row in scans:
-        scanNum, filterLine, peak_datas, retTime, file_name = row 
+        scanNum, filterLine, peak_datas, retTime, file_name = row
         if ' ms2 ' in filterLine:
             m = re.match(r'(.*) (\d+\.\d*)@(.*)', filterLine)
             colisionEnergy = float(m.groups()[1])
@@ -310,12 +311,12 @@ def roundCollisionEnergy(scans, decimal_places = 6):
         result.append(row)
 
     return result
-    
+
 def filterScanBy_retentionTime(scans, lowSeconds=0.5, highSeconds=float("inf")):
     log.info('filterScanBy_retentionTime %f to %f', lowSeconds, highSeconds)
     result = []
     for row in scans:
-        scanNum, filterLine, peak_datas, retTime, file_name = row 
+        scanNum, filterLine, peak_datas, retTime, file_name = row
         if retTime >= lowSeconds and  retTime <= highSeconds:
             result.append(row)
     return result
@@ -325,7 +326,7 @@ def filterScanBy_filterline(scans, subtext = ' ms ', keep=False):
     log.info('filterScanBy_filterline %s filter keep: %s', subtext, keep)
     result=[]
     for row in scans:
-        scanNum, filterLine, peak_datas, retTime, file_name = row 
+        scanNum, filterLine, peak_datas, retTime, file_name = row
         if keep:
             if (subtext in filterLine):
                 result.append(row)
@@ -366,7 +367,7 @@ def mergePeaksOnFilterline(scans):
         mergedPeaks[filterLine][4].extend(noise)
         mergedPeaks[filterLine][5].extend(charge)
         mergedPeaks[filterLine][6].extend([file_name]*len(zmass))
-        
+
     return mergedPeaks
 
 def filterlinePeaks_csv(mergedPeaks, filename = 'filterlinePeaks.csv'):
@@ -794,13 +795,13 @@ def aggregateBinData(peakData):
     abunds = peakData[1]
     resols = peakData[2]
     bins_low = peakData[-3]
-    bins_high = peakData[-2] 
+    bins_high = peakData[-2]
     bins = peakData[-1]
     binsData = dict()
     
     newRow = 0,0.0,0.0, 0.0 #  count, sumZmass, sumAbund, sumNoise
     for mass, abund, resol,baseline , noise, charge,file_name,  bin_low, bin_high, bin in zip(*peakData):
-        count, sumZmass, sumAbund , sum_Sig2Noise = binsData.get(bin, newRow) 
+        count, sumZmass, sumAbund , sum_Sig2Noise = binsData.get(bin, newRow)
         count +=1
         sumZmass += mass
         sumAbund += abund
@@ -861,10 +862,10 @@ def filterBins(binData, minRepetitionRate = 0.70, minSignal2Noise = 1.0, decimal
         (count, sumZmass, sumAbund, sum_sig2Noise) = row[2:]
         minSignal2Noise = 0 if sum_sig2Noise == 0 else minSignal2Noise # in casse there is no signal to noise
         if count >= (maxCount * minRepetitionRate) and (sum_sig2Noise/count) >= minSignal2Noise:
-            binData_filtered[bin]=(count, sumZmass, sumAbund, sum_sig2Noise)        
+            binData_filtered[bin]=(count, sumZmass, sumAbund, sum_sig2Noise)
 
         if idx+1 >= len(sortedBintable): continue
-        
+
         nextrow = sortedBintable[idx+1]  
         # test edge cases
         if abs(nextrow[0]-row[1])<decimal : # row highbin is adjecent nextrow lowbin
@@ -897,14 +898,18 @@ def bins2Peaks(binsData, peakData):
     abunds = peakData[1]
     resols = peakData[2]
     bins_low = peakData[-3]
-    bins_high = peakData[-2] 
+    bins_high = peakData[-2]
     bins = peakData[-1]
     
     filteredRowdata = [(row[0], row[1], row[6]) for row in zip(*peakData) if row[9] in bins_filtered]
     result = zip(*filteredRowdata)
     return result
     
+def reorder4lipidxplorer(filtered_bins):
 
+     log.debug('reorder4lipidxplorer so it goes ms+, msms+,ms-, msms-')
+     filtered_bins1 = collections.OrderedDict(sorted(filtered_bins.items(), key=lambda t: t[0]))
+     return filtered_bins1
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

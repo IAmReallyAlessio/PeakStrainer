@@ -151,8 +151,9 @@ def write2templateMzXML(newfilename, scanPeaks):
             newScan.remove(newScan.find('.//xmlns:precursorMz', namespaces))
         else:
             precursorMz = newScan.find('.//xmlns:precursorMz', namespaces)
-            precursorMz.attrib['activationMethod'] = scan.split()[6][7:10]
-            precursorMz.text = scan.split()[6][:6]
+            match = re.match( r'.* (.*)@(...)', scan, re.M|re.I)
+            precursorMz.attrib['activationMethod'] = match.group(2)
+            precursorMz.text = match.group(1)
 
         newScan.attrib['msLevel'] = str(msLevel)
         newScan.attrib['polarity'] = '-' if ' - ' in scan else '+'
