@@ -18,6 +18,7 @@ import math
 import re
 from _collections import defaultdict
 import collections
+import collections
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 try:
