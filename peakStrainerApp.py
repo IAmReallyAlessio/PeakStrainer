@@ -8,9 +8,6 @@ import wx
 import os
 from peakStrainer import *
 
-from lib.reorderScans.reorderScans import main as reorderscansMain  
-
-
 def main():
     app = wx.App(False)
     frame = MyFrame(None)
@@ -219,7 +216,8 @@ class MyFrame(MyFrame2):
         self.statusLog('Write mzXML file')
         newfilename = filepath[:-4]+ '.mzXML'
         log.info('Writing results to %s', newfilename)
-        write2templateMzXML(newfilename, filtered_bins)
+        filtered_bins_r = reorder4lipidxplorer(filtered_bins)
+        write2templateMzXML(newfilename, filtered_bins_r)
         
         log.debug('finish %f',  time.clock())
     
