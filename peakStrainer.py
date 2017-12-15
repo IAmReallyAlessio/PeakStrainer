@@ -62,7 +62,7 @@ def main(folder , technial_replicates =True, rcf_a=5408000.0, rcf_b=0.5):
     scans = filterScanBy_filterline(scans)
     scans = filterScanBy_samples(scans, step_size = 3)
     '''
-    
+    scans = removeLockFromHeader(scans)
     #Note: mergePeaksOnFilterline_withRandom to generate testing data
     scans = roundCollisionEnergy(scans)
     filterLines = mergePeaksOnFilterline(scans)
@@ -165,6 +165,16 @@ def ThermoRawfile2Scans(file_path):
     # peak_data.mass
     
     return MSrawscans
+
+def removeLockFromHeader(scans):
+    log.info('removeLockFromHeader')
+    newScans = []
+    for scan in scans:
+        scanList = list(scan)
+        header = scanList[1]
+        scanList[1] = header.replace('lock ','')
+        newScans.append(scanList)
+    return newScans
 
 def ThermoRawfile2Scans_RawQuant(file_path):
     log.info('raw file: %s', file_path)
