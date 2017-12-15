@@ -141,13 +141,23 @@ def make_perFile(filtered_peaks):
 
 def isElbowIIT(rawfile, end, scanNum, filterLine):
     nextScan = min(scanNum + 1, end)
+    nextNextScan = min(scanNum + 2, end)
     next_filterLine = rawfile.GetFilterForScanNum(nextScan)
-    if filterLine != next_filterLine:
+    nextNext_filterLine = rawfile.GetFilterForScanNum(nextNextScan)
+    if filterLine != next_filterLine or nextScan == end: # there is no elbow
         return False
     ion_injection_time = rawfile.GetTrailerExtraForScanNum(scanNum)['Ion Injection Time (ms)']
     next_ion_injection_time = rawfile.GetTrailerExtraForScanNum(nextScan)['Ion Injection Time (ms)']
-    isElbow = ion_injection_time > next_ion_injection_time * 2
-    return isElbow
+
+    if next_filterLine != nextNext_filterLine: # can't average so use estimation
+        return ion_injection_time > next_ion_injection_time + (math.sqrt(next_ion_injection_time)*3)
+
+    nextNext_ion_injection_time = rawfile.GetTrailerExtraForScanNum(nextNextScan)['Ion Injection Time (ms)']
+    average = (next_ion_injection_time + nextNext_ion_injection_time)/2
+    stdev = math.sqrt((next_ion_injection_time-average)**2+(nextNext_ion_injection_time-average)**2)
+
+    # TODO use pandas dataframe and getdo groupby and average to get these numbers
+    return ion_injection_time > average + max((stdev*3), (math.sqrt(next_ion_injection_time)*3)) # max used because sometimes the deviation is too small
 
 
 def ThermoRawfile2Scans(file_path):
