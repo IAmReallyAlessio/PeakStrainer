@@ -167,7 +167,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_panel5 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer19 = wx.BoxSizer( wx.VERTICAL )
 		
-		self.m_staticText7 = wx.StaticText( self.m_panel5, wx.ID_ANY, u"Discard Scans", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText7 = wx.StaticText( self.m_panel5, wx.ID_ANY, u"Select Scans", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText7.Wrap( -1 )
 		self.m_staticText7.SetFont( wx.Font( 10, 74, 90, 92, False, "Arial" ) )
 		
