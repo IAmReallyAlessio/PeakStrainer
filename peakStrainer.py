@@ -41,7 +41,7 @@ def main(file):
     scans = filterScanBy_filterline(scans)
     scans = filterScanBy_samples(scans, step_size = 3)
     '''
-    
+    scans = removeLockFromHeader(scans)
     #Note: mergePeaksOnFilterline_withRandom to generate testing data
     filterLines = mergePeaksOnFilterline(scans)
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
@@ -123,6 +123,16 @@ def ThermoRawfile2Scans(file_path):
     # peak_data.mass
     
     return MSrawscans
+
+def removeLockFromHeader(scans):
+    log.info('removeLockFromHeader')
+    newScans = []
+    for scan in scans:
+        scanList = list(scan)
+        header = scanList[1]
+        scanList[1] = header.replace('lock ','')
+        newScans.append(scanList)
+    return newScans
 
 def ThermoRawfile2Scans_csv(scans, filename='ThermoRawfile2Scans.csv'):
     with open(filename, "wb") as csv_file:

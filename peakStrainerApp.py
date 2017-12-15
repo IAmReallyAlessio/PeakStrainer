@@ -149,6 +149,7 @@ class MyFrame(MyFrame2):
         if self.m_checkBox5.GetValue(): scans = filterScanBy_retentionTime(scans, float(self.m_textCtrl2.GetValue()), float(self.m_textCtrl3.GetValue()) )
         #NOTE use try catch notify to validate input
         if self.m_checkBox6.GetValue(): scans = filterScanBy_filterline(scans, self.m_textCtrl4.GetValue(), self.m_radioBox1.GetSelection()==0)
+        if self.m_checkBox61.GetValue(): scans = removeLockFromHeader(scans)
         ''' filtering by scan
         scans = filterScanBy_samples(scans, step_size = 3)
         '''
