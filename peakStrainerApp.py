@@ -141,11 +141,10 @@ class MyFrame(MyFrame2):
         log.debug('Start %f', time.clock())
         
         self.statusLog('Read and select scans from raw file...')
-        scans = ThermoRawfile2Scans(filepath)
+        dropElbowIIT = self.m_checkBox611.GetValue()
+        scans = ThermoRawfile2Scans(filepath, dropElbowIIT)
         if self.m_checkBox8.GetValue(): ThermoRawfile2Scans_csv(scans, self.getCSVpath_file(rawfilename)+'-raw.csv')
                 
-        scans = filterScanBy_first(scans)
-        
         if self.m_checkBox5.GetValue(): scans = filterScanBy_retentionTime(scans, float(self.m_textCtrl2.GetValue()), float(self.m_textCtrl3.GetValue()) )
         #NOTE use try catch notify to validate input
         if self.m_checkBox6.GetValue(): scans = filterScanBy_filterline(scans, self.m_textCtrl4.GetValue(), self.m_radioBox1.GetSelection()==0)

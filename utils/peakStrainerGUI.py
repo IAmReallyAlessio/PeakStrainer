@@ -251,6 +251,24 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer19.Add( bSizer231, 0, wx.EXPAND, 5 )
 		
+		self.m_staticline153 = wx.StaticLine( self.m_panel5, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+		bSizer19.Add( self.m_staticline153, 0, wx.EXPAND |wx.ALL, 5 )
+		
+		bSizer2311 = wx.BoxSizer( wx.HORIZONTAL )
+		
+		self.m_checkBox611 = wx.CheckBox( self.m_panel5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_checkBox611.SetValue(True) 
+		bSizer2311.Add( self.m_checkBox611, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		
+		self.m_staticText1111 = wx.StaticText( self.m_panel5, wx.ID_ANY, u"Remove Scans with increased Ion Injection Time", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText1111.Wrap( -1 )
+		self.m_staticText1111.SetToolTipString( u"unusually increased Ion Injection Time indicates the scan is in transition and is invalid" )
+		
+		bSizer2311.Add( self.m_staticText1111, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		
+		
+		bSizer19.Add( bSizer2311, 0, wx.EXPAND, 5 )
+		
 		
 		self.m_panel5.SetSizer( bSizer19 )
 		self.m_panel5.Layout()
@@ -570,6 +588,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_checkBox5.Bind( wx.EVT_CHECKBOX, self.checkScanRet )
 		self.m_checkBox6.Bind( wx.EVT_CHECKBOX, self.checkScanHead )
 		self.m_checkBox61.Bind( wx.EVT_CHECKBOX, self.checkScanHead )
+		self.m_checkBox611.Bind( wx.EVT_CHECKBOX, self.checkScanHead )
 		self.m_radioBtn10.Bind( wx.EVT_RADIOBUTTON, self.radioPre )
 		self.m_radioBtn11.Bind( wx.EVT_RADIOBUTTON, self.radioPre )
 		self.m_radioBtn9.Bind( wx.EVT_RADIOBUTTON, self.radioBin )
@@ -604,6 +623,7 @@ class MyFrame2 ( wx.Frame ):
 	
 	def checkScanHead( self, event ):
 		event.Skip()
+	
 	
 	
 	def radioPre( self, event ):
