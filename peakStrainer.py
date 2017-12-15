@@ -15,7 +15,6 @@ from utils.peakStrainer_util import write2templateMzXML
 import itertools
 import math
 import collections
-from sqlalchemy.sql.expression import false
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
