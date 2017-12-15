@@ -18,7 +18,6 @@ import math
 import re
 from _collections import defaultdict
 import collections
-import collections
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 try:
@@ -31,7 +30,7 @@ import glob, os
 from pyteomics import mzxml, mzml
 import argparse
 
-__version__ = "17.03.29.0"
+__version__ = "17.12.15.0"
 
 
 def main(folder , technial_replicates =True, rcf_a=5408000.0, rcf_b=0.5):
@@ -55,7 +54,10 @@ def main(folder , technial_replicates =True, rcf_a=5408000.0, rcf_b=0.5):
 
 
     if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
-    
+
+    filename = file #" ".join(sys.argv[1:])
+    if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans, dropElbowIIT = True)
+
     scans = filterScanBy_first(scans)
     ''' filtering by scan
     scans = filterScanBy_retentionTime(scans)
@@ -137,6 +139,16 @@ def make_perFile(filtered_peaks):
             filterlines_of_file[filterline] = (fmass, fintens)
     return outfiles
 
+def isElbowIIT(rawfile, end, scanNum, filterLine):
+    nextScan = min(scanNum + 1, end)
+    next_filterLine = rawfile.GetFilterForScanNum(nextScan)
+    if filterLine != next_filterLine:
+        return False
+    ion_injection_time = rawfile.GetTrailerExtraForScanNum(scanNum)['Ion Injection Time (ms)']
+    next_ion_injection_time = rawfile.GetTrailerExtraForScanNum(nextScan)['Ion Injection Time (ms)']
+    isElbow = ion_injection_time > next_ion_injection_time * 2
+    return isElbow
+
 
 def ThermoRawfile2Scans(file_path):
     if True:
@@ -154,6 +166,12 @@ def ThermoRawfile2Scans(file_path):
         filterLine = rawfile.GetFilterForScanNum(scanNum)
         retTime =  rawfile.RTFromScanNum(scanNum)*60
         row = (scanNum, filterLine, peak_datas, retTime, file_path)
+
+        isElbow = isElbowIIT(rawfile, end, scanNum, filterLine)
+        if dropElbowIIT and isElbow:
+            log.info(' Scan Number {} is removed, it has increased Ion Injection Time, is probably invalid'.format(scanNum))
+            continue
+
         MSrawscans.append(row)
     
     log.info('Scan Count is %d', len(MSrawscans))

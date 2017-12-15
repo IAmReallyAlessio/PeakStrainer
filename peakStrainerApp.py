@@ -8,7 +8,7 @@ import wx
 import os
 from peakStrainer import *
 
-from lib.reorderScans.reorderScans import main as reorderscansMain  
+from lib.reorderScans.reorderScans import main as reorderscansMain
 from lib.simStitching.simStitcherApp import  main as simStitcherMain
 
 
@@ -73,7 +73,7 @@ class MyFrame(MyFrame2):
         
     def checkRoundCollision( self, event ):
         self.m_spinCtrl11.Enable(self.m_checkBox61.GetValue())
-        
+
     def checkOutcsv( self, event ):
         self.m_dirPicker1.Enable(self.m_checkBox8.GetValue())
     
@@ -91,12 +91,12 @@ class MyFrame(MyFrame2):
         # signal to noise ratio
         self.m_staticline18121.Enable(self.m_radioBtn111.GetValue())
         self.m_textCtrl612.Enable(self.m_radioBtn111.GetValue())
-    
+
     
     def clickedFinish( self, event ):
         self.m_notebook1.SetSelection(self.m_notebook1.GetPageCount()-1)
         self.run_all()
-        
+
     def clickedSimStitcher( self, event ):
         simStitcherMain()
 
@@ -118,7 +118,7 @@ class MyFrame(MyFrame2):
                 self.m_statuslog.WriteText('\n *** THERE WAS A PROBLEM PROCESSING THE FILE *** \n'+ filepath+ '\n')
                 self.m_statuslog.WriteText(str(e))
                 print(e)
-            
+
             self.m_statuslog.WriteText('finished filepath '+ filepath+ '\n')
             self.m_statuslog.WriteText('=========================='+ '\n')
         
@@ -156,16 +156,16 @@ class MyFrame(MyFrame2):
         log.debug('Start %f', time.clock())
         
         self.statusLog('Read and select scans from raw file...')
-        scans = ThermoRawfile2Scans(filepath)
+        dropElbowIIT = self.m_checkBox611.GetValue()
+        scans = ThermoRawfile2Scans(filepath, dropElbowIIT)
         if self.m_checkBox8.GetValue(): ThermoRawfile2Scans_csv(scans, self.getCSVpath_file(rawfilename)+'-raw.csv')
-        
-        scans = filterScanBy_first(scans)
-        
-        if self.m_checkBox61.GetValue(): 
+                
+        # scans = filterScanBy_first(scans)
+
+        if self.m_checkBox61.GetValue():
             dp = int(self.m_spinCtrl11.GetValue())
             scans = roundCollisionEnergy(scans,dp )
-       
-        
+
         if self.m_checkBox5.GetValue(): scans = filterScanBy_retentionTime(scans, float(self.m_textCtrl2.GetValue()), float(self.m_textCtrl3.GetValue()) )
         #NOTE use try catch notify to validate input
         if self.m_checkBox6.GetValue(): scans = filterScanBy_filterline(scans, self.m_textCtrl4.GetValue(), self.m_radioBox1.GetSelection()==0)
@@ -228,7 +228,7 @@ class MyFrame(MyFrame2):
         
         self.statusLog('Filter out bins ...')
         if self.m_radioBtn101.GetValue(): filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
-        if self.m_radioBtn111.GetValue(): 
+        if self.m_radioBtn111.GetValue():
             minRepetitionRate = (self.m_spinCtrl21.GetValue() * 0.01)
             minSingnal2Noise = float(self.m_textCtrl612.GetValue())
             filterlines_filtered = {k: filterBins(v, minRepetitionRate = minRepetitionRate, minSignal2Noise = minSingnal2Noise ) for k, v in filterlines_binData.iteritems()}
