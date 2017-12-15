@@ -33,9 +33,9 @@ def main(file):
 #         raise SystemExit
     
     filename = file #" ".join(sys.argv[1:])
-    if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans, dropElbowIIT = True)
+    scans = ThermoRawfile2Scans(filename, dropElbowIIT = True)
+    if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
     
-    scans = filterScanBy_first(scans)
     ''' filtering by scan
     scans = filterScanBy_retentionTime(scans)
     scans = filterScanBy_filterline(scans)
@@ -165,11 +165,6 @@ def ThermoRawfile2Scans_csv(scans, filename='ThermoRawfile2Scans.csv'):
 Filter on scans
 '''
                 
-def filterScanBy_first(scans, n = 1):
-    log.info('filterScanBy_first %d scans', n)
-    
-    return scans[n:]
-    
 def filterScanBy_retentionTime(scans, lowSeconds=0.5, highSeconds=float("inf")):
     log.info('filterScanBy_retentionTime %f to %f', lowSeconds, highSeconds)
     result = []
