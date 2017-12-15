@@ -85,8 +85,8 @@ class MyFrame2 ( wx.Frame ):
 		
 		self.m_button4 = wx.Button( self.m_panel3, wx.ID_ANY, u"simStitcher", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer7.Add( self.m_button4, 0, wx.ALL, 5 )
-		
-		
+
+
 		bSizer5.Add( bSizer7, 0, 0, 5 )
 		
 		
@@ -170,7 +170,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_panel5 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer19 = wx.BoxSizer( wx.VERTICAL )
 		
-		self.m_staticText7 = wx.StaticText( self.m_panel5, wx.ID_ANY, u"Discard Scans that are not selected", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText7 = wx.StaticText( self.m_panel5, wx.ID_ANY, u"Select Scans", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText7.Wrap( -1 )
 		self.m_staticText7.SetFont( wx.Font( 10, 74, 90, 92, False, "Arial" ) )
 		
@@ -238,25 +238,25 @@ class MyFrame2 ( wx.Frame ):
 		
 		self.m_staticline111 = wx.StaticLine( self.m_panel5, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
 		bSizer19.Add( self.m_staticline111, 0, wx.EXPAND |wx.ALL, 5 )
-		
+
 		bSizer231 = wx.BoxSizer( wx.HORIZONTAL )
-		
+
 		self.m_checkBox61 = wx.CheckBox( self.m_panel5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer231.Add( self.m_checkBox61, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
-		
+
 		self.m_staticText111 = wx.StaticText( self.m_panel5, wx.ID_ANY, u"Round Collision Energy Decimal places", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText111.Wrap( -1 )
 		bSizer231.Add( self.m_staticText111, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
-		
+
 		self.m_spinCtrl11 = wx.SpinCtrl( self.m_panel5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 0, 6, 6 )
 		self.m_spinCtrl11.Enable( False )
-		
+
 		bSizer231.Add( self.m_spinCtrl11, 0, wx.ALL, 5 )
-		
-		
+
+
 		bSizer19.Add( bSizer231, 0, wx.EXPAND, 5 )
-		
-		
+
+
 		self.m_panel5.SetSizer( bSizer19 )
 		self.m_panel5.Layout()
 		bSizer19.Fit( self.m_panel5 )
@@ -521,23 +521,23 @@ class MyFrame2 ( wx.Frame ):
 		bSizer251.Add( bSizer261, 0, wx.EXPAND, 5 )
 		
 		bSizer2611 = wx.BoxSizer( wx.HORIZONTAL )
-		
+
 		self.m_staticline18121 = wx.StaticText( self.m_panel8, wx.ID_ANY, u"Minimum signal to noise ratio", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticline18121.Wrap( -1 )
 		self.m_staticline18121.SetFont( wx.Font( 9, 74, 90, 92, False, "Arial" ) )
 		self.m_staticline18121.Enable( False )
-		
+
 		bSizer2611.Add( self.m_staticline18121, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
-		
+
 		self.m_textCtrl612 = wx.TextCtrl( self.m_panel8, wx.ID_ANY, u"1.0", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_textCtrl612.Enable( False )
-		
+
 		bSizer2611.Add( self.m_textCtrl612, 0, wx.ALL, 5 )
-		
-		
+
+
 		bSizer251.Add( bSizer2611, 0, wx.EXPAND, 5 )
-		
-		
+
+
 		self.m_panel8.SetSizer( bSizer251 )
 		self.m_panel8.Layout()
 		bSizer251.Fit( self.m_panel8 )
@@ -612,10 +612,10 @@ class MyFrame2 ( wx.Frame ):
 	
 	def clickOpenSpecReord( self, event ):
 		event.Skip()
-	
+
 	def clickedSimStitcher( self, event ):
 		event.Skip()
-	
+
 	def checkOutcsv( self, event ):
 		event.Skip()
 	
@@ -630,10 +630,10 @@ class MyFrame2 ( wx.Frame ):
 	
 	def checkScanHead( self, event ):
 		event.Skip()
-	
+
 	def checkRoundCollision( self, event ):
 		event.Skip()
-	
+
 	def radioPre( self, event ):
 		event.Skip()
 	
