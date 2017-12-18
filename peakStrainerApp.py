@@ -7,6 +7,7 @@ from utils.peakStrainerGUI import MyFrame2
 import wx
 import os
 from peakStrainer import *
+from lib.reorderScans.reorderScans import main as reorderscansMain
 
 def main():
     app = wx.App(False)
