@@ -142,10 +142,6 @@ class MyFrame(MyFrame1):
             self.directoryUpdated(None)
         
     def directoryUpdated( self, event ):
-        if event is None: 
-            self.model.source = []
-        else:
-            self.model.source = getSourceList(self.m_dirPicker1.GetPath())
         self.m_listBox1.Set(self.model.source)
         self.model.target = []
         self.m_listBox2.Set(self.model.target)
