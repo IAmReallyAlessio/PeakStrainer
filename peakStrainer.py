@@ -115,6 +115,7 @@ def main(folder , technial_replicates =True, rcf_a=5408000.0, rcf_b=0.5):
 
     for perfile in perFiles:
         filtered_bins = perFiles[perfile]
+        filtered_bins = reorder4lipidxplorer(filtered_bins)
         newfilename = perfile[:-4]+ '.mzXML'
         log.info('Writing results to %s', newfilename)
         write2templateMzXML(newfilename, filtered_bins)
@@ -169,7 +170,7 @@ def ThermoRawfile2Scans(file_path):
     
     start = rawfile.FirstSpectrumNumber
     end = rawfile.GetLastSpectrumNumber()
- 
+
     MSrawscans = []
     for scanNum in range(start, end+1):
         peak_datas = rawfile.GetLabelData(scanNum)[0]
@@ -333,7 +334,7 @@ Filter on scans
                 
 def filterScanBy_first(scans, n = 1):
     log.info('filterScanBy_first %d scans', n)
-    
+
     return scans[n:]
 def roundCollisionEnergy(scans, decimal_places = 6):
     log.info('roundCollisionEnergy in header to merge scans to %d decimal places', decimal_places)
