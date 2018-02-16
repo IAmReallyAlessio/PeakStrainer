@@ -22,7 +22,7 @@ __version__ = "17.12.15.0"
 
 
 def main(file):
-    log.setLevel(logging.DEBUG)
+    log.setLevel(logging.INFO)
     if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
     if log.level == logging.DEBUG:logging.basicConfig(filename='peakStrainer.log',filemode='w')
     
@@ -87,8 +87,7 @@ def main(file):
     # can't use filtered bins in mzxml because it is not readable by seems
     filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
     
-#     order = [' ms ', '.33-', ' ms ']
-#     filtered_bins = reorderScans(filtered_bins, order)
+    filtered_bins = reorder4lipidxplorer(filtered_bins)
     
     newfilename = filename[:-4]+ '.mzXML'
     log.info('Writing results to %s', newfilename)
