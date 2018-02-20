@@ -14,7 +14,10 @@ class mySimStitcherFrame(SimStitcherFrame):
     def filecChanged( self, event ):
         filepath  = self.m_filePicker1.GetPath()
         doCompare = self.m_checkBox1.GetValue()
-        simStitcher(filepath, doCompare)
+        simStitcher(filepath, doCompare, self.callback)
+    
+    def callback(self, message):
+        print(message)
         
     
 def main():

@@ -9,6 +9,7 @@ import re
 from base64 import b64decode
 from array import array
 from collections import namedtuple
+import warnings
 log = logging.getLogger(os.path.basename(__file__))
 from utils.peakStrainer_util import getMZXMLEncondedScans, decode_mzXML_Peaks, write2templateMzXML
 from itertools import compress
@@ -228,7 +229,7 @@ def project_ms2sim(matchingSims, popts):
     simIntens_Corrected = [matchingSim[1] * correctionFactors[idx] for idx, matchingSim in enumerate(matchingSims)]
     return [matchingSim + (simIntens_Corrected[idx],) for idx, matchingSim in enumerate(matchingSims)]
 
-def simStitcher(filePath = None, doCompare = True):
+def simStitcher(filePath = None, doCompare = True, callback = None):
     log.setLevel(logging.DEBUG)
     log.addHandler(logging.StreamHandler()) # log to console
     if log.level == logging.DEBUG: logging.basicConfig(filename='simSitcher.log',filemode='w')
@@ -267,6 +268,8 @@ def simStitcher(filePath = None, doCompare = True):
         masses, intens = scan.nonOverlapPeaks()
         scans_stitched.setdefault(head, ([],[]))[0].extend(masses)
         scans_stitched.setdefault(head, ([],[]))[1].extend(intens)
+        
+    
     
     log.info('stitched scans:')
     log.info('\n'.join(scans_stitched.keys()))
@@ -284,7 +287,22 @@ def simStitcher(filePath = None, doCompare = True):
     log.info('renamed stitched scans:')
     log.info('\n'.join(scans_stitched.keys()))
     
+    log.info('check if stitched scans have gaps')
+    maxGap = scans[0].filterLine._high() - scans[0].filterLine._low()
+    delList =set()
+    for key in scans_stitched:
+        masses, _ = scans_stitched[key]
+        
+        for next, mass in zip(masses[1:], masses[:-1]):
+           if next - mass > maxGap:
+               log.error("***gap between two sims is larger than sim,  {} it will be removed ***".format(key))
+               if callback:
+                   callback("***gap between two sims is larger than sim,  {} it will be removed ***".format(key))
+               delList.add(key)
     
+    for  key in   delList:
+        del scans_stitched[key]
+                
     log.info('writing to :'+outputStitchedFile(filePath))
     write2templateMzXML(outputStitchedFile(filePath), scans_stitched)      
     
