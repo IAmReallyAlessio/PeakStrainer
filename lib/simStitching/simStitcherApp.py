@@ -17,25 +17,25 @@ class mySimStitcherFrame(SimStitcherFrame):
 #         simStitcher(filepath, doCompare)
         wildcard = "mzXML (*.mzXML)|*.mzxml;*MZXML"
         dlg = wx.FileDialog(self, message="Select your files",defaultDir=os.getcwd(),defaultFile="*.mzXML", wildcard=wildcard, style=wx.OPEN|wx.MULTIPLE)
- 
+
         if dlg.ShowModal() == wx.ID_OK:
             self.path, file = os.path.split(dlg.GetPath())
             self.fileNames = dlg.GetFilenames()
-                  
+
             self.m_textCtrl1.SetValue(str(self.path).replace('\\\\', '\\')+' '+ str(len(self.fileNames))+' files')
             self.m_button2.Enable(True)
             self.m_gauge1.SetValue(0)
-    
+
 
     def clickStart( self, event ):
         self.run_all()
-    
+
     def radioDefault( self, event ):
         self.RadioCustom(event)
-    
+
     def RadioCustom( self, event ):
         self.m_textCtrl4.Enable(self.m_radioBtn41.GetValue())
-        
+
     def checkCut( self, event ):
         print 'checkCut' + str(self.m_checkBox11.GetValue())
         if self.m_checkBox11.GetValue():
@@ -43,7 +43,7 @@ class mySimStitcherFrame(SimStitcherFrame):
         else:
             self.m_checkBox1.SetValue(False)
             self.checkScale(event)
-        
+
     def checkScale( self, event ):
 #         print 'checkScale' + str(self.m_checkBox1.GetValue())
         if self.m_checkBox1.GetValue():
@@ -52,9 +52,9 @@ class mySimStitcherFrame(SimStitcherFrame):
         else:
             self.m_checkBox12.SetValue(False)
             self.checkAdapt(event)
-            
-        
-    
+
+
+
     def checkAdapt( self, event ):
 #         print 'checkAdapt' + str(self.m_checkBox12.GetValue())
         if self.m_checkBox12.GetValue():
@@ -62,14 +62,14 @@ class mySimStitcherFrame(SimStitcherFrame):
             self.checkScale(event)
         else:
             pass
-        
+
         if self.m_checkBox12.GetValue():
             dlg = wx.MessageDialog(self, 'This option is used to show SIM edges are not consistent\n please use with caution. ', 'Warning', wx.OK | wx.ICON_WARNING)
             dlg.ShowModal()
             dlg.Destroy()
-        
-        
-           
+
+
+
     def get_simEdge(self):
         if self.m_radioBtn31.GetValue(): return 5 # its default
         try:
@@ -79,7 +79,7 @@ class mySimStitcherFrame(SimStitcherFrame):
             dlg.ShowModal()
             dlg.Destroy()
             raise ValueError('text must be a float')
-    
+
     def run_all(self):
 #         self.path
 #         self.fileNames
@@ -87,11 +87,11 @@ class mySimStitcherFrame(SimStitcherFrame):
 
         scaleToCenterMass = self.m_checkBox1.GetValue()
         adaptByRegresion = self.m_checkBox12.GetValue()
-#         cut1 = self.m_checkBox11.GetValue() 
+#         cut1 = self.m_checkBox11.GetValue()
         daltons = self.get_simEdge() if self.m_checkBox11.GetValue() else 0.
         loglevel = int(self.m_slider1.GetValue())
-        
-        
+
+
         for onefile in self.fileNames:
             filepath = str(self.path+'\\'+onefile)
             self.m_gauge1.SetValue(self.m_gauge1.GetValue() + gaugeStep)
@@ -104,9 +104,19 @@ class mySimStitcherFrame(SimStitcherFrame):
                 dlg.ShowModal()
                 dlg.Destroy()
                 self.m_gauge1.SetValue(self.m_gauge1.GetValue() - gaugeStep)
-                
+
         raise SystemExit
-            
+
+
+    def filecChanged(self, event):
+        filepath = self.m_filePicker1.GetPath()
+        doCompare = self.m_checkBox1.GetValue()
+        simStitcher(filepath, doCompare, self.callback)
+
+
+    def callback(self, message):
+        print(message)
+
     
 def main():
     app = wx.App(False)
