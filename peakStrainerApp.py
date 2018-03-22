@@ -119,7 +119,7 @@ class MyFrame(MyFrame2):
         
         if self.m_checkBox2.GetValue(): reorderscansMain(self.path)
             
-        raise SystemExit
+#         raise SystemExit
     
 
     def getLoglevel(self):
@@ -183,8 +183,12 @@ class MyFrame(MyFrame2):
         if self.m_radioBtn1.GetValue(): filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
         if self.m_radioBtn4.GetValue(): 
             #     for different function for ms and for msms
-            filterlines_withBins_ms = {k: generateBins_resolutionPowerFunc(v, self.m_textCtrl61.GetValue(), self.m_textCtrl71.GetValue() ) for k, v in filterLines.iteritems() if ' ms ' in k }
-            filterlines_withBins_msms = {k: generateBins_resolutionPowerFunc(v, self.m_textCtrl611.GetValue(), self.m_textCtrl711.GetValue() ) for k, v in filterLines.iteritems() if ' ms ' not in k}
+            a= float(self.m_textCtrl61.GetValue())
+            b= float(self.m_textCtrl71.GetValue())
+            aa= float(self.m_textCtrl611.GetValue())
+            bb = float(self.m_textCtrl711.GetValue())
+            filterlines_withBins_ms = {k: generateBins_resolutionPowerFunc(v, a, b ) for k, v in filterLines.iteritems() if ' ms ' in k }
+            filterlines_withBins_msms = {k: generateBins_resolutionPowerFunc(v,aa , bb ) for k, v in filterLines.iteritems() if ' ms ' not in k}
             filterlines_withBins = filterlines_withBins_ms.update(filterlines_withBins_msms)
             
         
