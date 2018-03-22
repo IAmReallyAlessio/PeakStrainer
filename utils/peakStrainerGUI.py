@@ -29,7 +29,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer30 = wx.BoxSizer( wx.VERTICAL )
 		
-		self.m_staticText1 = wx.StaticText( self.m_panel1, wx.ID_ANY, u"PeakStrainer", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText1 = wx.StaticText( self.m_panel1, wx.ID_ANY, u"PeakStrainer Development", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText1.Wrap( -1 )
 		self.m_staticText1.SetFont( wx.Font( 14, 74, 90, 92, False, "Arial" ) )
 		
@@ -236,6 +236,26 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer19.Add( bSizer23, 0, wx.EXPAND, 5 )
 		
+		self.m_staticline111 = wx.StaticLine( self.m_panel5, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+		bSizer19.Add( self.m_staticline111, 0, wx.EXPAND |wx.ALL, 5 )
+		
+		bSizer231 = wx.BoxSizer( wx.HORIZONTAL )
+		
+		self.m_checkBox61 = wx.CheckBox( self.m_panel5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer231.Add( self.m_checkBox61, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		
+		self.m_staticText111 = wx.StaticText( self.m_panel5, wx.ID_ANY, u"Round Collision Energy Decimal places", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText111.Wrap( -1 )
+		bSizer231.Add( self.m_staticText111, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		
+		self.m_spinCtrl11 = wx.SpinCtrl( self.m_panel5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 0, 6, 6 )
+		self.m_spinCtrl11.Enable( False )
+		
+		bSizer231.Add( self.m_spinCtrl11, 0, wx.ALL, 5 )
+		
+		
+		bSizer19.Add( bSizer231, 0, wx.EXPAND, 5 )
+		
 		
 		self.m_panel5.SetSizer( bSizer19 )
 		self.m_panel5.Layout()
@@ -310,7 +330,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer42 = wx.BoxSizer( wx.HORIZONTAL )
 		
-		self.m_radioBtn9 = wx.RadioButton( self.m_panel7, wx.ID_ANY, u"Use Default", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_radioBtn9 = wx.RadioButton( self.m_panel7, wx.ID_ANY, u"Use Default (a= 5408000.0, b=0.5)", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_radioBtn9.SetValue( True ) 
 		self.m_radioBtn9.SetFont( wx.Font( 9, 74, 90, 92, False, "Arial" ) )
 		
@@ -555,6 +575,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_checkBox10.Bind( wx.EVT_CHECKBOX, self.checkOutConf )
 		self.m_checkBox5.Bind( wx.EVT_CHECKBOX, self.checkScanRet )
 		self.m_checkBox6.Bind( wx.EVT_CHECKBOX, self.checkScanHead )
+		self.m_checkBox61.Bind( wx.EVT_CHECKBOX, self.checkRoundCollision )
 		self.m_radioBtn10.Bind( wx.EVT_RADIOBUTTON, self.radioPre )
 		self.m_radioBtn11.Bind( wx.EVT_RADIOBUTTON, self.radioPre )
 		self.m_radioBtn9.Bind( wx.EVT_RADIOBUTTON, self.radioBin )
@@ -591,6 +612,9 @@ class MyFrame2 ( wx.Frame ):
 		event.Skip()
 	
 	def checkScanHead( self, event ):
+		event.Skip()
+	
+	def checkRoundCollision( self, event ):
 		event.Skip()
 	
 	def radioPre( self, event ):

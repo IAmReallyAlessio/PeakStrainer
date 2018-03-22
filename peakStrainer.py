@@ -14,6 +14,7 @@ import csv
 from utils.peakStrainer_util import write2templateMzXML
 import itertools
 import math
+import re
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
 
@@ -42,6 +43,7 @@ def main(file):
     '''
     
     #Note: mergePeaksOnFilterline_withRandom to generate testing data
+    scans = roundCollisionEnergy(scans)
     filterLines = mergePeaksOnFilterline(scans)
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
     
@@ -141,6 +143,21 @@ def filterScanBy_first(scans, n = 1):
     log.info('filterScanBy_first %d scans', n)
     
     return scans[n:]
+
+def roundCollisionEnergy(scans, decimal_places = 6):
+    log.info('roundCollisionEnergy in header to merge scans to %d decimal places', decimal_places)
+    result = []
+    for row in scans:
+        scanNum, filterLine, peak_datas, retTime = row 
+        if ' ms2 ' in filterLine:
+            m = re.match(r'(.*) (\d+\.\d*)@(.*)', filterLine)
+            colisionEnergy = float(m.groups()[1])
+            new_colisionEnergy = round(colisionEnergy, decimal_places)
+            new_filterLine = m.groups()[0] +' '+ str(new_colisionEnergy) +'@'+ m.groups()[2]
+            row = scanNum, new_filterLine, peak_datas, retTime
+        result.append(row)
+
+    return result
     
 def filterScanBy_retentionTime(scans, lowSeconds=0.5, highSeconds=float("inf")):
     log.info('filterScanBy_retentionTime %f to %f', lowSeconds, highSeconds)

@@ -71,6 +71,9 @@ class MyFrame(MyFrame2):
         self.m_textCtrl4.Enable(self.m_checkBox6.GetValue())
         self.m_radioBox1.Enable(self.m_checkBox6.GetValue())
         
+    def checkRoundCollision( self, event ):
+        self.m_spinCtrl11.Enable(self.m_checkBox61.GetValue())
+        
     def checkOutcsv( self, event ):
         self.m_dirPicker1.Enable(self.m_checkBox8.GetValue())
     
@@ -108,8 +111,10 @@ class MyFrame(MyFrame2):
             self.m_statuslog.WriteText('Starting filepath '+ filepath + '\n')
             try:
                 self.run_once(filepath, onefile)
-            except :
+            except Exception as e:
                 self.m_statuslog.WriteText('\n *** THERE WAS A PROBLEM PROCESSING THE FILE *** \n'+ filepath+ '\n')
+                self.m_statuslog.WriteText(e)
+                print(e)
             
             self.m_statuslog.WriteText('finished filepath '+ filepath+ '\n')
             self.m_statuslog.WriteText('=========================='+ '\n')
@@ -150,8 +155,13 @@ class MyFrame(MyFrame2):
         self.statusLog('Read and select scans from raw file...')
         scans = ThermoRawfile2Scans(filepath)
         if self.m_checkBox8.GetValue(): ThermoRawfile2Scans_csv(scans, self.getCSVpath_file(rawfilename)+'-raw.csv')
-                
+        
         scans = filterScanBy_first(scans)
+        
+        if self.m_checkBox61.GetValue(): 
+            dp = int(self.m_spinCtrl11.GetValue())
+            scans = roundCollisionEnergy(scans,dp )
+       
         
         if self.m_checkBox5.GetValue(): scans = filterScanBy_retentionTime(scans, float(self.m_textCtrl2.GetValue()), float(self.m_textCtrl3.GetValue()) )
         #NOTE use try catch notify to validate input
