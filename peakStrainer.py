@@ -17,6 +17,7 @@ import math
 import re
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
+from pyteomics import mzxml 
 
 __version__ = "17.03.29.0"
 
@@ -32,7 +33,13 @@ def main(file):
 #         raise SystemExit
     
     filename = file #" ".join(sys.argv[1:])
-    scans = ThermoRawfile2Scans(filename)
+    extension = os.path.splitext(filename)[1]
+    if extension.lower() == '.raw':
+        scans = ThermoRawfile2Scans(filename)
+    elif extension.lower() == '.mzxml':
+        scans = mzXML2Scans(filename)
+    
+    
     if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
     
     scans = filterScanBy_first(scans)
@@ -101,7 +108,7 @@ def main(file):
 
 def ThermoRawfile2Scans(file_path):
     # NOTE: for testing use ThermoRawfile2Scans_sample instead
-    log.info('file: %s', file_path)
+    log.info('raw file: %s', file_path)
     rawfile = MSFileReader.ThermoRawfile(file_path)
     
     start = rawfile.FirstSpectrumNumber
@@ -123,6 +130,24 @@ def ThermoRawfile2Scans(file_path):
     # peak_data = peak_datas[0]
     # peak_data.mass
     
+    return MSrawscans
+
+def mzXML2Scans(file_path):
+    log.info('mzXMXL file: %s', file_path)
+    MSrawscans = []
+    with mzxml.read(file_path) as reader:
+        for spectrum in reader:
+# (zmass, abunds, resols, baseline , noise, charge) = peakData
+            scanNum = spectrum['num']
+            count = len(spectrum['m/z array'])
+            peak_datas = (spectrum['m/z array'], spectrum['intensity array'], [None]*count,[None]*count,[None]*count,[None]*count)
+            filterLine = spectrum['filterLine']
+            retTime =  spectrum['retentionTime']
+            row = (scanNum, filterLine, peak_datas, retTime)
+            MSrawscans.append(row)
+        
+    
+    log.info('Scan Count is %d', len(MSrawscans))
     return MSrawscans
 
 def ThermoRawfile2Scans_csv(scans, filename='ThermoRawfile2Scans.csv'):
