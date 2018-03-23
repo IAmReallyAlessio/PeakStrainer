@@ -17,7 +17,7 @@ import math
 import re
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
-from pyteomics import mzxml 
+from pyteomics import mzxml, mzml
 
 __version__ = "17.03.29.0"
 
@@ -32,12 +32,14 @@ def main(file):
 #         print("A filename must be provided")
 #         raise SystemExit
     
-    filename = file #" ".join(sys.argv[1:])
+    filename = " ".join(sys.argv[1:])
     extension = os.path.splitext(filename)[1]
     if extension.lower() == '.raw':
         scans = ThermoRawfile2Scans(filename)
     elif extension.lower() == '.mzxml':
         scans = mzXML2Scans(filename)
+    elif extension.lower() == '.mzml':
+        scans = mzML2Scans(filename)
     
     
     if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
@@ -133,7 +135,7 @@ def ThermoRawfile2Scans(file_path):
     return MSrawscans
 
 def mzXML2Scans(file_path):
-    log.info('mzXMXL file: %s', file_path)
+    log.info('mzXML file: %s', file_path)
     MSrawscans = []
     with mzxml.read(file_path) as reader:
         for spectrum in reader:
@@ -143,6 +145,30 @@ def mzXML2Scans(file_path):
             peak_datas = (spectrum['m/z array'], spectrum['intensity array'], [None]*count,[None]*count,[None]*count,[None]*count)
             filterLine = spectrum['filterLine']
             retTime =  spectrum['retentionTime']
+            row = (scanNum, filterLine, peak_datas, retTime)
+            MSrawscans.append(row)
+        
+    
+    log.info('Scan Count is %d', len(MSrawscans))
+    return MSrawscans
+
+def mzML2Scans(file_path):
+    log.info('mzML file: %s', file_path)
+    MSrawscans = []
+    with mzml.read(file_path) as reader:
+        for spectrum in reader:
+# (zmass, abunds, resols, baseline , noise, charge) = peakData
+            id = spectrum['id']
+            m = re.match(r'.* scan=(\d)', id)
+            scanNum = int(m.groups()[0])
+            
+            if len(spectrum['scanList']['scan']) > 1:
+                log.error('scanList for single scan is more than 1 for: {}'.format(id))
+                
+            count = len(spectrum['m/z array'])
+            peak_datas = (spectrum['m/z array'], spectrum['intensity array'], [None]*count,[None]*count,[None]*count,[None]*count)
+            filterLine = spectrum['scanList']['scan'][0]['filter string']
+            retTime =  spectrum['scanList']['scan'][0]['scan start time']*60
             row = (scanNum, filterLine, peak_datas, retTime)
             MSrawscans.append(row)
         
