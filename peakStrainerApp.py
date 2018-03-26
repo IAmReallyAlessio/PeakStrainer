@@ -113,7 +113,7 @@ class MyFrame(MyFrame2):
                 self.run_once(filepath, onefile)
             except Exception as e:
                 self.m_statuslog.WriteText('\n *** THERE WAS A PROBLEM PROCESSING THE FILE *** \n'+ filepath+ '\n')
-                self.m_statuslog.WriteText(e)
+                self.m_statuslog.WriteText(str(e))
                 print(e)
             
             self.m_statuslog.WriteText('finished filepath '+ filepath+ '\n')
@@ -199,8 +199,9 @@ class MyFrame(MyFrame2):
             bb = float(self.m_textCtrl711.GetValue())
             filterlines_withBins_ms = {k: generateBins_resolutionPowerFunc(v, a, b ) for k, v in filterLines.iteritems() if ' ms ' in k }
             filterlines_withBins_msms = {k: generateBins_resolutionPowerFunc(v,aa , bb ) for k, v in filterLines.iteritems() if ' ms ' not in k}
-            filterlines_withBins = filterlines_withBins_ms.update(filterlines_withBins_msms)
-            
+            filterlines_withBins = filterlines_withBins_ms
+            filterlines_withBins.update(filterlines_withBins_msms)
+            print len(filterlines_withBins)
         
         if self.m_checkBox8.GetValue(): filterlinePeaks_csv(filterlines_withBins,self.getCSVpath_file(rawfilename)+'-generateBins.csv')
         
