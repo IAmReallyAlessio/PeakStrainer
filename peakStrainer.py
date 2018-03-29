@@ -253,7 +253,7 @@ def mergePeaksOnFilterline(scans):
     # create dict
     mergedPeaks = {}
     for filterLine in filterLines:
-        mergedPeaks[filterLine]=([],[],[])
+        mergedPeaks[filterLine]=([],[],[],[],[],[])
         
 #     populate dict
     for scanNo, filterLine, peakData, retTime in scans:
@@ -261,6 +261,9 @@ def mergePeaksOnFilterline(scans):
         mergedPeaks[filterLine][0].extend(zmass)
         mergedPeaks[filterLine][1].extend(abunds)
         mergedPeaks[filterLine][2].extend(resols)
+        mergedPeaks[filterLine][3].extend(baseline)
+        mergedPeaks[filterLine][4].extend(noise)
+        mergedPeaks[filterLine][5].extend(charge)
     
     return mergedPeaks
 
@@ -347,7 +350,7 @@ def generateBins_decimalPlaces(peakData, decimal_places = 4):
     bins_low = [ round(mass-halfWidth,decimal_places) for mass in masses]
     bins_high = [ round(mass+halfWidth,decimal_places) for mass in masses] 
     
-    peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
+    peakData += (bins_low, bins_high)
     return peakData
 
 def generateBins_resolution(peakData, decimal_places = 4):
@@ -364,7 +367,7 @@ def generateBins_resolution(peakData, decimal_places = 4):
     bins_low = [round(mass-halfWidth,decimal_places ) for mass in bins_low]
     bins_high = [round(mass+halfWidth,decimal_places ) for mass in bins_high]
     
-    peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
+    peakData += ( bins_low, bins_high)
     return peakData
 
 def peakWidth_at_hight(abunds, highth = 0.95):
@@ -415,7 +418,7 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
     bins_high = [round(mass+halfWidth,decimal_places ) for mass in bins_high]
     
     
-    peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
+    peakData += ( bins_low, bins_high)
     return peakData
 
 def generateBins_resolutionPowerFunc(peakData, a = 1.0, minus_b = 1.0, decimal_places = 4):
@@ -439,8 +442,7 @@ def generateBins_resolutionPowerFunc(peakData, a = 1.0, minus_b = 1.0, decimal_p
     bins_low = [round(mass-halfWidth,decimal_places ) for mass in bins_low]
     bins_high = [round(mass+halfWidth,decimal_places ) for mass in bins_high]
     
-    
-    peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
+    peakData += (bins_low, bins_high)
     return peakData
 
 def generateBins_theoreticalIntensity(peakData, decimal_places = 4):
@@ -474,7 +476,7 @@ def generateBins_theoreticalIntensity(peakData, decimal_places = 4):
     bins_high = [round(mass+halfWidth,decimal_places ) for mass in bins_high]
     
     
-    peakData = (peakData[0], peakData[1], peakData[2], bins_low, bins_high)
+    peakData += (bins_low, bins_high)
     return peakData
 
 def alterBins_mergeOverlap(peakData):
@@ -485,8 +487,8 @@ def alterBins_mergeOverlap(peakData):
     masses =    list(sortedPeakData[0])
     abunds =    list(sortedPeakData[1])
     resols =    list(sortedPeakData[2])
-    bins_low =  list(sortedPeakData[3])
-    bins_high = list(sortedPeakData[4])
+    bins_low =  list(sortedPeakData[6])
+    bins_high = list(sortedPeakData[7])
     
     while True: #bubble check
         changeCount = 0
@@ -512,7 +514,7 @@ def alterBins_mergeOverlap(peakData):
         log.debug('merged %d pairs of bins', changeCount)
         if changeCount == 0 : break
                 
-    peakData = (masses, abunds, resols, bins_low, bins_high)
+    peakData = tuple(sortedPeakData[:-2]) + (bins_low, bins_high)
     return peakData 
     
 '''
@@ -523,8 +525,8 @@ def sortMassIn_FirstBin(peakData):
     masses = peakData[0]
     abunds = peakData[1]
     resols = peakData[2]
-    bins_low = peakData[3]
-    bins_high = peakData[4]
+    bins_low = peakData[6]
+    bins_high = peakData[7]
     
     uniqBins = set(zip(bins_low,bins_high))
     log.debug('Mass count %d, available bins %d', len(masses), len(uniqBins))
@@ -547,12 +549,12 @@ def sortMassIn_FirstBin(peakData):
         log.error('There was a problem setting masses in bins, please verify bins where created correctly')
         raise RuntimeError('There was a problem setting masses in bins, please verify bins where created correctly')
     
-    peakData = (peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins)
+    peakData += (bins,)
     return peakData
 
 
 def sortPeaksByBinWidth(peakData):
-    bin_width = [bin_high - bin_low for bin_low, bin_high in zip(peakData[3], peakData[4])]
+    bin_width = [bin_high - bin_low for bin_low, bin_high in zip(peakData[6], peakData[7])]
     sorted_peakdata_plus = zip(*sorted(zip(bin_width, *peakData)))
     sorted_peakdata = sorted_peakdata_plus[1:]
     return sorted_peakdata
@@ -562,8 +564,8 @@ def sortMassIn_NarrowestBin(peakData):
     masses = peakData[0]
     abunds = peakData[1]
     resols = peakData[2]
-    bins_low = peakData[3]
-    bins_high = peakData[4]
+    bins_low = peakData[-2]
+    bins_high = peakData[-1]
     
     uniqBins = set(zip(bins_low,bins_high))
     log.debug('Mass count %d, available bins %d', len(masses), len(uniqBins))
@@ -577,8 +579,8 @@ def sortMassIn_NarrowestBin(peakData):
     masses = sorted_peakdata[0]
     abunds = sorted_peakdata[1]
     resols = sorted_peakdata[2]
-    bins_low = sorted_peakdata[3]
-    bins_high = sorted_peakdata[4]
+    bins_low = sorted_peakdata[6]
+    bins_high = sorted_peakdata[7]
     
     bins = []
     for mass in masses:
@@ -590,7 +592,7 @@ def sortMassIn_NarrowestBin(peakData):
     if(len(bins) != len(masses)):
         log.error('There was a problem setting masses in bins, please verify bins where created correctly')
     
-    peakData = (peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins)
+    peakData += (bins,)
     return peakData
 
 def sortMassIn_sortWindow(peakData, window = 200):
@@ -602,8 +604,8 @@ def sortMassIn_sortWindow(peakData, window = 200):
     masses = peakData_sorted[0]
     abunds = peakData_sorted[1]
     resols = peakData_sorted[2]
-    bins_low = peakData_sorted[3]
-    bins_high = peakData_sorted[4]
+    bins_low = peakData_sorted[6]
+    bins_high = peakData_sorted[7]
     
     tryAgain =True
     
@@ -630,7 +632,7 @@ def sortMassIn_sortWindow(peakData, window = 200):
     if(len(bins) != len(masses)):
         log.error('There was a problem setting masses in bins, please verify bins where created correctly, and window size')
     
-    peakData = (peakData[0], peakData[1], peakData[2], peakData[3], peakData[4], bins)
+    peakData += (bins,)
     return peakData
 
 def sortMassIn_sortNarrowWindow(peakData, window = 200):
@@ -641,8 +643,8 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
     masses = peakData_sorted[0]
     abunds = peakData_sorted[1]
     resols = peakData_sorted[2]
-    bins_low = peakData_sorted[3]
-    bins_high = peakData_sorted[4]
+    bins_low = peakData_sorted[6]
+    bins_high = peakData_sorted[7]
     
     bins = []
     for idx, mass in enumerate(masses):
@@ -651,17 +653,21 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
         highidx = window + lowidx
         
         #--
-        bin_width = [bin_high - bin_low for bin_low, bin_high in zip(peakData_sorted[3][lowidx:highidx], peakData_sorted[4][lowidx:highidx])]
+        bin_width = [bin_high - bin_low for bin_low, bin_high in zip(peakData_sorted[6][lowidx:highidx], peakData_sorted[7][lowidx:highidx])]
         sorted_peakdata_plus = zip(*sorted(zip(bin_width, peakData_sorted[0][lowidx:highidx],
                                                peakData_sorted[1][lowidx:highidx],
                                                peakData_sorted[2][lowidx:highidx],
                                                peakData_sorted[3][lowidx:highidx],
-                                               peakData_sorted[4][lowidx:highidx])))
+                                               peakData_sorted[4][lowidx:highidx],
+                                               peakData_sorted[5][lowidx:highidx],
+                                               peakData_sorted[6][lowidx:highidx],
+                                               peakData_sorted[7][lowidx:highidx]
+                                               )))
         sorted_peakdata = sorted_peakdata_plus[1:]
         #--
         
         if idx % window == 0: log.debug('at %d of %d', idx, len(masses))
-        for bin_low, bin_high in zip(sorted_peakdata[3], sorted_peakdata[4]):
+        for bin_low, bin_high in zip(sorted_peakdata[6], sorted_peakdata[7]):
             if mass >= bin_low and mass <= bin_high:
                 found = True
                 bins.append((bin_low,bin_high))
@@ -672,7 +678,7 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
     if(len(bins) != len(masses)):
         log.error('There was a problem setting masses in bins, please verify bins where created correctly')
     
-    peakData = (peakData_sorted[0], peakData_sorted[1], peakData_sorted[2], peakData_sorted[3], peakData[4], bins)
+    peakData = peakData_sorted+ (bins,)
     return peakData
 
 '''
@@ -683,18 +689,19 @@ def aggregateBinData(peakData):
     masses = peakData[0]
     abunds = peakData[1]
     resols = peakData[2]
-    bins_low = peakData[3]
-    bins_high = peakData[4] 
-    bins = peakData[5]
+    bins_low = peakData[6]
+    bins_high = peakData[7] 
+    bins = peakData[8]
     binsData = dict()
     
-    newRow = 0,0.0,0.0 #  count, sumZmass, sumAbund
-    for mass, abund, resol, bin_low, bin_high, bin in zip(*peakData):
-        count, sumZmass, sumAbund = binsData.get(bin, newRow) 
+    newRow = 0,0.0,0.0, 0.0 #  count, sumZmass, sumAbund, sumNoise
+    for mass, abund, resol,baseline , noise, charge, bin_low, bin_high, bin in zip(*peakData):
+        count, sumZmass, sumAbund , sumNoise = binsData.get(bin, newRow) 
         count +=1
         sumZmass += mass
         sumAbund += abund
-        binsData[bin] = count, sumZmass, sumAbund 
+        sumNoise += noise
+        binsData[bin] = count, sumZmass, sumAbund , sumNoise
 
     log.debug('bin count %d ', len(binsData))
     return binsData
@@ -715,14 +722,14 @@ def getMaxCount(binData, disregardBottom = 0.10):
     maxCount = 0
     maxAbunds = 0
     for bin in binData:
-        count, sumZmass, sumAbund = binData[bin]
+        count, sumZmass, sumAbund, sumNoise = binData[bin]
         if maxAbunds < (sumAbund / count):
             maxAbunds = sumAbund / count
     
     abundsCutoff = maxAbunds * disregardBottom
     log.debug('bins with average intensity lower than %f are not evaluated to establish min repetition rate', abundsCutoff)
     for bin in binData:
-        count, sumZmass, sumAbund = binData[bin]
+        count, sumZmass, sumAbund, sumNoise = binData[bin]
         if (sumAbund / count) < abundsCutoff: continue  # dont consider the
         if maxCount < count:
             maxCount = count
@@ -743,17 +750,16 @@ def filterBins(binData, minRepetitionRate = 0.70, decimal_places = 4, disregardB
 #     for bin in binData:
     for idx, row in enumerate(sortedBintable):
         bin = row[0:2]
-        (count, sumZmass, sumAbund) = row[2:]
+        (count, sumZmass, sumAbund, sumNoise) = row[2:]
         if count >= (maxCount * minRepetitionRate):
-            binData_filtered[bin]=(count, sumZmass, sumAbund)
-        
+            binData_filtered[bin]=(count, sumZmass, sumAbund, sumNoise)        
         if idx+1 >= len(sortedBintable): continue
             
         nextrow = sortedBintable[idx+1]  
         # test edge cases
         if abs(nextrow[0]-row[1])<decimal : # row highbin is adjecent nextrow lowbin
             if  row[2]+nextrow[2]>= (maxCount * minRepetitionRate):
-                binData_filtered[bin]=(count, sumZmass, sumAbund)
+                binData_filtered[bin]=(count, sumZmass, sumAbund, sumNoise)
                 binData_filtered[nextrow[0:2]]=nextrow[2:]
 
     log.debug('Filter rate %f', len(binData_filtered)/len(binData))
@@ -766,7 +772,7 @@ def formatPeaks(binData):
     masses = []
     intens = []
     for bin in binData:
-        (count, sumZmass, sumAbund) = binData[bin]
+        (count, sumZmass, sumAbund, sumNoise) = binData[bin]
         masses.append(sumZmass/count)
         intens.append(sumAbund/count)
     
@@ -778,11 +784,11 @@ def bins2Peaks(binsData, peakData):
     masses = peakData[0]
     abunds = peakData[1]
     resols = peakData[2]
-    bins_low = peakData[3]
-    bins_high = peakData[4] 
-    bins = peakData[5]
+    bins_low = peakData[6]
+    bins_high = peakData[7] 
+    bins = peakData[8]
     
-    filteredRowdata = [(row[0], row[1]) for row in zip(*peakData) if row[5] in bins_filtered]
+    filteredRowdata = [(row[0], row[1]) for row in zip(*peakData) if row[8] in bins_filtered]
     result = zip(*filteredRowdata)
     return result
     
