@@ -57,7 +57,7 @@ class SimStitcherFrame ( wx.Frame ):
 		
 		self.m_checkBox11 = wx.CheckBox( self, wx.ID_ANY, u"Cut SIM edges", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_checkBox11.SetValue(True) 
-		self.m_checkBox11.SetToolTipString( u"Remove peaks that overlap and peaks close to the edge" )
+		self.m_checkBox11.SetToolTipString( u"Remove peaks that overlap AND peaks close to the edge" )
 		
 		bSizer61.Add( self.m_checkBox11, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 		
@@ -86,8 +86,7 @@ class SimStitcherFrame ( wx.Frame ):
 		
 		bSizer6 = wx.BoxSizer( wx.HORIZONTAL )
 		
-		self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, u"Scale SIM to FT", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_checkBox1.SetValue(True) 
+		self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, u"Scale SIM to FT center mass", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_checkBox1.SetToolTipString( u"Scale the intensity such that the center SIM mass is the same as the corresponding FT mass" )
 		
 		bSizer6.Add( self.m_checkBox1, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
@@ -100,7 +99,7 @@ class SimStitcherFrame ( wx.Frame ):
 		
 		bSizer62 = wx.BoxSizer( wx.HORIZONTAL )
 		
-		self.m_checkBox12 = wx.CheckBox( self, wx.ID_ANY, u"Adapt SIM to FT", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_checkBox12 = wx.CheckBox( self, wx.ID_ANY, u"Adapt SIM to matching FT peaks", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_checkBox12.SetToolTipString( u"Change the intensity of the SIM peaks based on trend of matchin FT peaks" )
 		
 		bSizer62.Add( self.m_checkBox12, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
