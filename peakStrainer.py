@@ -685,7 +685,7 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
 aggregate bins
 '''
 def aggregateBinData(peakData):
-    log.debug('aggregateBinData count %d, count, sumZmass, sumAbund', len(peakData))
+    log.debug('aggregateBinData count %d, count, sumZmass, sumAbund, sum_Sig2Noise', len(peakData))
     masses = peakData[0]
     abunds = peakData[1]
     resols = peakData[2]
@@ -696,12 +696,13 @@ def aggregateBinData(peakData):
     
     newRow = 0,0.0,0.0, 0.0 #  count, sumZmass, sumAbund, sumNoise
     for mass, abund, resol,baseline , noise, charge, bin_low, bin_high, bin in zip(*peakData):
-        count, sumZmass, sumAbund , sumNoise = binsData.get(bin, newRow) 
+        count, sumZmass, sumAbund , sum_Sig2Noise = binsData.get(bin, newRow) 
         count +=1
         sumZmass += mass
         sumAbund += abund
-        sumNoise += noise
-        binsData[bin] = count, sumZmass, sumAbund , sumNoise
+        sig2noise = abund/noise
+        sum_Sig2Noise += sig2noise
+        binsData[bin] = count, sumZmass, sumAbund , sum_Sig2Noise
 
     log.debug('bin count %d ', len(binsData))
     return binsData
@@ -737,7 +738,7 @@ def getMaxCount(binData, disregardBottom = 0.10):
     log.debug('Max peak count is %d, for bins with average abundance above %f ', maxCount, abundsCutoff)
     return maxCount
 
-def filterBins(binData, minRepetitionRate = 0.70, decimal_places = 4, disregardBottom= 0.10):
+def filterBins(binData, minRepetitionRate = 0.70, minSignal2Noise = 1.0, decimal_places = 4, disregardBottom= 0.10):
     decimal = (10 ** -decimal_places)
     log.debug('filterBins count %d ,minRepetitionRate %f, decimal places %d, %f, desrigarding bottom %f percent',len(binData),minRepetitionRate, decimal_places, decimal, disregardBottom)
     if disregardBottom >= 1 : raise RuntimeError('disregardBottom can not be more than 1')
@@ -750,16 +751,19 @@ def filterBins(binData, minRepetitionRate = 0.70, decimal_places = 4, disregardB
 #     for bin in binData:
     for idx, row in enumerate(sortedBintable):
         bin = row[0:2]
-        (count, sumZmass, sumAbund, sumNoise) = row[2:]
-        if count >= (maxCount * minRepetitionRate):
-            binData_filtered[bin]=(count, sumZmass, sumAbund, sumNoise)        
+        (count, sumZmass, sumAbund, sum_sig2Noise) = row[2:]
+        if count >= (maxCount * minRepetitionRate) and (sum_sig2Noise/count) >= minSignal2Noise:
+            binData_filtered[bin]=(count, sumZmass, sumAbund, sum_sig2Noise)        
+
         if idx+1 >= len(sortedBintable): continue
-            
+        
         nextrow = sortedBintable[idx+1]  
         # test edge cases
         if abs(nextrow[0]-row[1])<decimal : # row highbin is adjecent nextrow lowbin
-            if  row[2]+nextrow[2]>= (maxCount * minRepetitionRate):
-                binData_filtered[bin]=(count, sumZmass, sumAbund, sumNoise)
+            count2 =row[2]+nextrow[2]
+            sum_sig2Noise2 = row[5]+nextrow[5]
+            if count2 >= (maxCount * minRepetitionRate) and (sum_sig2Noise2/count2) >= minSignal2Noise:
+                binData_filtered[bin]=(count, sumZmass, sumAbund, sum_sig2Noise)
                 binData_filtered[nextrow[0:2]]=nextrow[2:]
 
     log.debug('Filter rate %f', len(binData_filtered)/len(binData))

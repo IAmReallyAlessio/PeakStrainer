@@ -520,6 +520,23 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer251.Add( bSizer261, 0, wx.EXPAND, 5 )
 		
+		bSizer2611 = wx.BoxSizer( wx.HORIZONTAL )
+		
+		self.m_staticline18121 = wx.StaticText( self.m_panel8, wx.ID_ANY, u"Minimum signal to noise ratio", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticline18121.Wrap( -1 )
+		self.m_staticline18121.SetFont( wx.Font( 9, 74, 90, 92, False, "Arial" ) )
+		self.m_staticline18121.Enable( False )
+		
+		bSizer2611.Add( self.m_staticline18121, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		
+		self.m_textCtrl612 = wx.TextCtrl( self.m_panel8, wx.ID_ANY, u"1.0", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl612.Enable( False )
+		
+		bSizer2611.Add( self.m_textCtrl612, 0, wx.ALL, 5 )
+		
+		
+		bSizer251.Add( bSizer2611, 0, wx.EXPAND, 5 )
+		
 		
 		self.m_panel8.SetSizer( bSizer251 )
 		self.m_panel8.Layout()

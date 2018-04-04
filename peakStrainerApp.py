@@ -88,6 +88,9 @@ class MyFrame(MyFrame2):
         self.m_staticline1812.Enable(self.m_radioBtn111.GetValue())
         self.m_spinCtrl21.Enable(self.m_radioBtn111.GetValue())
         self.m_staticText26.Enable(self.m_radioBtn111.GetValue())
+        # signal to noise ratio
+        self.m_staticline18121.Enable(self.m_radioBtn111.GetValue())
+        self.m_textCtrl612.Enable(self.m_radioBtn111.GetValue())
     
     
     def clickedFinish( self, event ):
@@ -224,7 +227,10 @@ class MyFrame(MyFrame2):
         
         self.statusLog('Filter out bins ...')
         if self.m_radioBtn101.GetValue(): filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
-        if self.m_radioBtn111.GetValue(): filterlines_filtered = {k: filterBins(v, minRepetitionRate = (self.m_spinCtrl21.GetValue() * 0.01) ) for k, v in filterlines_binData.iteritems()}
+        if self.m_radioBtn111.GetValue(): 
+            minRepetitionRate = (self.m_spinCtrl21.GetValue() * 0.01)
+            minSingnal2Noise = float(self.m_textCtrl612.GetValue())
+            filterlines_filtered = {k: filterBins(v, minRepetitionRate = minRepetitionRate, minSignal2Noise = minSingnal2Noise ) for k, v in filterlines_binData.iteritems()}
         
         if self.m_checkBox8.GetValue(): filterlineBins_csv(filterlines_filtered,self.getCSVpath_file(rawfilename)+'-filteredBins.csv')
         
