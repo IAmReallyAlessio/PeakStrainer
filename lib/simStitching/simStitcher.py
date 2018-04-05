@@ -81,6 +81,12 @@ class Scan(object):
     def nonOverlapPeaks(self):
         return self.nonOverlap_andNoEdgePeaks(daltons = 0)
     
+    def cutEdgePeaks(self, daltons = 5):
+        masses, intens = self.allPeaks()
+        isEdge = [mass >= self.filterLine._low()+daltons and mass < self.filterLine._high()-daltons for mass in masses]
+        
+        return list(compress(masses, isEdge)), list(compress(intens, isEdge))
+    
     def nonOverlap_andNoEdgePeaks(self, daltons = 5):
         '''
         remove edge of sim if still available after overlap
@@ -200,9 +206,12 @@ def toCSVFile(fileBaseName, dictOrList):
             
         elif type(dictOrList) is dict:
             string = '\n'.join(map(str,dictOrList.items()))
-            string = string.replace(':',',')
-            string = string.replace('(','') 
-            string = string.replace(')','') 
+            string = string.replace(':',':\n')
+            string = string.replace('(','\n') 
+            string = string.replace(')','\n')
+            string = string.replace('[','\n')
+            string = string.replace('[','\n')
+             
             
         outfile.write(string)
             
@@ -390,7 +399,7 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     log.debug('\n'.join(map(str,scans_mzxml)))
     
     log.info('drop first scan because invalid')
-    scans_mzxml = scans_mzxml[1:]
+#     scans_mzxml = scans_mzxml[1:]
         
     log.info('get Sim scans')
     scans_mzxml_sim= [scan for scan in scans_mzxml if ' sim ' in scan[1].lower()]
@@ -403,8 +412,9 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     scans.sort(key=lambda scan: scan.filterLine.asTuple())
     
     log.debug('\n'.join(map(str,scans)))
-    if loglevel>2: toCSVFile(csvPath+'scans', scans)
+    if loglevel>2: toCSVFile(csvPath+'ordered_scans', scans)
     
+    #link scans together
     scans[0].next = scans[1] #previous is None
     for idx, scan in enumerate(scans):
         if idx == 0 or idx >= len(scans)-1: continue
@@ -416,7 +426,7 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     scans_stitched = {}
     for scan in scans:
         head = scan.filterLine._head()
-        masses, intens = scan.nonOverlap_andNoEdgePeaks(daltons)
+        masses, intens = scan.cutEdgePeaks(daltons)
         totIonCounts = [scan.totalIonCount()] * len(masses)
         heads = [scan.filterLine] * len(masses)
         scans_stitched.setdefault(head, ([],[],[],[]))[0].extend(masses)
