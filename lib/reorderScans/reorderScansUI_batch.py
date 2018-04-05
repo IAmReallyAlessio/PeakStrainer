@@ -78,7 +78,6 @@ class MyFrame1 ( wx.Frame ):
 		bSizer5.Add( self.m_button2, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
 		
 		self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, u"SIM", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_checkBox1.Enable( False )
 		self.m_checkBox1.SetToolTipString( u"Include SIM" )
 		
 		bSizer5.Add( self.m_checkBox1, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
