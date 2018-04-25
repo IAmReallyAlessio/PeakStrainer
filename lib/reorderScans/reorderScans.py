@@ -55,24 +55,32 @@ def getSourceList(folderPath):
     containsMS = False
     containsPos = False
     containsNeg = False
+    containsLock = False
+    
     for scan in scans:
         if not containsMS and ' ms ' in scan: containsMS = True 
         if not containsPos and ' + ' in scan: containsPos = True
         if not containsNeg and ' - ' in scan: containsNeg = True
+        if not containsNeg and ' lock ' in scan: containsLock = True
         
         m = re.search(r'@(.*?) ', scan)
         if m:
             select.add(m.group(1))
     
     #----
+    #TODO need to use MVC pattern not mix view with control
     if containsMS:
         if containsNeg: sourceList.append(' ms , - ') # notice comma I split on comma
         if containsPos: sourceList.append(' ms , + ')
+    
+    if containsLock:
+        if containsNeg and containsMS: sourceList.append(' ms , - , lock ') # notice comma I split on comma
+        if containsPos and containsMS: sourceList.append(' ms , + , lock ') # notice comma I split on comma
         
     for e in select:
         if containsNeg: sourceList.append(e+', - ')
         if containsPos: sourceList.append(e+', + ')
-    
+        
     
     return sourceList
 
@@ -97,10 +105,15 @@ def saveFile(filePath, targetOrder, includeSims=False):
     for selectionLine in targetOrder:
         type = selectionLine.split(',')[0]
         mode = selectionLine.split(',')[1]
+        if len(selectionLine.split(',')) == 3:
+            lock = selectionLine.split(',')[2]  #dirty hack should be a named tuple
+        else:
+            lock = '' # this is in every string even the empty one
+        #TODO need to use MVC pattern not mix view with control
         for scan in sortedScanElems:
             scanLine = scan.attrib['filterLine']
             if includeSims == False and ' sim ' in scanLine.lower(): continue
-            if type in scanLine and mode in scanLine:
+            if type in scanLine and mode in scanLine and lock in scanLine:
                 new_scan = copy.deepcopy(scan)
                 counter = counter + 1 
                 new_scan.attrib['retentionTime'] = 'PT'+str(counter)+'.0S'
