@@ -100,24 +100,32 @@ def saveFile(filePath, targetOrder, includeSims=False):
     for scan in scanElems:
         msRunElement.remove(scan)
     
-    
     counter = 0
     for selectionLine in targetOrder:
         type = selectionLine.split(',')[0]
         mode = selectionLine.split(',')[1]
         if len(selectionLine.split(',')) == 3:
             lock = selectionLine.split(',')[2]  #dirty hack should be a named tuple
+            useLock = True
         else:
-            lock = '' # this is in every string even the empty one
+            lock = ' lock ' 
+            useLock =False
         #TODO need to use MVC pattern not mix view with control
         for scan in sortedScanElems:
             scanLine = scan.attrib['filterLine']
             if includeSims == False and ' sim ' in scanLine.lower(): continue
-            if type in scanLine and mode in scanLine and lock in scanLine:
-                new_scan = copy.deepcopy(scan)
-                counter = counter + 1 
-                new_scan.attrib['retentionTime'] = 'PT'+str(counter)+'.0S'
-                msRunElement.append(new_scan)
+            if useLock == False and lock in scanLine: continue
+            if type in scanLine and mode in scanLine:
+                if not useLock : #TODO refactor this its horrible ist so it does not repeat scans with 
+                    new_scan = copy.deepcopy(scan)
+                    counter = counter + 1 
+                    new_scan.attrib['retentionTime'] = 'PT'+str(counter)+'.0S'
+                    msRunElement.append(new_scan)
+                elif lock in scanLine:
+                    new_scan = copy.deepcopy(scan)
+                    counter = counter + 1 
+                    new_scan.attrib['retentionTime'] = 'PT'+str(counter)+'.0S'
+                    msRunElement.append(new_scan)
 
     dir,file = os.path.split(filePath)
     
@@ -159,14 +167,16 @@ class MyFrame(MyFrame1):
         self.m_listBox2.Set(self.model.target)
         
     def sourceDubleClicked( self, event ):
-        idx = self.m_listBox1.GetSelection()
-        self.model.target.append(self.m_listBox1.GetItems()[idx])
+        idxs = self.m_listBox1.GetSelections()
+        for idx in idxs: 
+            self.model.target.append(self.m_listBox1.GetItems()[idx])
         self.m_listBox2.Set(self.model.target)
     
     
     def addToTargetList( self, event ):
-        idx = self.m_listBox1.GetSelection()
-        self.model.target.append(self.m_listBox1.GetItems()[idx])
+        idxs = self.m_listBox1.GetSelections()
+        for idx in idxs: 
+            self.model.target.append(self.m_listBox1.GetItems()[idx])
         self.m_listBox2.Set(self.model.target)
     
     def removeFromTargetList( self, event ):

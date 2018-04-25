@@ -64,7 +64,7 @@ class MyFrame1 ( wx.Frame ):
 		bSizer4 = wx.BoxSizer( wx.HORIZONTAL )
 		
 		m_listBox1Choices = []
-		self.m_listBox1 = wx.ListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_listBox1Choices, wx.LB_SINGLE )
+		self.m_listBox1 = wx.ListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_listBox1Choices, wx.LB_MULTIPLE|wx.LB_SINGLE )
 		bSizer4.Add( self.m_listBox1, 1, wx.ALL|wx.EXPAND, 5 )
 		
 		bSizer7 = wx.BoxSizer( wx.VERTICAL )
