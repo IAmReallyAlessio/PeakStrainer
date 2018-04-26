@@ -43,49 +43,28 @@ def getMZXMLFiles(folderPath):
     
     return result 
 
+def sanitize(scan):
+    if "@" in scan:
+        m = re.match(r'(.*?)\s(\d*\.\d*)(@.*)\s\[', scan)
+        result = m.groups()[0]+' '+m.groups()[2]
+    else:
+        m = re.match(r'(.*?)\s\[', scan)
+        result = m.groups()[0]
+   
+    return result
 
 def getSourceList(folderPath):
-    sourceList = []
     
     files = getMZXMLFiles(folderPath)
     first = files[0]
     scans = getScanHeaders(first)
     
-    select = set()
-    containsMS = False
-    containsPos = False
-    containsNeg = False
-    containsLock = False
+    sanitizedScans = set([sanitize(scan) for scan in scans])    
     
-    for scan in scans:
-        if not containsMS and ' ms ' in scan: containsMS = True 
-        if not containsPos and ' + ' in scan: containsPos = True
-        if not containsNeg and ' - ' in scan: containsNeg = True
-        if not containsNeg and ' lock ' in scan: containsLock = True
-        
-        m = re.search(r'@(.*?) ', scan)
-        if m:
-            select.add(m.group(1))
-    
-    #----
-    #TODO need to use MVC pattern not mix view with control
-    if containsMS:
-        if containsNeg: sourceList.append(' ms , - ') # notice comma I split on comma
-        if containsPos: sourceList.append(' ms , + ')
-    
-    if containsLock:
-        if containsNeg and containsMS: sourceList.append(' ms , - , lock ') # notice comma I split on comma
-        if containsPos and containsMS: sourceList.append(' ms , + , lock ') # notice comma I split on comma
-        
-    for e in select:
-        if containsNeg: sourceList.append(e+', - ')
-        if containsPos: sourceList.append(e+', + ')
-        
-    
-    return sourceList
+    return sorted(sanitizedScans)
 
 
-def saveFile(filePath, targetOrder, includeSims=False):
+def saveFile(filePath, targetOrder, includeSims=False): # TODO include sims is deprocated
        #     TODO:handle different namespaces of mzxml 
     namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}
     ET.register_namespace('', 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0')
@@ -100,32 +79,19 @@ def saveFile(filePath, targetOrder, includeSims=False):
     for scan in scanElems:
         msRunElement.remove(scan)
     
-    counter = 0
+    selected = set()
     for selectionLine in targetOrder:
-        type = selectionLine.split(',')[0]
-        mode = selectionLine.split(',')[1]
-        if len(selectionLine.split(',')) == 3:
-            lock = selectionLine.split(',')[2]  #dirty hack should be a named tuple
-            useLock = True
-        else:
-            lock = ' lock ' 
-            useLock =False
-        #TODO need to use MVC pattern not mix view with control
         for scan in sortedScanElems:
-            scanLine = scan.attrib['filterLine']
-            if includeSims == False and ' sim ' in scanLine.lower(): continue
-            if useLock == False and lock in scanLine: continue
-            if type in scanLine and mode in scanLine:
-                if not useLock : #TODO refactor this its horrible ist so it does not repeat scans with 
-                    new_scan = copy.deepcopy(scan)
-                    counter = counter + 1 
-                    new_scan.attrib['retentionTime'] = 'PT'+str(counter)+'.0S'
-                    msRunElement.append(new_scan)
-                elif lock in scanLine:
-                    new_scan = copy.deepcopy(scan)
-                    counter = counter + 1 
-                    new_scan.attrib['retentionTime'] = 'PT'+str(counter)+'.0S'
-                    msRunElement.append(new_scan)
+            filterLine= scan.attrib['filterLine']
+            if sanitize(filterLine) == selectionLine:
+               selected.add(scan)
+
+    counter = 0
+    for scan in selected:
+        new_scan = copy.deepcopy(scan)
+        counter = counter + 1 
+        new_scan.attrib['retentionTime'] = 'PT'+str(counter)+'.0S'
+        msRunElement.append(new_scan)
 
     dir,file = os.path.split(filePath)
     
