@@ -11,9 +11,11 @@ from array import array
 from collections import namedtuple
 from math import sqrt
 log = logging.getLogger(os.path.basename(__file__))
-from utils.peakStrainer_util import getMZXMLEncondedScans, decode_mzXML_Peaks, write2templateMzXML
+from utils.peakStrainer_util import getMZXMLEncondedScans, decode_mzXML_Peaks, write2templateMzXML, encodePeaks
 from itertools import compress
 import numpy as np
+import xml.etree.ElementTree as ET
+import copy
 
 class Scan(object):
     
@@ -377,6 +379,43 @@ def getSelectedMatchingSim(matchingSim):
          
     return selected
 
+def replaceScansinXML(original, destination, remove, include):
+    namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}
+    ET.register_namespace('', 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0')
+    tree = ET.parse(original)
+    
+    msRunElement = tree.find('.//xmlns:msRun', namespaces)
+    scanElements = msRunElement.findall('.//xmlns:scan', namespaces)
+    
+    #remove
+    for scan in scanElements:
+        scanLine = scan.attrib['filterLine']
+        for r_prefix in remove:
+            if  r_prefix in scanLine:
+                msRunElement.remove(scan)
+    
+    #include
+    scanTemplete = scanElements[0]
+    print ET.tostring(scanTemplete).decode()
+    
+    idx = int(scanElements[-1].attrib['num'])
+    for scan in include:
+        idx +=1
+        (masses, intens) = include[scan][:2]
+        newScan = copy.deepcopy(scanTemplete)
+        newScan.attrib['filterLine'] = scan
+        newScan.attrib['peaksCount'] = str(len(masses))
+        newScan.attrib['num']=str(idx+1)
+        newScan.attrib['msLevel'] = "1" if ' ms ' in scan else "2"
+        newScan.attrib['polarity'] = '-' if ' - ' in scan else '+'
+        newScan.attrib['retentionTime'] = 'PT{}S'.format(0.0+idx)
+        
+        encodedPeaks = encodePeaks(masses, intens)
+        newScan.find('.//xmlns:peaks', namespaces).text = encodedPeaks
+        msRunElement.append(newScan)
+        
+    tree.write(destination, encoding='ISO-8859-1', xml_declaration=True)
+    
 
 def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , daltons = 5 ,csvPath1 = None, loglevel = 3):
     '''
@@ -451,10 +490,19 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     log.info('renamed stitched scans:')
     log.info('\n'.join(scans_stitched.keys()))
     
-    
+     
     if not scaleToCenterMass:
         log.info('writing to :'+outputStitchedFile(filePath))
-        write2templateMzXML(outputStitchedFile(filePath), scans_stitched)      
+        #---
+        #get scans that where stitched --> names
+        #remove from mzxml
+        #add stiched to mzXML
+        remove = names
+        include = scans_stitched
+        destination = outputStitchedFile(filePath)
+        replaceScansinXML(filePath, destination, remove, include)
+        
+#         write2templateMzXML(outputStitchedFile(filePath), scans_stitched)      
         log.info('finish stitching')
         return #ALL DONE!    
 
