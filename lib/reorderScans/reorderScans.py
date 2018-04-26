@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ET
 import os
 import re
 import copy
+from collections import OrderedDict
 
 def main(folderpath = None):
     app = wx.App(False)
@@ -79,15 +80,20 @@ def saveFile(filePath, targetOrder, includeSims=False): # TODO include sims is d
     for scan in scanElems:
         msRunElement.remove(scan)
     
-    selected = set()
+    selected = []
     for selectionLine in targetOrder:
         for scan in sortedScanElems:
             filterLine= scan.attrib['filterLine']
             if sanitize(filterLine) == selectionLine:
-               selected.add(scan)
+               selected.append(scan)
 
+    selectedSet = []
+    for e in selected:
+        if e not in selectedSet:
+            selectedSet.append(e)
+    
     counter = 0
-    for scan in selected:
+    for scan in selectedSet:
         new_scan = copy.deepcopy(scan)
         counter = counter + 1 
         new_scan.attrib['retentionTime'] = 'PT'+str(counter)+'.0S'
@@ -136,6 +142,7 @@ class MyFrame(MyFrame1):
         idxs = self.m_listBox1.GetSelections()
         for idx in idxs: 
             self.model.target.append(self.m_listBox1.GetItems()[idx])
+            self.m_listBox1.Deselect(idx)
         self.m_listBox2.Set(self.model.target)
     
     
@@ -143,6 +150,7 @@ class MyFrame(MyFrame1):
         idxs = self.m_listBox1.GetSelections()
         for idx in idxs: 
             self.model.target.append(self.m_listBox1.GetItems()[idx])
+            self.m_listBox1.Deselect(idx)
         self.m_listBox2.Set(self.model.target)
     
     def removeFromTargetList( self, event ):
