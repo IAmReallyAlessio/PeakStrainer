@@ -92,11 +92,17 @@ def saveFile(filePath, targetOrder, includeSims=False): # TODO include sims is d
             filterLine= scan.attrib['filterLine']
             if sanitize(filterLine) == selectionLine:
                selected.append(scan)
-
-    selectedSet = []
-    for e in selected:
-        if e not in selectedSet:
-            selectedSet.append(e)
+    
+    uniquEntries = set(targetOrder)
+    noDuplicates = len(uniquEntries) == len(targetOrder)
+    
+    if noDuplicates:      
+        selectedSet = []
+        for e in selected:
+            if e not in selectedSet:
+                selectedSet.append(e)
+    else:
+        selectedSet = selected
     
     counter = 0
     for scan in selectedSet:
