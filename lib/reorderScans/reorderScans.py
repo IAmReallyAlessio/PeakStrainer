@@ -70,9 +70,12 @@ def getSourceList(folderPath):
 
 def saveFile(filePath, targetOrder, includeSims=False): # TODO include sims is deprocated
        #     TODO:handle different namespaces of mzxml 
-    namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}
-    ET.register_namespace('', 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0')
+#     namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}
+#     ET.register_namespace('', 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0')
     tree = ET.parse(filePath)
+    root_namespace_tmp = tree.getroot().tag.split('}')[0]
+    root_namespace_tmp = root_namespace_tmp.replace('{','')
+    namespaces = {'xmlns': root_namespace_tmp}
  
     msRunElement = tree.find('.//xmlns:msRun', namespaces)
     scanElems = msRunElement.findall('.//xmlns:scan', namespaces)
