@@ -1,3 +1,4 @@
+
 #!/bin/env python2.7
 # encoding: utf-8
 '''
@@ -215,7 +216,7 @@ def filterScanBy_retentionTime(scans, lowSeconds=0.5, highSeconds=float("inf")):
     result = []
     for row in scans:
         scanNum, filterLine, peak_datas, retTime = row 
-        if retTime >+ lowSeconds and  retTime <= highSeconds:
+        if retTime >= lowSeconds and  retTime <= highSeconds:
             result.append(row)
     return result
     
