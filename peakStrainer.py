@@ -113,7 +113,7 @@ def main(file):
     
 
 def ThermoRawfile2Scans(file_path):
-    if False:
+    if True:
         return ThermoRawfile2Scans_RawQuant(file_path)
     # NOTE: for testing use ThermoRawfile2Scans_sample instead
     log.info('raw file: %s', file_path)
