@@ -26,7 +26,7 @@ def encodePeaks(masses, intens):
     if sys.byteorder != 'big':
         peaks.byteswap()
         
-    encoded = b64encode(peaks)
+    encoded = b64encode(peaks).decode()
     return encoded
     
 

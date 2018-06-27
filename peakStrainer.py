@@ -18,7 +18,10 @@ import math
 import re
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
-from pyteomics import mzxml, mzml
+from lib import RawQuant
+from collections import namedtuple
+import numpy as np
+#from pyteomics import mzxml, mzml
 
 __version__ = "17.03.29.0"
 
@@ -57,47 +60,47 @@ def main(file):
     filterLines = mergePeaksOnFilterline(scans)
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
     
-    preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
-    #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
+    preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.items()}
+    #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.items()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')    
     
     ''' create bins for peaks
-    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
-    filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.iteritems()}
-    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
-    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.iteritems()} # 5408000.0, 2096000.0
+    filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.items()}
+    filterlines_withBins = {k: generateBins_resolution(v) for k, v in filterLines.items()}
+    filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.items()}
+    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.items()} # 5408000.0, 2096000.0
     '''
-    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.items()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
-#     filterlines_withBins_ms = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.iteritems() if ' ms ' in k }
-#     filterlines_withBins_msms = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.iteritems() if ' ms ' not in k}
+#     filterlines_withBins_ms = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.items() if ' ms ' in k }
+#     filterlines_withBins_msms = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.items() if ' ms ' not in k}
 #     filterlines_withBins = filterlines_withBins_ms.update(filterlines_withBins_msms)
 #     for different function for ms and for msms
     
-    filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
+    filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.items()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'mergeBins.csv')
     
     
     ''' put each mass in a bin
-    filterlines_inBins = {k: sortMassIn_sortWindow(v) for k, v in filterlines_withBins.iteritems()}
-    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
-    filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
+    filterlines_inBins = {k: sortMassIn_sortWindow(v) for k, v in filterlines_withBins.items()}
+    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.items()}
+    filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.items()}
     '''
-    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.items()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_inBins,'sortMassIn.csv')
     
-    filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
+    filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.items()}
     if log.level == logging.DEBUG: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
     
-    filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
+    filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.items()}
     if log.level == logging.DEBUG: filterlineBins_csv(filterlines_filtered,'filteredBins.csv')
     
-    filtered_peaks = {k: bins2Peaks(v, filterlines_inBins[k]) for k, v in filterlines_filtered.iteritems()}
+    filtered_peaks = {k: bins2Peaks(v, filterlines_inBins[k]) for k, v in filterlines_filtered.items()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filtered_peaks,'mzXMLdata.csv')
        
     # can't use filtered bins in mzxml because it is not readable by seems
-    filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
+    filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.items()}
     
 #     order = [' ms ', '.33-', ' ms ']
 #     filtered_bins = reorderScans(filtered_bins, order)
@@ -110,6 +113,8 @@ def main(file):
     
 
 def ThermoRawfile2Scans(file_path):
+    if False:
+        return ThermoRawfile2Scans_RawQuant(file_path)
     # NOTE: for testing use ThermoRawfile2Scans_sample instead
     log.info('raw file: %s', file_path)
     rawfile = MSFileReader.ThermoRawfile(file_path)
@@ -127,7 +132,59 @@ def ThermoRawfile2Scans(file_path):
     
     log.info('Scan Count is %d', len(MSrawscans))
     #Note: to reshape into lists use 
-    #scanNum, filterLine, peak_datas, retTime = zip(*MSrawscans)
+    #scanNum, filterLine, peak_datas, retTime = list(zip(*MSrawscans)
+    
+    #Note: to get list of mass use 
+    # peak_data = peak_datas[0]
+    # peak_data.mass
+    
+    return MSrawscans
+
+def ThermoRawfile2Scans_RawQuant(file_path):
+    log.info('raw file: %s', file_path)
+    raw = RawQuant.RawFileReader.open_raw_file(file_path)
+    raw.SelectInstrument(0, 1)  # needed by thermo
+    
+    start = raw.RunHeaderEx.FirstSpectrum
+    end = raw.RunHeaderEx.LastSpectrum
+    
+    Labels = namedtuple('Labels', 'mass intensity resolution baseline noise charge')
+    def get_out(raw, scan):
+        
+        data = raw.GetCentroidStream(scan, None)
+
+        out = np.empty((data.Length, 6))
+        
+        asNumpyArray = RawQuant.RawFileReader.asNumpyArray
+
+#         out[:, 0] = asNumpyArray(data.Masses)
+#         out[:, 1] = asNumpyArray(data.Intensities)
+#         out[:, 2] = asNumpyArray(data.Resolutions)
+#         out[:, 3] = asNumpyArray(data.Baselines)
+#         out[:, 4] = asNumpyArray(data.Noises)
+#         out[:, 5] = asNumpyArray(data.Charges)
+
+        return Labels(tuple(asNumpyArray(data.Masses)),
+                      tuple(asNumpyArray(data.Intensities)),
+                      tuple(asNumpyArray(data.Resolutions)),
+                      tuple(asNumpyArray(data.Baselines)),
+                      tuple(asNumpyArray(data.Noises)),
+                      tuple(asNumpyArray(data.Charges)) )
+ 
+ 
+ 
+    MSrawscans = []
+    for scanNum in range(start, end+1):
+        data = raw.GetCentroidStream(scanNum, None)
+        peak_datas = get_out(raw, scanNum )
+        filterLine = raw.GetScanEventForScanNumber(scanNum).ToString()
+        retTime =  raw.RetentionTimeFromScanNumber(scanNum)*60
+        row = (scanNum, filterLine, peak_datas, retTime)
+        MSrawscans.append(row)
+    
+    log.info('Scan Count is %d', len(MSrawscans))
+    #Note: to reshape into lists use 
+    #scanNum, filterLine, peak_datas, retTime = list(zip(*MSrawscans)
     
     #Note: to get list of mass use 
     # peak_data = peak_datas[0]
@@ -178,7 +235,7 @@ def mzML2Scans(file_path):
     return MSrawscans
 
 def ThermoRawfile2Scans_csv(scans, filename='ThermoRawfile2Scans.csv'):
-    with open(filename, "wb") as csv_file:
+    with open(filename, "w") as csv_file:
         writer = csv.writer(csv_file, delimiter=',')
         writer.writerow(('scanNum', 'filterLine', 'retTime', 'row'))
         for scan in scans:
@@ -269,7 +326,7 @@ def mergePeaksOnFilterline(scans):
     return mergedPeaks
 
 def filterlinePeaks_csv(mergedPeaks, filename = 'filterlinePeaks.csv'):
-    with open(filename, "wb") as csv_file:
+    with open(filename, "w") as csv_file:
             writer = csv.writer(csv_file, delimiter=',')
             writer.writerow(('Scan','Row data'))
             for scan in mergedPeaks:
@@ -307,16 +364,16 @@ def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionR
         bins[rounded] = bins.get(rounded, 0) + 1
     
     log.debug('Prelimianry groups count %d', len(bins))
-    minCount_bin = {bin:(count/3)+1 for bin,count in bins.iteritems() if (count/3)+1 >= minCount}
+    minCount_bin = {bin:(count/3)+1 for bin,count in bins.items() if (count/3)+1 >= minCount}
     log.debug('groups with minCount %d: %d', minCount,len(minCount_bin))
     minCount_bin_max = float(max(minCount_bin.values())) if len(minCount_bin) is not 0 else 0 
-    minRepetitionRate_bin = {bin:count for bin,count in minCount_bin.iteritems() if (count/minCount_bin_max) > minRepetitionRate }
+    minRepetitionRate_bin = {bin:count for bin,count in minCount_bin.items() if (count/minCount_bin_max) > minRepetitionRate }
     log.debug('groups with minRepetitionRate %f: %d', minRepetitionRate,len(minRepetitionRate_bin))
     
     preFilterPass = [rounded in minRepetitionRate_bin.keys() for rounded in roundeds]
     compressedPeakData = list(itertools.compress(zip(*peakData), preFilterPass))
     compressedPeakData = zip(*compressedPeakData)
-    log.debug('final peak count %d',len(compressedPeakData))
+    log.debug('final peak count %d',preFilterPass.count(True))
     return compressedPeakData    
 
 
@@ -484,7 +541,7 @@ def alterBins_mergeOverlap(peakData):
     log.debug('alterBins_mergeOverlap')
     
     
-    sortedPeakData = zip(*sorted(zip(*peakData)))
+    sortedPeakData = list(zip(*sorted(zip(*peakData))))
     masses =    list(sortedPeakData[0])
     abunds =    list(sortedPeakData[1])
     resols =    list(sortedPeakData[2])
@@ -533,7 +590,7 @@ def sortMassIn_FirstBin(peakData):
     log.debug('Mass count %d, available bins %d', len(masses), len(uniqBins))
     if (len(masses) * len(uniqBins) > 1000000):
         log.debug('this operation may take a long time, use sortMassIn_sortWindow instead')
-        return sortMassIn_sortWindow(peakData,len(uniqBins)/100)
+        return sortMassIn_sortWindow(peakData,int(len(uniqBins)/100))
     bins = []
     for mass in masses:
         inbin =False
@@ -543,7 +600,7 @@ def sortMassIn_FirstBin(peakData):
                 inbin = True
                 break
         if not inbin:
-            print 'error'
+            print ('error')
             
     
     if(len(bins) != len(masses)):
@@ -600,7 +657,7 @@ def sortMassIn_sortWindow(peakData, window = 200):
     if window > 200 : window = 200  
     log.debug('sortMassIn_sortWindow, window size %d', window)
     
-    peakData_sorted = zip(*sorted(zip(*peakData)))
+    peakData_sorted = list(zip(*sorted(zip(*peakData))))
     
     masses = peakData_sorted[0]
     abunds = peakData_sorted[1]
@@ -616,6 +673,7 @@ def sortMassIn_sortWindow(peakData, window = 200):
         for idx, mass in enumerate(masses):
             found = False
             lowidx = 0 if idx < (window / 2) else idx - (window / 2)
+            lowidx = int(lowidx)
             highidx = window + lowidx
             if idx % window == 0: log.debug('at %d of %d', idx, len(masses))
             for bin_low, bin_high in zip(bins_low[lowidx:highidx], bins_high[lowidx:highidx]):
@@ -639,7 +697,7 @@ def sortMassIn_sortWindow(peakData, window = 200):
 def sortMassIn_sortNarrowWindow(peakData, window = 200):
     log.debug('sortMassIn_sortNarrowWindow, window size %d', window)
     
-    peakData_sorted = zip(*sorted(zip(*peakData)))
+    peakData_sorted = list(zip(*sorted(zip(*peakData))))
     
     masses = peakData_sorted[0]
     abunds = peakData_sorted[1]
@@ -655,7 +713,7 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
         
         #--
         bin_width = [bin_high - bin_low for bin_low, bin_high in zip(peakData_sorted[6][lowidx:highidx], peakData_sorted[7][lowidx:highidx])]
-        sorted_peakdata_plus = zip(*sorted(zip(bin_width, peakData_sorted[0][lowidx:highidx],
+        sorted_peakdata_plus = list(zip(*sorted(zip(bin_width, peakData_sorted[0][lowidx:highidx],
                                                peakData_sorted[1][lowidx:highidx],
                                                peakData_sorted[2][lowidx:highidx],
                                                peakData_sorted[3][lowidx:highidx],
@@ -663,7 +721,7 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
                                                peakData_sorted[5][lowidx:highidx],
                                                peakData_sorted[6][lowidx:highidx],
                                                peakData_sorted[7][lowidx:highidx]
-                                               )))
+                                               ))))
         sorted_peakdata = sorted_peakdata_plus[1:]
         #--
         
@@ -709,7 +767,7 @@ def aggregateBinData(peakData):
     return binsData
 
 def filterlineBins_csv(filterlineBins, filename = 'filterlineBins.csv'):
-    with open(filename, "wb") as csv_file:
+    with open(filename, "w") as csv_file:
             writer = csv.writer(csv_file, delimiter=',')
             writer.writerow(('filterline','binLow', 'binH','row data'))
             for filterline in filterlineBins:
