@@ -16,17 +16,22 @@ from utils.peakStrainer_util import write2templateMzXML
 import itertools
 import math
 import re
+from _collections import defaultdict
 log = logging.getLogger(os.path.basename(__file__))
 from lib import MSFileReader
-from lib import RawQuant
+try:
+    from lib import RawQuant
+except ImportError as error:
+    log.error("could not import RawQuant" ) 
 from collections import namedtuple
 import numpy as np
-#from pyteomics import mzxml, mzml
+import glob, os   
+from pyteomics import mzxml, mzml
 
 __version__ = "17.03.29.0"
 
 
-def main(file):
+def main(folder , technial_replicates =True):
     log.setLevel(logging.DEBUG)
     if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
     if log.level == logging.DEBUG:logging.basicConfig(filename='peakStrainer.log',filemode='w')
@@ -35,15 +40,15 @@ def main(file):
 #     if len(sys.argv) == 1:
 #         print("A filename must be provided")
 #         raise SystemExit
-    
-    filename = " ".join(sys.argv[1:])
-    extension = os.path.splitext(filename)[1]
-    if extension.lower() == '.raw':
-        scans = ThermoRawfile2Scans(filename)
-    elif extension.lower() == '.mzxml':
-        scans = mzXML2Scans(filename)
-    elif extension.lower() == '.mzml':
-        scans = mzML2Scans(filename)
+ 
+#     filename = " ".join(sys.argv[1:])
+#     extension = os.path.splitext(filename)[1]
+#     if extension.lower() == '.raw':
+#         scans = ThermoRawfile2Scans(filename)
+#     elif extension.lower() == '.mzxml':
+    scans = mzXML2Scans(folder, technial_replicates = technial_replicates)
+#     elif extension.lower() == '.mzml':
+#         scans = mzML2Scans(filename)
     
     
     if log.level == logging.DEBUG: ThermoRawfile2Scans_csv(scans)
@@ -100,16 +105,34 @@ def main(file):
     if log.level == logging.DEBUG: filterlinePeaks_csv(filtered_peaks,'mzXMLdata.csv')
        
     # can't use filtered bins in mzxml because it is not readable by seems
-    filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.items()}
-    
+#     filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.items()}# this makes an average of the bin
+    perFiles = make_perFile(filtered_peaks)
+      
+    for perfile in perFiles:
+        filtered_bins = perFiles[perfile]
+        newfilename = perfile[:-4]+ '.mzXML'
+        log.info('Writing results to %s', newfilename)
+        write2templateMzXML(newfilename, filtered_bins)
 #     order = [' ms ', '.33-', ' ms ']
 #     filtered_bins = reorderScans(filtered_bins, order)
     
-    newfilename = filename[:-4]+ '.mzXML'
-    log.info('Writing results to %s', newfilename)
-    write2templateMzXML(newfilename, filtered_bins)
+    
     
     log.debug('finish %f',  time.clock())
+    
+def make_perFile(filtered_peaks):
+    log.info('split the fltered peaks into files from scans')
+    # get the files
+    outfiles = defaultdict(dict) 
+    for filterline in filtered_peaks:
+        masses, intens, files = filtered_peaks[filterline]
+        uniqFiles =  set(files)
+        for file in uniqFiles:
+            filterlines_of_file = outfiles[file]
+            fmass = [m for m,i,f in zip(masses, intens, files) if f == file]
+            fintens = [i for m,i,f in zip(masses, intens, files) if f == file]
+            filterlines_of_file[filterline] = (fmass, fintens)
+    return outfiles
     
 
 def ThermoRawfile2Scans(file_path):
@@ -127,7 +150,7 @@ def ThermoRawfile2Scans(file_path):
         peak_datas = rawfile.GetLabelData(scanNum)[0]
         filterLine = rawfile.GetFilterForScanNum(scanNum)
         retTime =  rawfile.RTFromScanNum(scanNum)*60
-        row = (scanNum, filterLine, peak_datas, retTime)
+        row = (scanNum, filterLine, peak_datas, retTime, file_path)
         MSrawscans.append(row)
     
     log.info('Scan Count is %d', len(MSrawscans))
@@ -179,21 +202,24 @@ def ThermoRawfile2Scans_RawQuant(file_path):
         peak_datas = get_out(raw, scanNum )
         filterLine = raw.GetScanEventForScanNumber(scanNum).ToString()
         retTime =  raw.RetentionTimeFromScanNumber(scanNum)*60
-        row = (scanNum, filterLine, peak_datas, retTime)
+        row = (scanNum, filterLine, peak_datas, retTime, file_path)
         MSrawscans.append(row)
     
     log.info('Scan Count is %d', len(MSrawscans))
     #Note: to reshape into lists use 
     #scanNum, filterLine, peak_datas, retTime = list(zip(*MSrawscans)
-    
-    #Note: to get list of mass use 
+    #retTime, file_name   #Note: to get list of mass use 
     # peak_data = peak_datas[0]
     # peak_data.mass
     
     return MSrawscans
 
-def mzXML2Scans(file_path):
+def mzXML2Scans(file_path, add_file_name = False, technial_replicates= False):
+    if technial_replicates:
+        return mzXML2Scans_technical_replacates(file_path)
+    
     log.info('mzXML file: %s', file_path)
+    
     MSrawscans = []
     with mzxml.read(file_path) as reader:
         for spectrum in reader:
@@ -203,12 +229,28 @@ def mzXML2Scans(file_path):
             peak_datas = (spectrum['m/z array'], spectrum['intensity array'], [None]*count,[None]*count,[None]*count,[None]*count)
             filterLine = spectrum['filterLine']
             retTime =  spectrum['retentionTime']
-            row = (scanNum, filterLine, peak_datas, retTime)
+            if add_file_name:
+                row = (scanNum, filterLine, peak_datas, retTime, file_path)
+            else:
+                row = (scanNum, filterLine, peak_datas, retTime)
             MSrawscans.append(row)
         
     
     log.info('Scan Count is %d', len(MSrawscans))
     return MSrawscans
+
+def mzXML2Scans_technical_replacates(file_path):
+    log.info('techical replicates mzXML files at: %s', file_path)
+    files = glob.glob(folder+'/*.mzxml')
+    log.info('processing {} files'.format(len(files)))
+    
+    MSrawscans_fromReplicates = []
+    for file in files:
+        MSrawscans = mzXML2Scans(file, add_file_name = True)
+        MSrawscans_fromReplicates.extend(MSrawscans)  
+        
+    
+    return  MSrawscans_fromReplicates   
 
 def mzML2Scans(file_path):
     log.info('mzML file: %s', file_path)
@@ -227,7 +269,7 @@ def mzML2Scans(file_path):
             peak_datas = (spectrum['m/z array'], spectrum['intensity array'], [None]*count,[None]*count,[None]*count,[None]*count)
             filterLine = spectrum['scanList']['scan'][0]['filter string']
             retTime =  spectrum['scanList']['scan'][0]['scan start time']*60
-            row = (scanNum, filterLine, peak_datas, retTime)
+            row = (scanNum, filterLine, peak_datas, retTime, file_path)
             MSrawscans.append(row)
         
     
@@ -239,9 +281,9 @@ def ThermoRawfile2Scans_csv(scans, filename='ThermoRawfile2Scans.csv'):
         writer = csv.writer(csv_file, delimiter=',')
         writer.writerow(('scanNum', 'filterLine', 'retTime', 'row'))
         for scan in scans:
-            (scanNum, filterLine, peak_datas, retTime) = scan
+            (scanNum, filterLine, peak_datas, retTime, file_name) = scan
             for row in zip(*peak_datas):
-                line = (scanNum, filterLine, retTime) + row
+                line = (scanNum, filterLine, retTime, file_name) + row
                 writer.writerow(line)
 
 '''
@@ -257,13 +299,13 @@ def roundCollisionEnergy(scans, decimal_places = 6):
     log.info('roundCollisionEnergy in header to merge scans to %d decimal places', decimal_places)
     result = []
     for row in scans:
-        scanNum, filterLine, peak_datas, retTime = row 
+        scanNum, filterLine, peak_datas, retTime, file_name = row 
         if ' ms2 ' in filterLine:
             m = re.match(r'(.*) (\d+\.\d*)@(.*)', filterLine)
             colisionEnergy = float(m.groups()[1])
             new_colisionEnergy = round(colisionEnergy, decimal_places)
             new_filterLine = m.groups()[0] +' '+ str(new_colisionEnergy) +'@'+ m.groups()[2]
-            row = scanNum, new_filterLine, peak_datas, retTime
+            row = scanNum, new_filterLine, peak_datas, retTime, file_name
         result.append(row)
 
     return result
@@ -272,7 +314,7 @@ def filterScanBy_retentionTime(scans, lowSeconds=0.5, highSeconds=float("inf")):
     log.info('filterScanBy_retentionTime %f to %f', lowSeconds, highSeconds)
     result = []
     for row in scans:
-        scanNum, filterLine, peak_datas, retTime = row 
+        scanNum, filterLine, peak_datas, retTime, file_name = row 
         if retTime >= lowSeconds and  retTime <= highSeconds:
             result.append(row)
     return result
@@ -282,7 +324,7 @@ def filterScanBy_filterline(scans, subtext = ' ms ', keep=False):
     log.info('filterScanBy_filterline %s filter keep: %s', subtext, keep)
     result=[]
     for row in scans:
-        scanNum, filterLine, peak_datas, retTime = row 
+        scanNum, filterLine, peak_datas, retTime, file_name = row 
         if keep:
             if (subtext in filterLine):
                 result.append(row)
@@ -305,16 +347,16 @@ merge peaks and coarse grained filtering
 def mergePeaksOnFilterline(scans):
     log.info('Merging %d scans' , len(scans))
     
-    filterLines = set([filterLine for scanNo, filterLine, peakData, retTime in scans])
+    filterLines = set([filterLine for scanNo, filterLine, peakData, retTime, file_name in scans])
     log.info('found %d uniqe filterlines', len(filterLines))
     
     # create dict
     mergedPeaks = {}
     for filterLine in filterLines:
-        mergedPeaks[filterLine]=([],[],[],[],[],[])
+        mergedPeaks[filterLine]=([],[],[],[],[],[],[])
         
 #     populate dict
-    for scanNo, filterLine, peakData, retTime in scans:
+    for scanNo, filterLine, peakData, retTime, file_name  in scans:
         (zmass, abunds, resols, baseline , noise, charge) = peakData
         mergedPeaks[filterLine][0].extend(zmass)
         mergedPeaks[filterLine][1].extend(abunds)
@@ -322,7 +364,8 @@ def mergePeaksOnFilterline(scans):
         mergedPeaks[filterLine][3].extend(baseline)
         mergedPeaks[filterLine][4].extend(noise)
         mergedPeaks[filterLine][5].extend(charge)
-    
+        mergedPeaks[filterLine][6].extend([file_name]*len(zmass))
+        
     return mergedPeaks
 
 def filterlinePeaks_csv(mergedPeaks, filename = 'filterlinePeaks.csv'):
@@ -545,8 +588,8 @@ def alterBins_mergeOverlap(peakData):
     masses =    list(sortedPeakData[0])
     abunds =    list(sortedPeakData[1])
     resols =    list(sortedPeakData[2])
-    bins_low =  list(sortedPeakData[6])
-    bins_high = list(sortedPeakData[7])
+    bins_low =  list(sortedPeakData[-2])
+    bins_high = list(sortedPeakData[-1])
     
     while True: #bubble check
         changeCount = 0
@@ -583,8 +626,8 @@ def sortMassIn_FirstBin(peakData):
     masses = peakData[0]
     abunds = peakData[1]
     resols = peakData[2]
-    bins_low = peakData[6]
-    bins_high = peakData[7]
+    bins_low = peakData[-2]
+    bins_high = peakData[-1]
     
     uniqBins = set(zip(bins_low,bins_high))
     log.debug('Mass count %d, available bins %d', len(masses), len(uniqBins))
@@ -612,7 +655,7 @@ def sortMassIn_FirstBin(peakData):
 
 
 def sortPeaksByBinWidth(peakData):
-    bin_width = [bin_high - bin_low for bin_low, bin_high in zip(peakData[6], peakData[7])]
+    bin_width = [bin_high - bin_low for bin_low, bin_high in zip(peakData[-2], peakData[-1])]
     sorted_peakdata_plus = zip(*sorted(zip(bin_width, *peakData)))
     sorted_peakdata = sorted_peakdata_plus[1:]
     return sorted_peakdata
@@ -637,8 +680,8 @@ def sortMassIn_NarrowestBin(peakData):
     masses = sorted_peakdata[0]
     abunds = sorted_peakdata[1]
     resols = sorted_peakdata[2]
-    bins_low = sorted_peakdata[6]
-    bins_high = sorted_peakdata[7]
+    bins_low = sorted_peakdata[-2]
+    bins_high = sorted_peakdata[-1]
     
     bins = []
     for mass in masses:
@@ -662,8 +705,8 @@ def sortMassIn_sortWindow(peakData, window = 200):
     masses = peakData_sorted[0]
     abunds = peakData_sorted[1]
     resols = peakData_sorted[2]
-    bins_low = peakData_sorted[6]
-    bins_high = peakData_sorted[7]
+    bins_low = peakData_sorted[-2]
+    bins_high = peakData_sorted[-1]
     
     tryAgain =True
     
@@ -702,8 +745,8 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
     masses = peakData_sorted[0]
     abunds = peakData_sorted[1]
     resols = peakData_sorted[2]
-    bins_low = peakData_sorted[6]
-    bins_high = peakData_sorted[7]
+    bins_low = peakData_sorted[-2]
+    bins_high = peakData_sorted[-1]
     
     bins = []
     for idx, mass in enumerate(masses):
@@ -712,7 +755,7 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
         highidx = window + lowidx
         
         #--
-        bin_width = [bin_high - bin_low for bin_low, bin_high in zip(peakData_sorted[6][lowidx:highidx], peakData_sorted[7][lowidx:highidx])]
+        bin_width = [bin_high - bin_low for bin_low, bin_high in zip(peakData_sorted[-2][lowidx:highidx], peakData_sorted[-1][lowidx:highidx])]
         sorted_peakdata_plus = list(zip(*sorted(zip(bin_width, peakData_sorted[0][lowidx:highidx],
                                                peakData_sorted[1][lowidx:highidx],
                                                peakData_sorted[2][lowidx:highidx],
@@ -720,13 +763,14 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
                                                peakData_sorted[4][lowidx:highidx],
                                                peakData_sorted[5][lowidx:highidx],
                                                peakData_sorted[6][lowidx:highidx],
-                                               peakData_sorted[7][lowidx:highidx]
+                                               peakData_sorted[7][lowidx:highidx],
+                                               peakData_sorted[8][lowidx:highidx]
                                                ))))
         sorted_peakdata = sorted_peakdata_plus[1:]
         #--
         
         if idx % window == 0: log.debug('at %d of %d', idx, len(masses))
-        for bin_low, bin_high in zip(sorted_peakdata[6], sorted_peakdata[7]):
+        for bin_low, bin_high in zip(sorted_peakdata[-2], sorted_peakdata[-1]):
             if mass >= bin_low and mass <= bin_high:
                 found = True
                 bins.append((bin_low,bin_high))
@@ -748,18 +792,21 @@ def aggregateBinData(peakData):
     masses = peakData[0]
     abunds = peakData[1]
     resols = peakData[2]
-    bins_low = peakData[6]
-    bins_high = peakData[7] 
-    bins = peakData[8]
+    bins_low = peakData[-3]
+    bins_high = peakData[-2] 
+    bins = peakData[-1]
     binsData = dict()
     
     newRow = 0,0.0,0.0, 0.0 #  count, sumZmass, sumAbund, sumNoise
-    for mass, abund, resol,baseline , noise, charge, bin_low, bin_high, bin in zip(*peakData):
+    for mass, abund, resol,baseline , noise, charge,file_name,  bin_low, bin_high, bin in zip(*peakData):
         count, sumZmass, sumAbund , sum_Sig2Noise = binsData.get(bin, newRow) 
         count +=1
         sumZmass += mass
         sumAbund += abund
-        sig2noise = abund/noise
+        if noise is not None:
+            sig2noise = abund/noise
+        else:
+            sig2noise = 0
         sum_Sig2Noise += sig2noise
         binsData[bin] = count, sumZmass, sumAbund , sum_Sig2Noise
 
@@ -811,6 +858,7 @@ def filterBins(binData, minRepetitionRate = 0.70, minSignal2Noise = 1.0, decimal
     for idx, row in enumerate(sortedBintable):
         bin = row[0:2]
         (count, sumZmass, sumAbund, sum_sig2Noise) = row[2:]
+        minSignal2Noise = 0 if sum_sig2Noise == 0 else minSignal2Noise # in casse there is no signal to noise
         if count >= (maxCount * minRepetitionRate) and (sum_sig2Noise/count) >= minSignal2Noise:
             binData_filtered[bin]=(count, sumZmass, sumAbund, sum_sig2Noise)        
 
@@ -847,11 +895,11 @@ def bins2Peaks(binsData, peakData):
     masses = peakData[0]
     abunds = peakData[1]
     resols = peakData[2]
-    bins_low = peakData[6]
-    bins_high = peakData[7] 
-    bins = peakData[8]
+    bins_low = peakData[-3]
+    bins_high = peakData[-2] 
+    bins = peakData[-1]
     
-    filteredRowdata = [(row[0], row[1]) for row in zip(*peakData) if row[8] in bins_filtered]
+    filteredRowdata = [(row[0], row[1], row[6]) for row in zip(*peakData) if row[9] in bins_filtered]
     result = zip(*filteredRowdata)
     return result
     
@@ -859,10 +907,9 @@ def bins2Peaks(binsData, peakData):
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        print("A filename must be provided")
+        print("A folder must be provided with technial replciates ")
         raise SystemExit
     
-    filename = " ".join(sys.argv[1:])
+    folder = " ".join(sys.argv[1:])
     
-    for file in sys.argv[1:]:
-        main(file)
+    main(folder)
