@@ -27,11 +27,12 @@ from collections import namedtuple
 import numpy as np
 import glob, os   
 from pyteomics import mzxml, mzml
+import argparse
 
 __version__ = "17.03.29.0"
 
 
-def main(folder , technial_replicates =True):
+def main(folder , technial_replicates =True, rcf_a=5408000.0, rcf_b=0.5):
     log.setLevel(logging.DEBUG)
     if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
     if log.level == logging.DEBUG:logging.basicConfig(filename='peakStrainer.log',filemode='w')
@@ -75,7 +76,7 @@ def main(folder , technial_replicates =True):
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.items()}
     filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.items()} # 5408000.0, 2096000.0
     '''
-    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.items()}
+    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v, rcf_a, rcf_b ) for k, v in filterLines.items()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
 #     filterlines_withBins_ms = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.items() if ' ms ' in k }
@@ -241,7 +242,7 @@ def mzXML2Scans(file_path, add_file_name = False, technial_replicates= False):
 
 def mzXML2Scans_technical_replacates(file_path):
     log.info('techical replicates mzXML files at: %s', file_path)
-    files = glob.glob(folder+'/*.mzxml')
+    files = glob.glob(file_path+'/*.mzxml')
     log.info('processing {} files'.format(len(files)))
     
     MSrawscans_fromReplicates = []
@@ -906,10 +907,11 @@ def bins2Peaks(binsData, peakData):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        print("A folder must be provided with technial replciates ")
-        raise SystemExit
+    parser = argparse.ArgumentParser()
+    parser.add_argument("folder", help="folder with technical replicates")
+    parser.add_argument("--rcf_a", help="select the resolution curve finction value a", type=float, default=5408000.0 )
+    parser.add_argument("--rcf_b", help="select the resolution curve finction value b", type=float, default=0.5)
     
-    folder = " ".join(sys.argv[1:])
+    args = parser.parse_args()
     
-    main(folder)
+    main(args.folder, technial_replicates =True, rcf_a=args.rcf_a, rcf_b=args.rcf_b)

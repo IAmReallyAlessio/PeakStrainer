@@ -5,7 +5,7 @@
 block_cipher = None
 
 
-a = Analysis(['peakStrainerApp.py'],
+a = Analysis(['peakStrainer.py'],
              pathex=['C:\\apps\\eclipseRCP\\workspace\\PeakStrainer'],
              binaries=[],
              datas=[('utils\\template.mzXML','utils')],
@@ -21,15 +21,15 @@ pyz = PYZ(a.pure, a.zipped_data,
 exe = EXE(pyz,
           a.scripts,
           exclude_binaries=True,
-          name='peakStrainerApp',
+          name='peakStrainer',
           debug=False,
           strip=False,
           upx=False,
-          console=False )
+          console=True )
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
                a.datas,
                strip=False,
                upx=False,
-               name='peakStrainerApp')
+               name='peakStrainer')
