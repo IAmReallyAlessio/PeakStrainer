@@ -102,8 +102,13 @@ class MyFrame(MyFrame2):
             self.m_statuslog.WriteText('Starting filepath '+ filepath + '\n')
             try:
                 self.run_once(filepath, onefile)
-            except :
-                self.m_statuslog.WriteText('\n *** THERE WAS A PROBLEM PROCESSING THE FILE *** \n'+ filepath+ '\n')
+            except Exception as e:
+                self.m_statuslog.WriteText('\n *** THERE WAS A PROBLEM PROCESSING THE FILE *** \n'+ filepath+ '\n\n\n')
+                import sys
+                self.m_statuslog.WriteText(sys.executable+'\n\n')
+                log.error(sys.executable)
+                self.m_statuslog.WriteText(str(e)+'\n\n')
+                log.error(str(e))
             
             self.m_statuslog.WriteText('finished filepath '+ filepath+ '\n')
             self.m_statuslog.WriteText('=========================='+ '\n')
