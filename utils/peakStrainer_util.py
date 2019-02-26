@@ -128,6 +128,36 @@ def getMZXMLEncondedScans(filePath):
 
     return zip(*rawscans)
 
+def generatePsudoMGF(newfilename, preFiltered_filterlines):
+    def getCharge(title):
+        charge =title.split()[-1]
+        mode = title.split()[2]
+        return charge+mode
+
+    def getPepMass(title):
+        combined = title.split()[-3]
+        return combined.split('@')[0]
+
+    with file(newfilename, 'w') as outfile:
+        for title in preFiltered_filterlines:
+            if not preFiltered_filterlines[title]:
+                log.info('no Data for {}'.format(title))
+                continue
+            outfile.write('BEGIN IONS'+'\n')
+
+            outfile.write('TITLE='+title+'\n')
+            outfile.write('CHARGE='+getCharge(title)+'\n')
+            outfile.write('PEPMASS='+getPepMass(title)+'\n')
+#
+            masses, intens = preFiltered_filterlines[title]
+            for mass, inten in zip(masses, intens):
+                outfile.write("{0:.4f} {1:.0f}".format(mass, inten)+'\n')
+
+            outfile.write('END IONS\n\n')
+
+
+
+
 def write2templateMzXML(newfilename, scanPeaks):
     namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}
     ET.register_namespace('', 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0')
