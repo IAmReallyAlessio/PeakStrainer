@@ -73,3 +73,52 @@ The source code is available and is intended to be readable and extensible.
 For more about the command line and source code,
 please go to [implementation Notes](Implementation_notes)
  
+
+## Options
+PeakStrainer can be configured to run in different ways,
+but the default setting should work most of the time.
+Just in case here are some options you can change.
+
+Please note that some options are not available in the GUI.
+one of the goals of the GUI is to maintain simplicity.
+This is why some options are only in the code.
+
+### Select Scans
+A simple way to reduce the size of the file is by removing some scans.
+Scan can be removed based on:
+- Retention time, ie from ... to ... in seconds
+- By filterline text, filterline is a short text that describes the scan,
+	ie. filter line should include the text `NSI` or
+	filter line should exclude the text `+`
+- By Sample, this is mainly for testing, you can get 1 out of every _N_ scans,
+	ie. take 1 out of every 10 scans 
+
+
+### Pre-filter Peaks
+At this stage we remove what seems to be random noise.
+first we combine the spectra that has the same preconditions, 
+ie. mode, selected ion m/z, etc.
+And we count the peaks at a given m/z value,
+if the count is very low, like 1 or 2, as compared to other peak counts,
+then we consider those peaks random and discard them.
+### Sort Peaks
+Now that we defined the bins, we need to sort the peaks into the bins,
+this would be trivial if the bins did not overlap,
+but sometimes they do overlap so we need to decide how to handle it.
+
+- Peak in first bin the matched, quick and straight forward,
+works well if there is no bin overlap
+- Peak in narrowest bin, this maintains peak resolution and underlying peaks can be detected, 
+but it is computationally expensive and provides very small differences
+
+- Peak in bin sort window, in this case we only check a few bins to see if the peak matches, it is less computationally expensive, than the others
+
+### Filter Bins
+By grouping peaks together into bins we can count how often peaks occur in a given m/z range.
+We would expect these groups to have approximately the same number of peaks.
+if the peaks are much less than expected then we filter those groups out
+
+### Store Results
+We can see the results of each step in the process trough csv files.
+there are _comma separated values_ files, and also a psudo mzXML file.
+
