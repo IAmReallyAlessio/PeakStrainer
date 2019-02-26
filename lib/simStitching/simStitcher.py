@@ -9,16 +9,17 @@ import re
 from base64 import b64decode
 from array import array
 from collections import namedtuple
-import warnings
+from math import sqrt
 log = logging.getLogger(os.path.basename(__file__))
 from utils.peakStrainer_util import getMZXMLEncondedScans, decode_mzXML_Peaks, write2templateMzXML
 from itertools import compress
+import numpy as np
 
 class Scan(object):
     
     class FilterLine(object):
-        MODE_POS = '+'
-        MODE_NEG = '-'
+        MODE_POS = ' + '
+        MODE_NEG = ' - '
         
         def __init__(self, filterline):
             self.filterline = filterline
@@ -36,11 +37,13 @@ class Scan(object):
             return float(self.match.group(2))
         def _high(self):
             return float(self.match.group(3))
+        def _center(self):
+            return ( float(self.match.group(2)) + float(self.match.group(3)) ) /2
         def asTuple(self):
             return (self._head(),self._low(),self._high())
         def mode(self):
-            if ' + ' in self._head(): return  self.MODE_POS
-            elif ' - '  in self._head(): return  self.MODE_NEG
+            if self.MODE_POS in self._head(): return  self.MODE_POS
+            elif self.MODE_NEG  in self._head(): return  self.MODE_NEG
             else: return None
         
         
@@ -52,7 +55,8 @@ class Scan(object):
         self.masses, self.intens = decode_mzXML_Peaks(self.encodedPeaks)
         self.previous = None
         self.next = None
-        
+        self.centreCorrectionFactor = None # correction factor for the center peak
+
         
     def __str__(self):
         return 'Scan Num {}, {}, peak Count = {}, low ={}, high = {}'.format(self.scanNo,self.filterLine, len(self.masses), self.overlapLow(), self.overlapHigh())
@@ -75,11 +79,19 @@ class Scan(object):
         return self.decode_mzXML_Peaks(self.encodedPeaks)
     
     def nonOverlapPeaks(self):
+        return self.nonOverlap_andNoEdgePeaks(daltons = 0)
+
+    def nonOverlap_andNoEdgePeaks(self, daltons = 5):
+        '''
+        remove edge of sim if still available after overlap
+
+        :param daltons: how many daltons to remove from the edge of the SIM
+        '''
         masses, intens = self.allPeaks()
-        isNonOverlap = [mass >= self.overlapLow() and mass < self.overlapHigh() for mass in masses]
+        isNonOverlap = [mass >= self.overlapLow()+daltons and mass < self.overlapHigh()-daltons for mass in masses]
         
-        return list(compress(masses, isNonOverlap)), list(compress(intens, isNonOverlap)) 
-    
+        return list(compress(masses, isNonOverlap)), list(compress(intens, isNonOverlap))
+
 
     def _getHighOverlap(self): # 3 cases either last one, or there is an overlap or there isn't
         if self.next is None or self.filterLine._head() != self.next.filterLine._head(): return 0
@@ -109,7 +121,11 @@ class Scan(object):
             return self.filterLine._high()-self._getLowOverlap()
         else:
             return self.filterLine._high()-self._getHighOverlap()
-  
+
+    def totalIonCount(self):
+        mass, intens = self.allPeaks()
+        return sum(intens)
+
 
 
 def getSampleSimPeak(scans, relintens= 0.05, mzGap = 0.5):
@@ -126,7 +142,7 @@ def getSampleSimPeak(scans, relintens= 0.05, mzGap = 0.5):
             return False
         
     
-    SimSample =  namedtuple('SimSample', 'mass intens filterLine')
+    SimSample =  namedtuple('SimSample', 'mass intens filterLine totalIonCount')
     results = []
     for scan in scans:
         target = (scan.filterLine._high()+scan.filterLine._low())/2
@@ -150,7 +166,7 @@ def getSampleSimPeak(scans, relintens= 0.05, mzGap = 0.5):
         else:
             for mass in sortedMasses:
                 idx = gapMasses.index(mass)
-                simSample = SimSample(gapMasses[idx],gapIntens[idx],scan.filterLine )
+                simSample = SimSample(gapMasses[idx],gapIntens[idx],scan.filterLine, scan.totalIonCount() )
                 results.append(simSample)
         
     return results
@@ -191,48 +207,183 @@ def toCSVFile(fileBaseName, dictOrList):
         outfile.write(string)
             
 
-def func(x, a, b):
-    return  a*(x**-b)
+def func(mass, totIonCount, C):
+    X= mass
+    Y = totIonCount
+    return  C[4]*X**2. + C[5]*Y**2. + C[3]*X*Y + C[1]*X + C[2]*Y + C[0]
+
+def fun(C, mass, totIonCount, deviationFactor):
+    X= np.array(mass)
+    Y = np.array(totIonCount)
+    offset = np.array(deviationFactor)
+    return  (C[4]*np.power(X,2.) + C[5]*np.power(Y,2.) + C[3]*X*Y + C[1]*X + C[2]*Y + C[0])-offset
+
+def updateFunc(C, centerfactor, startOffset, mass, deviationFactor=0, onlyScale = False):
+    '''
+
+    :param C: values for regression training
+    :param centerfactor: scaling for mass at center of sim to match ms
+    :param startOffset: how far from sim center is the mass
+    :param mass: the mass
+    :param deviationFactor: scaling for current mass to corresponding ms mass
+    :param onlyScale: no function, only scale to centre mass, this is good approximation
+    '''
+
+    if onlyScale: return centerfactor
+
+    cf = np.array(centerfactor)
+    so = np.array(startOffset)
+    m= np.array(mass)
+    df = np.array(deviationFactor)
+
+    return (cf + (C[0]*np.exp(C[1]*so)) * (C[2]*m)+C[3] ) - df
 
 
-def getFuncVariables(matchingSim):
+def getCenterFactors(simMasses, deviationFactors, simHeads):
+    import pandas as pd
+    centers = [simHead._center() for simHead in simHeads]
+    dfcf = pd.DataFrame({'simMasses':simMasses, 'deviationFactors':deviationFactors, 'simHeads':simHeads, 'centers':centers})
+    dfcf['distances']=abs(dfcf.simMasses - dfcf.centers)
+    dfcf['mini'] = dfcf.groupby('simHeads')['distances'].transform('min')
+
+    selectDF = dfcf[dfcf.distances == dfcf.mini ]
+    result = (selectDF.simHeads.tolist(), selectDF.deviationFactors.tolist())
+    dictRes = dict(zip(*result))
+    return dictRes
+
+
+
+
+def getDeviationTrend(matchingSim, C=None):
     log.info('curve fitting to generate projection')
+    log.info('given C:{}'.format(C))
     result = {}
-    uniqMSHeads = set([line[5] for line in matchingSim])
-    from scipy.optimize import curve_fit
-    for uniqMShead in uniqMSHeads:
-        matchingSimSelection = [line for line in matchingSim if line[5] == uniqMShead]
+    centreFactors = {}
+    uniqMSHeads = set([line[6] for line in matchingSim])
+    #from scipy.optimize import  curve_fit use for linear regresion
+    #import scipy.linalg # used for surface
+    import scipy.optimize
+
+    for mode in [Scan.FilterLine.MODE_POS, Scan.FilterLine.MODE_NEG]:
+#         if C is not None:
+#             result[uniqMShead] = C
+#             continue
+        matchingSimSelection = [line for line in matchingSim if mode in line[6]]
 #         minMSInten = max([line[4] for line in matchingSimSelection]) * 0.01 # only sample peaks with a minimum intensity for function, performs worse!!!!, dont do it
 #         validSimSelection = [line for line in matchingSimSelection if line[4] > minMSInten]
-        simMasses, simIntens, simHeads, msMasses, msIntens, msHeads = zip(*matchingSimSelection)
+        simMasses, simIntens, simHeads,simTotalIonCount, msMasses, msIntens, msHeads = zip(*matchingSimSelection)
         
-        sumSimIntens = sum(simIntens) # to normalize
-        simMsIntens = sum(msIntens)
-        simIntens_norm = [simInten / sumSimIntens for simInten in simIntens]
-        msIntens_norm = [msInten / simMsIntens for msInten in msIntens]
-        deviationFactors = [msIntens_norm[idx] / simIntens_norm[idx] for idx, _ in enumerate(msIntens_norm)]
+#         sumSimIntens = sum(simIntens) # to normalize
+#         simMsIntens = sum(msIntens)
+#         simIntens_norm = [simInten / sumSimIntens for simInten in simIntens]
+#         msIntens_norm = [msInten / simMsIntens for msInten in msIntens]
+        deviationFactors = [msIntens[idx] / simIntens[idx] for idx, _ in enumerate(msIntens)]
+        centerfactorsDict =  getCenterFactors(simMasses, deviationFactors, simHeads)
+        centerfactorsList = [centerfactorsDict[simHead] for simHead in simHeads]
+        startOffsets = [ simMass - simhead._low() for simMass, simhead in zip(simMasses, simHeads)]
         try:
-            popt, pconv = curve_fit(func, msMasses, deviationFactors)
-        except:
-            log.error('ERROR: Values do not fit a curve')
-            popt =  (0,0)
-        log.info('function a*(x**-b) uses values: projection, %f, %f for %s', popt[0], popt[1], uniqMShead)
-        result[uniqMShead] = popt
-    return result
+        #    popt, pconv = curve_fit(func, msMasses, deviationFactors)
+        # as per https://gist.github.com/amroamroamro/1db8d69b4b65e8bc66a6
+#             data = np.array([simMasses, simTotalIonCount, deviationFactors])
+#             data= data.T
+#
+#             A = np.c_[np.ones(data.shape[0]), data[:,:2], np.prod(data[:,:2], axis=1), data[:,:2]**2] # C[0] + C[1]*X+C[2]*Y + C[3]*X*Y + C[4]*X**2.+C[5]*Y**2.
+            #C,_,_,_ = scipy.linalg.lstsq(A, data[:,2]) returns negatives
+            #C,_ = scipy.optimize.nnls(A, data[:,2]) #linear
 
-def project_ms2sim(matchingSims, popts):
+            #from http://scipy-cookbook.readthedocs.io/items/robust_regression.html
+            x0 = np.ones(4)
+            C = scipy.optimize.least_squares(updateFunc, x0, args=(centerfactorsList, startOffsets, simMasses, deviationFactors))
+
+            # evaluate it on a grid
+            #Z = np.dot(np.c_[np.ones(XX.shape), XX, YY, XX*YY, XX**2, YY**2], C).reshape(X.shape)
+            # Z = C[4]*X**2. + C[5]*Y**2. + C[3]*X*Y + C[1]*X + C[2]*Y + C[0]
+        except:
+            log.error('ERROR: Values do not fit a surface')
+            popt =  (0,0,0,0,0,0)
+        log.info('function least_squares uses values: projection, %s for %s', str(C.x), mode)
+        result[mode] = C.x
+        centreFactors.update(centerfactorsDict)
+    return result, centreFactors
+
+def project_ms2sim(matchingSims, popts, centerFactors, onlyScale = True):
     
-#     simMasses, simIntens, simHeads, msMasses, msIntens, msHeads = zip(*matchingSim)
-    
-    correctionFactors = [func(simMass, *popts[msHead]) for simMass, simInten, simHead, msMass, msInten, msHead in matchingSims]
+    simMasses, simIntens, simHeads, simTotalIonCounts, msMasses, msIntens, msHeads = zip(*matchingSims)
+    startOffsets = [ simMass - simhead._low() for simMass, simhead in zip(simMasses, simHeads)]
+#     modes = [Scan.FilterLine.MODE_POS if Scan.FilterLine.MODE_POS in msHead \
+#              else Scan.FilterLine.MODE_NEG for msHead in msHeads]
+    correctionFactors = [updateFunc(popts[simHead.mode()], centerFactors[simHead], startOffset, simMass, deviationFactor = 0, onlyScale= onlyScale) for  simHead, startOffset, simMass in zip(simHeads, startOffsets,simMasses )]
     
     simIntens_Corrected = [matchingSim[1] * correctionFactors[idx] for idx, matchingSim in enumerate(matchingSims)]
-    return [matchingSim + (simIntens_Corrected[idx],) for idx, matchingSim in enumerate(matchingSims)]
+    sqError = [(matchingSim[1] - simIntens_Corrected[idx])**2 for idx, matchingSim in enumerate(matchingSims)]
+    sumSqError = sum(sqError)
 
-def simStitcher(filePath = None, doCompare = True, callback = None):
-    log.setLevel(logging.DEBUG)
+    l2norm = sqrt(sumSqError)
+
+    log.info(' l2 norm {} from max {}, count = {}'.format(l2norm, max([msInten for simMass, simInten, simHead, simTotIonCount ,msMass, msInten, msHead in matchingSims]),len(sqError) ))
+
+    return [matchingSim + (simIntens_Corrected[idx], correctionFactors[idx]) for idx, matchingSim in enumerate(matchingSims)]
+
+
+def tr_loglevel(loglevel):
+    tr={0:logging.ERROR, 1:logging.INFO, 2:logging.DEBUG, 3:logging.DEBUG}
+    return tr[loglevel]
+
+
+def getCSVPath(csvPath, filePath):
+    dir,file = os.path.split(filePath)
+
+    baseName = file[:-6]
+
+    return getCSVPath1(csvPath, filePath)+baseName+'-'
+
+def getCSVPath1(csvPath, filePath):
+    dir,file = os.path.split(filePath)
+    if csvPath == None : csvPath = dir
+    if not csvPath.endswith('\\') : csvPath = csvPath +'\\'
+    csvPath=csvPath+'logfiles\\'
+    if not os.path.exists(csvPath): os.makedirs(csvPath)
+
+    return csvPath
+
+
+
+def getSelectedMatchingSim(matchingSim):
+    '''
+    will return one scan per sim, the one closes to the centre of the sim
+    :param matchingSim: all matching peaks between sim scans and ms
+    '''
+#     simMass, simInten, simHead, simTotalIonCount, msMass,msInten, msHead = zip(*matchingSim)
+
+    sortedMatchingSim = sorted(matchingSim, key=lambda e: abs(e[0]-e[2]._center()))
+
+    first = set()
+    selected = []
+
+    for e in sortedMatchingSim:
+        if e[2].filterline in first: continue
+        first.add(e[2].filterline)
+        selected.append(e)
+
+
+    return selected
+
+
+def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , daltons = 5 ,csvPath1 = None, loglevel = 3):
+    '''
+    stitch the sim scans together
+    :param filePath: thermo raw file to process
+    :param scaleToCenterMass: scale SIM to match MS, based on center SIM mass
+    :param adaptByRegresion: try to adapt the complete SIM to match MS, overrides scaleToCenterMass, performance is beta
+    :param daltons: daltons to remove from sim edge, default:5
+    :param csvPath1: csvoutput path
+    :param loglevel: from 0 low to 3 high
+    '''
+
+    log.setLevel(tr_loglevel(loglevel))
     log.addHandler(logging.StreamHandler()) # log to console
-    if log.level == logging.DEBUG: logging.basicConfig(filename='simSitcher.log',filemode='w')
+    if loglevel>0: csvPath = getCSVPath(csvPath1, filePath)
+    if loglevel>0: logging.basicConfig(filename=getCSVPath1(csvPath1, filePath)+'simSitcher.log',filemode='w')
     
     log.info('getMZXMLEncondedScans from'+ filePath)
     scans_mzxml = getMZXMLEncondedScanRows(filePath)
@@ -244,7 +395,7 @@ def simStitcher(filePath = None, doCompare = True, callback = None):
     log.info('get Sim scans')
     scans_mzxml_sim= [scan for scan in scans_mzxml if ' sim ' in scan[1].lower()]
     log.debug('\n'.join(map(str,scans_mzxml_sim)))
-    toCSVFile('scans_mzxml_sim',scans_mzxml_sim )
+    if loglevel>2: toCSVFile(csvPath+'scans_mzxml_sim',scans_mzxml_sim )
     
     scans =[Scan(*scan_xml) for scan_xml in scans_mzxml_sim]
     
@@ -252,7 +403,7 @@ def simStitcher(filePath = None, doCompare = True, callback = None):
     scans.sort(key=lambda scan: scan.filterLine.asTuple())
     
     log.debug('\n'.join(map(str,scans)))
-    toCSVFile('scans', scans)
+    if loglevel>2: toCSVFile(csvPath+'scans', scans)
     
     scans[0].next = scans[1] #previous is None
     for idx, scan in enumerate(scans):
@@ -265,16 +416,20 @@ def simStitcher(filePath = None, doCompare = True, callback = None):
     scans_stitched = {}
     for scan in scans:
         head = scan.filterLine._head()
-        masses, intens = scan.nonOverlapPeaks()
-        scans_stitched.setdefault(head, ([],[]))[0].extend(masses)
-        scans_stitched.setdefault(head, ([],[]))[1].extend(intens)
+        masses, intens = scan.nonOverlap_andNoEdgePeaks(daltons)
+        totIonCounts = [scan.totalIonCount()] * len(masses)
+        heads = [scan.filterLine] * len(masses)
+        scans_stitched.setdefault(head, ([],[],[],[]))[0].extend(masses)
+        scans_stitched.setdefault(head, ([],[],[],[]))[1].extend(intens)
+        scans_stitched.setdefault(head, ([],[],[],[]))[2].extend(totIonCounts)
+        scans_stitched.setdefault(head, ([],[],[],[]))[3].extend(heads)
         
     
     
     log.info('stitched scans:')
     log.info('\n'.join(scans_stitched.keys()))
     log.debug('\n'.join(map(str,scans_stitched.items())))
-    toCSVFile('scans_stitched', scans_stitched)
+    if loglevel>2: toCSVFile(csvPath+'scans_stitched', scans_stitched)
     names = scans_stitched.keys()
     # -- rename
     for stitched_Head in names:
@@ -300,54 +455,65 @@ def simStitcher(filePath = None, doCompare = True, callback = None):
                    callback("***gap between two sims is larger than sim,  {} it will be removed ***".format(key))
                delList.add(key)
     
-    for  key in   delList:
-        del scans_stitched[key]
-                
-    log.info('writing to :'+outputStitchedFile(filePath))
-    write2templateMzXML(outputStitchedFile(filePath), scans_stitched)      
+    if not scaleToCenterMass:
+        log.info('writing to :'+outputStitchedFile(filePath))
+        write2templateMzXML(outputStitchedFile(filePath), scans_stitched)
+        log.info('finish stitching')
+        return #ALL DONE!
+
     
-    log.info('finish stitching')
-    
-    if not doCompare: raise SystemExit 
-    
-    log.info('start validation')
+    log.info('start scaling')
     
     scans_mzxml_ms= [scan for scan in scans_mzxml if ' ms ' in scan[1].lower() and ' full ' in scan[1].lower()]
     log.debug('\n'.join(map(str,scans_mzxml_ms)))
-    toCSVFile('scans_mzxml_ms', scans_mzxml_ms)
+    if loglevel>2: toCSVFile(csvPath+'scans_mzxml_ms', scans_mzxml_ms)
     
     scans_ms =[Scan(*scan_xml) for scan_xml in scans_mzxml_ms]
     
     log.info('get Valid sim samples')
     sampleSimPeaks = getSampleSimPeak(scans)
     log.debug('\n'.join(map(str,sampleSimPeaks)))
-    toCSVFile('sampleSimPeaks', sampleSimPeaks)
+    if loglevel>2: toCSVFile(csvPath+'sampleSimPeaks', sampleSimPeaks)
     
     log.info('get matching ms peak')
     matchingSim = getMatchingMS(sampleSimPeaks, scans_ms)
     
-    popts = getFuncVariables(matchingSim)
+#     tightSelection = getSelectedMatchingSim(matchingSim)
     
-    projected = project_ms2sim(matchingSim, popts)
+    log.info('get deviation trend')
+    popts, centerFactors = getDeviationTrend(matchingSim)
+    onlyScale = scaleToCenterMass  and not adaptByRegresion
+    log.debug('is only scale {}, scaleToCenterMass:{} and adaptByRegresion: {}'.format(onlyScale, scaleToCenterMass, adaptByRegresion))
+    projected = project_ms2sim(matchingSim, popts, centerFactors, onlyScale)
+    log.debug('simMass     simInten     simHead     simTotalIonCount     msMass     msInten     msHead    correctedIntens    correctionFactor')
     log.debug('\n'.join(map(str,projected)))
-    toCSVFile('matchingSim', projected)
+    if loglevel>0: toCSVFile(csvPath+'matchingSim', projected) #simMass     simInten     simHead     simTotalIonCount     msMass     msInten     msHead    correctedIntens    correctionFactor
     
     log.info('finished comparing')
     
-    log.info('start sim intens adjustment')
+    log.info('start sim intens update')
+
     scans_adjusted={}
+
+#     popts, centerFactors
     for idx, scan in enumerate(scans_stitched):
-        (masses, intens) = scans_stitched[scan]
-        probalemMSfilterline = scan.replace('SIM', 'Full') #dirty hack, second time!
-        upto=probalemMSfilterline.index('[')
-        maybeMSfilterline = probalemMSfilterline[:upto] 
-        correctionFactors = [func(mass, *popts[maybeMSfilterline]) for mass in masses]
+        (masses, intens, totIonCount, heads) = scans_stitched[scan]
+        startOffsets = [ mass - head._low() for mass, head in zip(masses, heads)]
+        centreFactorsList =[]
+        for head in heads:
+            if head in centerFactors.keys():
+                centreFactorsList.append(centerFactors[head])
+            else:
+                log.info('No centrefactor found for {} , using 1 instead'.format(head))
+                centreFactorsList.append(1.0)
+#             correctionFactors = [update(mass, totIonCount, popts[maybeMSfilterline]) for mass,totIonCount  in zip(masses, totIonCount)]
+        correctionFactors = [updateFunc(popts[head.mode()], cf, startOffset, mass, deviationFactor = 0, onlyScale = onlyScale ) for head, cf,startOffset, mass in zip(heads,centreFactorsList, startOffsets, masses)]
     
         intensAdjusted = [intens[idx] * correctionFactors[idx] for idx, _ in enumerate(intens)]
         scans_adjusted[scan] = (masses, intensAdjusted)
         
     log.debug('\n'.join(map(str,scans_adjusted.items())))
-    toCSVFile('scans_adjusted', scans_adjusted)
+    if loglevel>2: toCSVFile(csvPath+'scans_adjusted', scans_adjusted)
     
     log.info('writing to :'+outputAdjustedFile(filePath))
     write2templateMzXML(outputAdjustedFile(filePath), scans_adjusted)

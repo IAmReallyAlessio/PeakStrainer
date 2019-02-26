@@ -83,7 +83,10 @@ class MyFrame2 ( wx.Frame ):
 		self.m_button3 = wx.Button( self.m_panel3, wx.ID_ANY, u"Spectra Reorder", wx.DefaultPosition, wx.DefaultSize, wx.NO_BORDER )
 		bSizer7.Add( self.m_button3, 0, wx.TOP|wx.BOTTOM|wx.RIGHT, 5 )
 		
-		
+		self.m_button4 = wx.Button( self.m_panel3, wx.ID_ANY, u"simStitcher", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer7.Add( self.m_button4, 0, wx.ALL, 5 )
+
+
 		bSizer5.Add( bSizer7, 0, 0, 5 )
 		
 		
@@ -167,7 +170,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_panel5 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer19 = wx.BoxSizer( wx.VERTICAL )
 		
-		self.m_staticText7 = wx.StaticText( self.m_panel5, wx.ID_ANY, u"Select Scans", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText7 = wx.StaticText( self.m_panel5, wx.ID_ANY, u"Discard Scans", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText7.Wrap( -1 )
 		self.m_staticText7.SetFont( wx.Font( 10, 74, 90, 92, False, "Arial" ) )
 		
@@ -404,7 +407,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer331.Add( self.m_staticText241, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
-		self.m_textCtrl61 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, u"5408000.0", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl61 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_textCtrl61.Enable( False )
 		
 		bSizer331.Add( self.m_textCtrl61, 0, wx.ALL, 5 )
@@ -416,7 +419,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer331.Add( self.m_staticText251, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
-		self.m_textCtrl71 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, u"0.5", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl71 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_textCtrl71.Enable( False )
 		
 		bSizer331.Add( self.m_textCtrl71, 0, wx.ALL, 5 )
@@ -439,7 +442,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer3311.Add( self.m_staticText2411, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
-		self.m_textCtrl611 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, u"5408000.0", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl611 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_textCtrl611.Enable( False )
 		
 		bSizer3311.Add( self.m_textCtrl611, 0, wx.ALL, 5 )
@@ -451,7 +454,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer3311.Add( self.m_staticText2511, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
-		self.m_textCtrl711 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, u"0.5", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl711 = wx.TextCtrl( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_textCtrl711.Enable( False )
 		
 		bSizer3311.Add( self.m_textCtrl711, 0, wx.ALL, 5 )
@@ -471,6 +474,9 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer34.Add( bSizer311, 0, wx.EXPAND, 5 )
 		
+		self.m_staticline162 = wx.StaticLine( self.m_panel7, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+		bSizer34.Add( self.m_staticline162, 0, wx.EXPAND |wx.ALL, 5 )
+
 		bSizer38 = wx.BoxSizer( wx.HORIZONTAL )
 		
 		self.m_checkBox11 = wx.CheckBox( self.m_panel7, wx.ID_ANY, u"Merge overlapping bins", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -582,6 +588,7 @@ class MyFrame2 ( wx.Frame ):
 		# Connect Events
 		self.m_buttonBrowse.Bind( wx.EVT_BUTTON, self.clickedBrowse )
 		self.m_button3.Bind( wx.EVT_BUTTON, self.clickOpenSpecReord )
+		self.m_button4.Bind( wx.EVT_BUTTON, self.clickedSimStitcher )
 		self.m_checkBox8.Bind( wx.EVT_CHECKBOX, self.checkOutcsv )
 		self.m_checkBox9.Bind( wx.EVT_CHECKBOX, self.checkoutLog )
 		self.m_checkBox10.Bind( wx.EVT_CHECKBOX, self.checkOutConf )
@@ -608,7 +615,10 @@ class MyFrame2 ( wx.Frame ):
 	
 	def clickOpenSpecReord( self, event ):
 		event.Skip()
-	
+
+	def clickedSimStitcher( self, event ):
+		event.Skip()
+
 	def checkOutcsv( self, event ):
 		event.Skip()
 	
@@ -623,9 +633,7 @@ class MyFrame2 ( wx.Frame ):
 	
 	def checkScanHead( self, event ):
 		event.Skip()
-	
-	
-	
+
 	def radioPre( self, event ):
 		event.Skip()
 	

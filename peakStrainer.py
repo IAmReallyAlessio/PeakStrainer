@@ -87,7 +87,8 @@ def main(file):
     # can't use filtered bins in mzxml because it is not readable by seems
     filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
     
-    filtered_bins = reorder4lipidxplorer(filtered_bins)
+#     order = [' ms ', '.33-', ' ms ']
+#     filtered_bins = reorderScans(filtered_bins, order)
     
     newfilename = filename[:-4]+ '.mzXML'
     log.info('Writing results to %s', newfilename)
@@ -174,6 +175,11 @@ def ThermoRawfile2Scans_csv(scans, filename='ThermoRawfile2Scans.csv'):
 Filter on scans
 '''
                 
+def filterScanBy_first(scans, n = 1):
+    log.info('filterScanBy_first %d scans', n)
+
+    return scans[n:]
+
 def filterScanBy_retentionTime(scans, lowSeconds=0.5, highSeconds=float("inf")):
     log.info('filterScanBy_retentionTime %f to %f', lowSeconds, highSeconds)
     result = []

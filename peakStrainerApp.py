@@ -7,7 +7,10 @@ from utils.peakStrainerGUI import MyFrame2
 import wx
 import os
 from peakStrainer import *
+
 from lib.reorderScans.reorderScans import main as reorderscansMain
+from lib.simStitching.simStitcherApp import  main as simStitcherMain
+
 
 def main():
     app = wx.App(False)
@@ -87,6 +90,9 @@ class MyFrame(MyFrame2):
     def clickedFinish( self, event ):
         self.m_notebook1.SetSelection(self.m_notebook1.GetPageCount()-1)
         self.run_all()
+
+    def clickedSimStitcher( self, event ):
+        simStitcherMain()
 
         
     #===========================================================================
