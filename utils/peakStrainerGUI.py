@@ -29,7 +29,7 @@ class MyFrame2 ( wx.Frame ):
 		
 		bSizer30 = wx.BoxSizer( wx.VERTICAL )
 		
-		self.m_staticText1 = wx.StaticText( self.m_panel1, wx.ID_ANY, u"PeakStrainer Development", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText1 = wx.StaticText( self.m_panel1, wx.ID_ANY, u"PeakStrainer Dev", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText1.Wrap( -1 )
 		self.m_staticText1.SetFont( wx.Font( 14, 74, 90, 92, False, "Arial" ) )
 		
@@ -93,7 +93,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_panel3.SetSizer( bSizer5 )
 		self.m_panel3.Layout()
 		bSizer5.Fit( self.m_panel3 )
-		self.m_notebook1.AddPage( self.m_panel3, u"General", False )
+		self.m_notebook1.AddPage( self.m_panel3, u"General", True )
 		self.m_panel4 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer9 = wx.BoxSizer( wx.VERTICAL )
 		
@@ -260,7 +260,7 @@ class MyFrame2 ( wx.Frame ):
 		self.m_panel5.SetSizer( bSizer19 )
 		self.m_panel5.Layout()
 		bSizer19.Fit( self.m_panel5 )
-		self.m_notebook1.AddPage( self.m_panel5, u"Scan Selection", True )
+		self.m_notebook1.AddPage( self.m_panel5, u"Scan Selection", False )
 		self.m_panel6 = wx.Panel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer25 = wx.BoxSizer( wx.VERTICAL )
 		
