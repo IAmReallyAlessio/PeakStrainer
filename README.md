@@ -1,98 +1,75 @@
 PeakStrainer
 =============
 
-PeakStrainer is a tool to reduce the size of MS spectra,
-with the goal of removing inconsistent signals
-and combining 
+PeakStrainer is an implementation of the paper [Intensity-Independent Noise Filtering in FT MS and FT MS/MS Spectra for Shotgun Lipidomics](http://pubs.acs.org/doi/abs/10.1021/acs.analchem.7b00794).
+It is a tool to reduce the file size of MS spectra,
+it does this by removing signals that do not repeat,
+or do not repeat often enough, between spectra.
 
- the consistent signals.
+To define if a signal repeats we first define a threshold of signal similarity.
+similarity is based on scan settings, the settings must be the same, and m/z proximity.
+To illustrate consider two scans A and B, both have the same settings.
+Scan A contains a peak at m/z 123.0001 and scan B contains a peak at m/z 123.0002,
+if the threshold is set to 0.0001, then the peak m/z 123.0001 is considered repeated between scans.
+
+The threshold is adaptable across the m/z range of the scans 
+and can be estimated based on the peak-resolutions given as full width half maximum (FWHM).
+
+Peak repetition information is used to filter out peaks that are not repeated more than a preset threshold,
+called repetition rate, given as percentage of total max repetitions.
+
+The input to the application is a *.raw files and the output at intermediate stages are *.CSV 
+and final results are stored as *.mzXML files.
+
+Reference
+-----------
+If you use the software for a publication  
+Please use DOI [10.17617/1.47](https://doi.org/10.17617/1.47) as a reference.
+if you would like to reference the paper please use DOI [10.1021/acs.analchem.7b00794](http://pubs.acs.org/doi/abs/10.1021/acs.analchem.7b00794)
+
+If you would like to share your process and or data, 
+please feel free to provide the data in the [Issues](https://git.mpi-cbg.de/labShevchenko/PeakStrainer/issues) page and we will find a place for it in the wiki.
 
 Quick Start
 -----------
  - Download [PeakStrainer.zip](https://git.mpi-cbg.de/labShevchenko/PeakStrainer/blob/master/dist/peakStrainerApp.zip)
  - Unzip the file
- - run ```peakStrainerApp.bat```   
+ - run ```peakStrainerApp.bat```
+ - select one or more *.raw files
+ - click finish to process with default settings
+ 
+ After processing *.mzXML files will be created in the same directory as the *.raw files
+ 
+Disclaimer
+-----------
+Despite all efforts that have been put into the development and testing, the software may contain errors or bugs. Therefore we provide no warranty and assume no responsibility for any consequences caused by the program installation and use. Please use it at your own risk
 
-Desktop Application
-----
-Run ```peakStrainerApp.bat``` this will start the Desktop application.
-Once one or more thermo.raw file are selected, you can click finish to process the file with default settings.
-The Desktop application contains several pages where setting can be changed from the default.
+License
+--------
+This program is a free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation. See the file LICENSE for details.
 
-If you don't change anything the default values are used.
+Contact
+--------
+Please contact us over the [Issues](https://git.mpi-cbg.de/labShevchenko/PeakStrainer/issues), It is open for questions and suggestions and other issues related to the software.
+  
 
-Command line Application
--------
-Run `peakStrainer.py file.raw` from the command line to process the file with the default settings.
-custom settings can be applied on the command line with ```utils\msps.py```
+Using PeakStrainer 
+=================
 
-I would recommend that you look at the code in ```peakStrainer.py```
-in the main method and update it there,
-the code should be readable and you can change it to your setting.
+You can use Peak Strainer as an application,
+from the command line or from the source code.
 
+There are several steps in the peak strainer process,
+and there are several approaches to complete these steps.
 
-## Options
-PeakStrainer can be configured to run in different ways,
-but the default setting should work most of the time.
-Just in case here are some options you can change.
+The GUI application is geared toward simplicity,
+only the best or most straight-forward approaches are available in the application.
 
-**Please note that some options are not available in the GUI.
-one of the goals of the GUI is to maintain simplicity.
-This is why some options are only in the code.**
+The command line is intended to be used in automated batch processes,
+it has the same functionality as the GUI application.
 
-### Select Scans
-A simple way to reduce the size of the file is by removing some scans.
-Scan can be removed based on:
-- Retention time, ie from ... to ... in seconds
-- By filterline text, filterline is a short text that describes the scan,
-	ie. filter line should include the text `NSI` or
-	filter line should exclude the text `+`
-- By Sample, this is mainly for testing, you can get 1 out of every _N_ scans,
-	ie. take 1 out of every 10 scans 
+The source code is available and is intended to be readable and extensible.
 
-
-### Pre-filter Peaks
-At this stage we remove what seems to be random noise.
-first we combine the spectra that has the same preconditions, 
-ie. mode, selected ion m/z, etc.
-And we count the peaks at a given m/z value,
-if the count is very low, like 1 or 2, as compared to other peak counts,
-then we consider those peaks random and discard them.
-
-This step makes the most difference and facilitates the following steps
-
-### Bin Generation
-Now that we have peaks that can be combined, we try to combine them.
-First we decide what peaks go together, to do this we use bins.
-bins give us the lower and upper bounds of m/z,
-all the peaks within those bound go together in a bin.
-
-Some ways to make bins are:
-- by decimal places, if the peaks are close enough... to a given decimal place,
-then they are in the same bin.
-- by measure resolution, given the raw file we read the peak resolution and make the bin as wide as the resolution, ie, peak width at 50% intensity
-- by a resolution function, in some cases the measured resolution is inconsistent,
-some peaks may be very wide or too narrow, so instead we extract a trendline for the resolution and use the trend instead of the measured value
-- by resolution function, in case we cannot extract the resolution trendline we can just input function values to estimate the resolution, this way we get bins that grow or shrink across the m/z range
-
-### Sort Peaks
-Now that we defined the bins, we need to sort the peaks into the bins,
-this would be trivial if the bins did not overlap,
-but sometimes they do overlap so we need to decide how to handle it.
-
-- Peak in first bin the matched, quick and straight forward,
-works well if there is no bin overlap
-- Peak in narrowest bin, this maintains peak resolution and underlying peaks can be detected, 
-but it is computationally expensive and provides very small differences
-
-- Peak in bin sort window, in this case we only check a few bins to see if the peak matches, it is less computationally expensive, than the others
-
-### Filter Bins
-By grouping peaks together into bins we can count how often peaks occur in a given m/z range.
-We would expect these groups to have approximately the same number of peaks.
-if the peaks are much less than expected then we filter those groups out
-
-### Store Results
-We can see the results of each step in the process trough csv files.
-there are _comma separated values_ files, and also a psudo mzXML file.
-
+For more about the command line and source code,
+please go to [implementation Notes](Implementation_notes)
+ 
