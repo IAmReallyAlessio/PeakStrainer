@@ -32,7 +32,7 @@ please feel free to provide the data in the [Issues](https://git.mpi-cbg.de/labS
 
 Quick Start
 -----------
- - Download [PeakStrainer.zip](https://cloud.mpi-cbg.de/index.php/s/YvxfBbFq398nwqP)
+ - Download [PeakStrainer.zip](https://cloud.mpi-cbg.de/index.php/s/VvDUx2J3gA8wM7z)
  - Unzip the file
  - run ```peakStrainerApp.bat```
  - select one or more *.raw files
