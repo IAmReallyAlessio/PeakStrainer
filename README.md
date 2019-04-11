@@ -32,6 +32,7 @@ please feel free to provide the data in the [Issues](https://git.mpi-cbg.de/labS
 
 Quick Start
 -----------
+ - Install msFilereader([see wiki](https://git.mpi-cbg.de/labShevchenko/PeakStrainer/wikis/Download))
  - Download [PeakStrainer.zip](https://cloud.mpi-cbg.de/index.php/s/VvDUx2J3gA8wM7z)
  - Unzip the file
  - run ```peakStrainerApp.bat```
