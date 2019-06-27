@@ -9,7 +9,11 @@ import xml.etree.ElementTree as ET
 import os
 import re
 import copy
+<<<<<<< HEAD
 from collections import OrderedDict
+=======
+import re
+>>>>>>> e07ad58... feat: check all the files
 
 def main(folderpath = None):
     app = wx.App(False)
@@ -17,6 +21,7 @@ def main(folderpath = None):
     frame.Show(True)
     app.MainLoop()
     
+<<<<<<< HEAD
 def getScanHeaders(filePath):
         #     TODO:handle different namespaces of mzxml 
 #     namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}
@@ -38,14 +43,22 @@ def getScanHeaders(filePath):
         scans.append(filterLine)
 
     return scans
+=======
+def getScanHeaders(files):
+    filterlines = []
+    for f in files:
+        with open(f,'r') as file:
+            matches = re.findall(' filterLine="(.*?)" ', file.read())
+            filterlines.extend(matches)
+    return list(set(filterlines))
+>>>>>>> e07ad58... feat: check all the files
     
 def getMZXMLFiles(folderPath):
     result = []
     for file in os.listdir(folderPath):
         if file.lower().endswith(".mzxml"):
             result.append(os.path.join(folderPath, file))
-    
-    return result 
+    return result
 
 def sanitize(scan):
     if "@" in scan:
@@ -60,8 +73,7 @@ def sanitize(scan):
 def getSourceList(folderPath):
     
     files = getMZXMLFiles(folderPath)
-    first = files[0]
-    scans = getScanHeaders(first)
+    scans = getScanHeaders(files)
     
     sanitizedScans = set([sanitize(scan) for scan in scans])    
     
