@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ET
 import os
 import re
 import copy
+import re
 
 def main(folderpath = None):
     app = wx.App(False)
@@ -16,40 +17,27 @@ def main(folderpath = None):
     frame.Show(True)
     app.MainLoop()
     
-def getScanHeaders(filePath):
-        #     TODO:handle different namespaces of mzxml 
-    namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}
-    ET.register_namespace('', 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0')
-    tree = ET.parse(filePath)
- 
-    scanElems = tree.findall('.//xmlns:scan', namespaces)
-    
-    scans = []
-    for scan in scanElems:
-#             scanNo = int(scan.attrib['num'])
-#         scanNo = scan.attrib['num'].zfill(5)
-#  scan number ges confused with other values so its not good
-# maybe add zerowidth space to solve '\u200b'
-        filterLine = scan.attrib['filterLine']
-        scans.append(filterLine)
-
-    return scans
+def getScanHeaders(files):
+    filterlines = []
+    for f in files:
+        with open(f,'r') as file:
+            matches = re.findall(' filterLine="(.*?)" ', file.read())
+            filterlines.extend(matches)
+    return list(set(filterlines))
     
 def getMZXMLFiles(folderPath):
     result = []
     for file in os.listdir(folderPath):
         if file.lower().endswith(".mzxml"):
             result.append(os.path.join(folderPath, file))
-    
-    return result 
+    return result
 
 
 def getSourceList(folderPath):
     sourceList = []
     
     files = getMZXMLFiles(folderPath)
-    first = files[0]
-    scans = getScanHeaders(first)
+    scans = getScanHeaders(files)
     
     select = set()
     containsMS = False
