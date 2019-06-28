@@ -28,7 +28,9 @@ class mySimStitcherFrame(SimStitcherFrame):
 
 
     def clickStart( self, event ):
-        self.run_all()
+        status = self.run_all()
+        if status:
+            self.Close()
 
     def radioDefault( self, event ):
         self.RadioCustom(event)
@@ -92,12 +94,14 @@ class mySimStitcherFrame(SimStitcherFrame):
         loglevel = int(self.m_slider1.GetValue())
 
 
+        ststus=False
         for onefile in self.fileNames:
             filepath = str(self.path+'\\'+onefile)
             self.m_gauge1.SetValue(self.m_gauge1.GetValue() + gaugeStep)
             try:
                 simStitcher(filepath, scaleToCenterMass, adaptByRegresion, daltons, csvPath1 = None, loglevel = loglevel)
                 self.m_gauge1.SetValue(self.m_gauge1.GetValue() + gaugeStep)
+                ststus = True
             except Exception as e:
                 print e
                 dlg = wx.MessageDialog(self, 'There was a problem processing the file {}'.format(onefile), 'Warning', wx.OK | wx.ICON_WARNING)
@@ -105,7 +109,7 @@ class mySimStitcherFrame(SimStitcherFrame):
                 dlg.Destroy()
                 self.m_gauge1.SetValue(self.m_gauge1.GetValue() - gaugeStep)
 
-        raise SystemExit
+        return ststus
 
 
     def filecChanged(self, event):
