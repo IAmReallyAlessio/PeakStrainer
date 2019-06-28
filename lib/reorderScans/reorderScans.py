@@ -7,13 +7,8 @@ from reorderScansUI_batch import MyFrame1
 import wx
 import xml.etree.ElementTree as ET
 import os
-import re
 import copy
-<<<<<<< HEAD
-from collections import OrderedDict
-=======
 import re
->>>>>>> e07ad58... feat: check all the files
 
 def main(folderpath = None):
     app = wx.App(False)
@@ -21,29 +16,6 @@ def main(folderpath = None):
     frame.Show(True)
     app.MainLoop()
     
-<<<<<<< HEAD
-def getScanHeaders(filePath):
-        #     TODO:handle different namespaces of mzxml 
-#     namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}
-#     ET.register_namespace('', 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0')
-    tree = ET.parse(filePath)
-    root_namespace_tmp = tree.getroot().tag.split('}')[0]
-    root_namespace_tmp = root_namespace_tmp.replace('{','')
-    namespaces = {'xmlns': root_namespace_tmp}
- 
-    scanElems = tree.findall('.//xmlns:scan', namespaces)
-    
-    scans = []
-    for scan in scanElems:
-#             scanNo = int(scan.attrib['num'])
-#         scanNo = scan.attrib['num'].zfill(5)
-#  scan number ges confused with other values so its not good
-# maybe add zerowidth space to solve '\u200b'
-        filterLine = scan.attrib['filterLine']
-        scans.append(filterLine)
-
-    return scans
-=======
 def getScanHeaders(files):
     filterlines = []
     for f in files:
@@ -51,8 +23,7 @@ def getScanHeaders(files):
             matches = re.findall(' filterLine="(.*?)" ', file.read())
             filterlines.extend(matches)
     return list(set(filterlines))
->>>>>>> e07ad58... feat: check all the files
-    
+
 def getMZXMLFiles(folderPath):
     result = []
     for file in os.listdir(folderPath):
