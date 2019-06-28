@@ -98,9 +98,13 @@ class MyFrame(MyFrame2):
         self.run_all()
 
     def clickedSimStitcher( self, event ):
+        self_ = self
         simStitcherMain()
+        #TODO fix this bug, for now I only know this works, but throws dead object error
+        # the identity of self gets lost
+        event.EventObject.Destroy()
 
-        
+
     #===========================================================================
     # Backend
     #===========================================================================
