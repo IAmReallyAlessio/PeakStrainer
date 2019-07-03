@@ -5,7 +5,7 @@
 block_cipher = None
 
 
-a = Analysis(['peakStrainer.py'],
+a = Analysis(['peakStrainerApp.py'],
              pathex=['C:\\apps\\eclipseRCP\\workspace\\PeakStrainer'],
              binaries=[],
              datas=[('utils\\template.mzXML','utils')],
