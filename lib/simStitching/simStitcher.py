@@ -94,7 +94,7 @@ class Scan(object):
 
 
     def _getHighOverlap(self): # 3 cases either last one, or there is an overlap or there isn't
-        if self.next is None or self.filterLine._head() != self.next.filterLine._head(): return 0
+        if self.__next__ is None or self.filterLine._head() != self.next.filterLine._head(): return 0
         
         if self.filterLine._high() > self.next.filterLine._low():
             return (self.filterLine._high() - self.next.filterLine._low())/2
@@ -117,7 +117,7 @@ class Scan(object):
             return self.filterLine._low() + self._getLowOverlap()
         
     def overlapHigh(self):
-        if self.next is None  or self.filterLine._head() != self.next.filterLine._head(): # use the difference in low
+        if self.__next__ is None  or self.filterLine._head() != self.next.filterLine._head(): # use the difference in low
             return self.filterLine._high()-self._getLowOverlap()
         else:
             return self.filterLine._high()-self._getHighOverlap()
@@ -199,7 +199,7 @@ def toCSVFile(fileBaseName, dictOrList):
             string = string.replace(')','')
             
         elif type(dictOrList) is dict:
-            string = '\n'.join(map(str,dictOrList.items()))
+            string = '\n'.join(map(str,list(dictOrList.items())))
             string = string.replace(':',',')
             string = string.replace('(','') 
             string = string.replace(')','') 
@@ -248,7 +248,7 @@ def getCenterFactors(simMasses, deviationFactors, simHeads):
 
     selectDF = dfcf[dfcf.distances == dfcf.mini ]
     result = (selectDF.simHeads.tolist(), selectDF.deviationFactors.tolist())
-    dictRes = dict(zip(*result))
+    dictRes = dict(list(zip(*result)))
     return dictRes
 
 
@@ -271,7 +271,7 @@ def getDeviationTrend(matchingSim, C=None):
         matchingSimSelection = [line for line in matchingSim if mode in line[6]]
 #         minMSInten = max([line[4] for line in matchingSimSelection]) * 0.01 # only sample peaks with a minimum intensity for function, performs worse!!!!, dont do it
 #         validSimSelection = [line for line in matchingSimSelection if line[4] > minMSInten]
-        simMasses, simIntens, simHeads,simTotalIonCount, msMasses, msIntens, msHeads = zip(*matchingSimSelection)
+        simMasses, simIntens, simHeads,simTotalIonCount, msMasses, msIntens, msHeads = list(zip(*matchingSimSelection))
         
 #         sumSimIntens = sum(simIntens) # to normalize
 #         simMsIntens = sum(msIntens)
@@ -308,7 +308,7 @@ def getDeviationTrend(matchingSim, C=None):
 
 def project_ms2sim(matchingSims, popts, centerFactors, onlyScale = True):
     
-    simMasses, simIntens, simHeads, simTotalIonCounts, msMasses, msIntens, msHeads = zip(*matchingSims)
+    simMasses, simIntens, simHeads, simTotalIonCounts, msMasses, msIntens, msHeads = list(zip(*matchingSims))
     startOffsets = [ simMass - simhead._low() for simMass, simhead in zip(simMasses, simHeads)]
 #     modes = [Scan.FilterLine.MODE_POS if Scan.FilterLine.MODE_POS in msHead \
 #              else Scan.FilterLine.MODE_NEG for msHead in msHeads]
@@ -427,10 +427,10 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     
     
     log.info('stitched scans:')
-    log.info('\n'.join(scans_stitched.keys()))
-    log.debug('\n'.join(map(str,scans_stitched.items())))
+    log.info('\n'.join(list(scans_stitched.keys())))
+    log.debug('\n'.join(map(str,list(scans_stitched.items()))))
     if loglevel>2: toCSVFile(csvPath+'scans_stitched', scans_stitched)
-    names = scans_stitched.keys()
+    names = list(scans_stitched.keys())
     # -- rename
     for stitched_Head in names:
         min_head = min([scan.filterLine._low() for scan in scans if scan.filterLine._head() == stitched_Head])
@@ -440,7 +440,7 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
         del scans_stitched[stitched_Head]
 
     log.info('renamed stitched scans:')
-    log.info('\n'.join(scans_stitched.keys()))
+    log.info('\n'.join(list(scans_stitched.keys())))
     
     log.info('check if stitched scans have gaps')
     maxGap = scans[0].filterLine._high() - scans[0].filterLine._low()
@@ -501,7 +501,7 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
         startOffsets = [ mass - head._low() for mass, head in zip(masses, heads)]
         centreFactorsList =[]
         for head in heads:
-            if head in centerFactors.keys():
+            if head in list(centerFactors.keys()):
                 centreFactorsList.append(centerFactors[head])
             else:
                 log.info('No centrefactor found for {} , using 1 instead'.format(head))
@@ -512,7 +512,7 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
         intensAdjusted = [intens[idx] * correctionFactors[idx] for idx, _ in enumerate(intens)]
         scans_adjusted[scan] = (masses, intensAdjusted)
         
-    log.debug('\n'.join(map(str,scans_adjusted.items())))
+    log.debug('\n'.join(map(str,list(scans_adjusted.items()))))
     if loglevel>2: toCSVFile(csvPath+'scans_adjusted', scans_adjusted)
     
     log.info('writing to :'+outputAdjustedFile(filePath))
@@ -538,7 +538,7 @@ def outputAdjustedFile(fileName):
 
     
 def getMZXMLEncondedScanRows(filePath):
-    return zip(*getMZXMLEncondedScans(filePath)) 
+    return list(zip(*getMZXMLEncondedScans(filePath))) 
 
 
 if __name__ == '__main__':

@@ -24,7 +24,7 @@ class SimStitcherFrame ( wx.Frame ):
 
 		bSizer2 = wx.BoxSizer( wx.VERTICAL )
 
-		self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, u"Sim Stitcher", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, "Sim Stitcher", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText1.Wrap( -1 )
 
 		self.m_staticText1.SetFont( wx.Font( 14, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, "Arial" ) )
@@ -34,7 +34,7 @@ class SimStitcherFrame ( wx.Frame ):
 		self.m_staticline1 = wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
 		bSizer2.Add( self.m_staticline1, 0, wx.EXPAND |wx.ALL, 5 )
 
-		self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, u"Select MZXML file to Sim Stich:", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, "Select MZXML file to Sim Stich:", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText2.Wrap( -1 )
 
 		bSizer2.Add( self.m_staticText2, 0, wx.ALL, 5 )
@@ -44,10 +44,10 @@ class SimStitcherFrame ( wx.Frame ):
 		self.m_textCtrl1 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer3.Add( self.m_textCtrl1, 1, wx.ALL, 5 )
 
-		self.BrowseBtn = wx.Button( self, wx.ID_ANY, u"Browse", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.BrowseBtn = wx.Button( self, wx.ID_ANY, "Browse", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer3.Add( self.BrowseBtn, 0, wx.ALL, 5 )
 
-		self.m_button2 = wx.Button( self, wx.ID_ANY, u"Start", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_button2 = wx.Button( self, wx.ID_ANY, "Start", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_button2.Enable( False )
 
 		bSizer3.Add( self.m_button2, 0, wx.ALL, 5 )
@@ -57,19 +57,19 @@ class SimStitcherFrame ( wx.Frame ):
 
 		bSizer61 = wx.BoxSizer( wx.HORIZONTAL )
 
-		self.m_checkBox11 = wx.CheckBox( self, wx.ID_ANY, u"Cut SIM edges", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_checkBox11 = wx.CheckBox( self, wx.ID_ANY, "Cut SIM edges", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_checkBox11.SetValue(True)
-		self.m_checkBox11.SetToolTip( u"Remove peaks that overlap AND peaks close to the edge" )
+		self.m_checkBox11.SetToolTip( "Remove peaks that overlap AND peaks close to the edge" )
 
 		bSizer61.Add( self.m_checkBox11, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 
-		self.m_textCtrl4 = wx.TextCtrl( self, wx.ID_ANY, u"5.0", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textCtrl4 = wx.TextCtrl( self, wx.ID_ANY, "5.0", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_textCtrl4.Enable( False )
-		self.m_textCtrl4.SetToolTip( u"Daltons to from the edge" )
+		self.m_textCtrl4.SetToolTip( "Daltons to from the edge" )
 
 		bSizer61.Add( self.m_textCtrl4, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 
-		self.m_staticText8 = wx.StaticText( self, wx.ID_ANY, u"Da.", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText8 = wx.StaticText( self, wx.ID_ANY, "Da.", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText8.Wrap( -1 )
 
 		bSizer61.Add( self.m_staticText8, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
@@ -77,11 +77,11 @@ class SimStitcherFrame ( wx.Frame ):
 
 		bSizer61.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
-		self.m_radioBtn31 = wx.RadioButton( self, wx.ID_ANY, u"Default", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_radioBtn31 = wx.RadioButton( self, wx.ID_ANY, "Default", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_radioBtn31.SetValue( True )
 		bSizer61.Add( self.m_radioBtn31, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 
-		self.m_radioBtn41 = wx.RadioButton( self, wx.ID_ANY, u"Custom", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_radioBtn41 = wx.RadioButton( self, wx.ID_ANY, "Custom", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer61.Add( self.m_radioBtn41, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 
 
@@ -89,9 +89,9 @@ class SimStitcherFrame ( wx.Frame ):
 
 		bSizer6 = wx.BoxSizer( wx.HORIZONTAL )
 
-		self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, u"Scale SIM to FT", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, "Scale SIM to FT", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_checkBox1.SetValue(True)
-		self.m_checkBox1.SetToolTip( u"Scale the intensity such that the center SIM mass is the same as the corresponding FT mass" )
+		self.m_checkBox1.SetToolTip( "Scale the intensity such that the center SIM mass is the same as the corresponding FT mass" )
 
 		bSizer6.Add( self.m_checkBox1, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 
@@ -103,8 +103,8 @@ class SimStitcherFrame ( wx.Frame ):
 
 		bSizer62 = wx.BoxSizer( wx.HORIZONTAL )
 
-		self.m_checkBox12 = wx.CheckBox( self, wx.ID_ANY, u"Adapt SIM to FT", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_checkBox12.SetToolTip( u"Change the intensity of the SIM peaks based on trend of matchin FT peaks" )
+		self.m_checkBox12 = wx.CheckBox( self, wx.ID_ANY, "Adapt SIM to FT", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_checkBox12.SetToolTip( "Change the intensity of the SIM peaks based on trend of matchin FT peaks" )
 
 		bSizer62.Add( self.m_checkBox12, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 
@@ -116,12 +116,12 @@ class SimStitcherFrame ( wx.Frame ):
 
 		bSizer5 = wx.BoxSizer( wx.HORIZONTAL )
 
-		self.m_staticText51 = wx.StaticText( self, wx.ID_ANY, u"Log Level", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText51 = wx.StaticText( self, wx.ID_ANY, "Log Level", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText51.Wrap( -1 )
 
 		bSizer5.Add( self.m_staticText51, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 
-		self.m_staticText6 = wx.StaticText( self, wx.ID_ANY, u"low", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText6 = wx.StaticText( self, wx.ID_ANY, "low", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText6.Wrap( -1 )
 
 		bSizer5.Add( self.m_staticText6, 0, wx.TOP|wx.BOTTOM|wx.LEFT|wx.ALIGN_BOTTOM, 5 )
@@ -129,7 +129,7 @@ class SimStitcherFrame ( wx.Frame ):
 		self.m_slider1 = wx.Slider( self, wx.ID_ANY, 0, 0, 3, wx.DefaultPosition, wx.DefaultSize, wx.SL_HORIZONTAL )
 		bSizer5.Add( self.m_slider1, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 
-		self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, u"high", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, "high", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText7.Wrap( -1 )
 
 		bSizer5.Add( self.m_staticText7, 0, wx.TOP|wx.BOTTOM|wx.RIGHT|wx.ALIGN_BOTTOM, 5 )

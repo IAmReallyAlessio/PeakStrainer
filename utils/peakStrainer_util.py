@@ -126,7 +126,7 @@ def getMZXMLEncondedScans(filePath):
         object = (scanNo, filterLine, encodedPeaks, retTime)
         rawscans.append(object)
 
-    return zip(*rawscans)
+    return list(zip(*rawscans))
 
 def generatePsudoMGF(newfilename, preFiltered_filterlines):
     def getCharge(title):
@@ -189,8 +189,8 @@ def write2templateMzXML(newfilename, scanPeaks):
         newScan.attrib['polarity'] = '-' if ' - ' in scan else '+'
         newScan.attrib['retentionTime'] = 'PT{}S'.format(0.0+idx)
         
-        encodedPeaks = encodePeaks(masses, intens)
-        newScan.find('.//xmlns:peaks', namespaces).text = encodedPeaks
+        encodedp = encodePeaks(masses, intens)
+        newScan.find('.//xmlns:peaks', namespaces).text = encodedp.decode()
         msRunElement.append(newScan)
     
     msRunElement.remove(scanTemplete)

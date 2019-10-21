@@ -1,7 +1,7 @@
 #!/bin/env python2.7
 # encoding: utf-8
 #### Standard library imports
-from __future__ import print_function
+
 import sys
 import os
 import time
@@ -35,10 +35,10 @@ except ImportError:
     XRawfile2_dll_loaded = False
     XRawfile2_dll_path = []
     XRawfile2_dll_path.append( os.path.dirname(os.path.abspath(__file__) ) + os.sep + 'XRawfile2_x64.dll' )    # 64bits msFileReader aside raw.py
-    XRawfile2_dll_path.append( u'C:\\Program Files\\Thermo\\MSFileReader\\XRawfile2_x64.dll' )    # 64bits msFileReader with 64bits system
+    XRawfile2_dll_path.append( 'C:\\Program Files\\Thermo\\MSFileReader\\XRawfile2_x64.dll' )    # 64bits msFileReader with 64bits system
     XRawfile2_dll_path.append( os.path.dirname(os.path.abspath(__file__) ) + os.sep + 'XRawfile2.dll' )    # 32bits msFileReader aside raw.py
-    XRawfile2_dll_path.append( u'C:\\Program Files (x86)\\Thermo\\MSFileReader\\XRawfile2.dll' )  # 32bits msFileReader with 64bits system
-    XRawfile2_dll_path.append( u'C:\\Program Files\\Thermo\\MSFileReader\\XRawfile2.dll' )        # 32bits msFileReader with 32bits system
+    XRawfile2_dll_path.append( 'C:\\Program Files (x86)\\Thermo\\MSFileReader\\XRawfile2.dll' )  # 32bits msFileReader with 64bits system
+    XRawfile2_dll_path.append( 'C:\\Program Files\\Thermo\\MSFileReader\\XRawfile2.dll' )        # 32bits msFileReader with 32bits system
     XRawfile2_dll_path_0 = copy.deepcopy(XRawfile2_dll_path)
     while not XRawfile2_dll_loaded:
         try :
@@ -67,9 +67,9 @@ def _to_float(x):
     return out
 
 try:
-    basestring
+    str
 except NameError:
-    basestring = str
+    str = str
 
 class ThermoRawfile(object):
 
@@ -335,7 +335,7 @@ class ThermoRawfile(object):
         """Returns the number of registered device controllers of a particular type in the raw file. See
         Controller Type in the Enumerated Types section for a list of the available controller types
         and their respective values."""
-        if isinstance(controllerType, basestring):
+        if isinstance(controllerType, str):
             controllerType = ThermoRawfile.controllerType[controllerType]
         pnNumControllersOfType = c_long()
         error = self.source.GetNumberOfControllersOfType(c_long(controllerType), byref(pnNumControllersOfType) )
@@ -360,7 +360,7 @@ class ThermoRawfile(object):
         example, multiple UV detectors). Controller numbers for each type are numbered starting
         at 1. See Controller Type in the Enumerated Types section for a list of the available controller
         types and their respective values."""
-        if isinstance(controllerType, basestring):
+        if isinstance(controllerType, str):
             controllerType = ThermoRawfile.controllerType[controllerType]
         error = self.source.SetCurrentController(c_long(controllerType), c_long(controllerNumber))
         if error : raise IOError("SetCurrentController error :", error)
@@ -1517,7 +1517,7 @@ class ThermoRawfile(object):
         val_num = c_long()
         error = self.source.GetTrailerExtraForScanNum(c_long(scanNumber),labels,values,val_num)
         if error : raise IOError("GetTrailerExtraForScanNum error :", error)
-        return OrderedDict(zip( map(lambda x: str(x[:-1]), labels.value) , map(_to_float, values.value) ))
+        return OrderedDict(list(zip( [str(x[:-1]) for x in labels.value] , list(map(_to_float, values.value)) )))
 
     def GetNumTuneData(self):
         """Gets the number of tune data entries recorded for the current controller. Tune Data is only

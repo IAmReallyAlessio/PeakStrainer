@@ -3,7 +3,7 @@ Created on 03.05.2017
 
 @author: mirandaa
 '''
-from reorderScansUI_batch import MyFrame1
+from .reorderScansUI_batch import MyFrame1
 import wx
 import xml.etree.ElementTree as ET
 import os
@@ -87,7 +87,7 @@ def saveFile(filePath, targetOrder, includeSims=False):
     scanElems = msRunElement.findall('.//xmlns:scan', namespaces)
     filterlines = [scan.attrib['filterLine'] for scan in scanElems]
     
-    _, sortedScanElems = zip(*sorted(zip(filterlines,scanElems )))
+    _, sortedScanElems = list(zip(*sorted(zip(filterlines,scanElems ))))
     
     for scan in scanElems:
         msRunElement.remove(scan)
