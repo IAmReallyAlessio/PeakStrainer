@@ -45,7 +45,7 @@ def main(file):
     filterLines = mergePeaksOnFilterline(scans)
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterLines, 'mergePeaksOnFilterline.csv')
     
-    preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
+    preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.items()}
     #preFiltered_filterlines = {k: preliminaryReductionFilter(v) for k, v in filterLines.iteritems()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')    
     
@@ -55,7 +55,7 @@ def main(file):
     filterlines_withBins = {k: generateBins_theoreticalResolution(v) for k, v in preFiltered_filterlines.iteritems()}
     filterlines_withBins = {k: generateBins_resolutionPowerFunc(v,a,b) for k, v in preFiltered_filterlines.iteritems()} # 5408000.0, 2096000.0
     '''
-    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.iteritems()}
+    filterlines_withBins = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.items()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'generateBins.csv')
     
 #     filterlines_withBins_ms = {k: generateBins_resolutionPowerFunc(v, 5408000.0, 0.5 ) for k, v in filterLines.iteritems() if ' ms ' in k }
@@ -63,7 +63,7 @@ def main(file):
 #     filterlines_withBins = filterlines_withBins_ms.update(filterlines_withBins_msms)
 #     for different function for ms and for msms
     
-    filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.iteritems()}
+    filterlines_withBins = {k: alterBins_mergeOverlap(v) for k, v in filterlines_withBins.items()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_withBins,'mergeBins.csv')
     
     
@@ -72,20 +72,20 @@ def main(file):
     filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
     filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
     '''
-    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+    filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.items()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filterlines_inBins,'sortMassIn.csv')
     
-    filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
+    filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.items()}
     if log.level == logging.DEBUG: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
     
-    filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
+    filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.items()}
     if log.level == logging.DEBUG: filterlineBins_csv(filterlines_filtered,'filteredBins.csv')
     
-    filtered_peaks = {k: bins2Peaks(v, filterlines_inBins[k]) for k, v in filterlines_filtered.iteritems()}
+    filtered_peaks = {k: bins2Peaks(v, filterlines_inBins[k]) for k, v in filterlines_filtered.items()}
     if log.level == logging.DEBUG: filterlinePeaks_csv(filtered_peaks,'mzXMLdata.csv')
        
     # can't use filtered bins in mzxml because it is not readable by seems
-    filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
+    filtered_bins = {k: formatPeaks(v) for k, v in filterlines_filtered.items()}
     
 #     order = [' ms ', '.33-', ' ms ']
 #     filtered_bins = reorderScans(filtered_bins, order)
@@ -273,15 +273,15 @@ def preliminaryFilter(peakData, decimal_places = 2, minCount = 2, minRepetitionR
         bins[rounded] = bins.get(rounded, 0) + 1
     
     log.debug('Prelimianry groups count %d', len(bins))
-    minCount_bin = {bin:(count/3)+1 for bin,count in bins.iteritems() if (count/3)+1 >= minCount}
+    minCount_bin = {bin:(count/3)+1 for bin,count in bins.items() if (count/3)+1 >= minCount}
     log.debug('groups with minCount %d: %d', minCount,len(minCount_bin))
     minCount_bin_max = float(max(minCount_bin.values())) if len(minCount_bin) is not 0 else 0 
-    minRepetitionRate_bin = {bin:count for bin,count in minCount_bin.iteritems() if (count/minCount_bin_max) > minRepetitionRate }
+    minRepetitionRate_bin = {bin:count for bin,count in minCount_bin.items() if (count/minCount_bin_max) > minRepetitionRate }
     log.debug('groups with minRepetitionRate %f: %d', minRepetitionRate,len(minRepetitionRate_bin))
     
-    preFilterPass = [rounded in minRepetitionRate_bin.keys() for rounded in roundeds]
-    compressedPeakData = list(itertools.compress(zip(*peakData), preFilterPass))
-    compressedPeakData = zip(*compressedPeakData)
+    preFilterPass = [rounded in list(minRepetitionRate_bin.keys()) for rounded in roundeds]
+    compressedPeakData = list(itertools.compress(list(zip(*peakData)), preFilterPass))
+    compressedPeakData = list(zip(*compressedPeakData))
     log.debug('final peak count %d',len(compressedPeakData))
     return compressedPeakData    
 
@@ -368,7 +368,7 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
     
     sort_mass = sorted(zip(abunds, masses, resols))#filter on intensity
         # 5408000.0, 2096000.0
-    select_abunds, select_masses, select_resols = zip(*sort_mass)
+    select_abunds, select_masses, select_resols = list(zip(*sort_mass))
     log.debug('Selecting only 90% highest intensity, as per Kai S.')
     side_len = len(select_masses) / 10
     popt, pconv = curve_fit(func, select_masses[side_len:], select_resols[side_len:])
@@ -427,7 +427,7 @@ def generateBins_theoreticalIntensity(peakData, decimal_places = 4):
     
     sort_mass = sorted(zip(masses, abunds))
     
-    select_masses, select_resols = zip(*sort_mass)
+    select_masses, select_resols = list(zip(*sort_mass))
     log.debug('Selecting only middle of distribution, as per Kai S.')
     side_len = len(select_masses) / 15
     popt, pconv = curve_fit(func, select_masses[side_len:-side_len], select_resols[side_len:-side_len])
@@ -451,7 +451,7 @@ def alterBins_mergeOverlap(peakData):
     log.debug('alterBins_mergeOverlap')
     
     
-    sortedPeakData = zip(*sorted(zip(*peakData)))
+    sortedPeakData = list(zip(*sorted(zip(*peakData))))
     masses =    list(sortedPeakData[0])
     abunds =    list(sortedPeakData[1])
     resols =    list(sortedPeakData[2])
@@ -510,7 +510,7 @@ def sortMassIn_FirstBin(peakData):
                 inbin = True
                 break
         if not inbin:
-            print 'error'
+            print('error')
             
     
     if(len(bins) != len(masses)):
@@ -523,7 +523,7 @@ def sortMassIn_FirstBin(peakData):
 
 def sortPeaksByBinWidth(peakData):
     bin_width = [bin_high - bin_low for bin_low, bin_high in zip(peakData[3], peakData[4])]
-    sorted_peakdata_plus = zip(*sorted(zip(bin_width, *peakData)))
+    sorted_peakdata_plus = list(zip(*sorted(zip(bin_width, *peakData))))
     sorted_peakdata = sorted_peakdata_plus[1:]
     return sorted_peakdata
 
@@ -567,7 +567,7 @@ def sortMassIn_sortWindow(peakData, window = 200):
     if window > 200 : window = 200  
     log.debug('sortMassIn_sortWindow, window size %d', window)
     
-    peakData_sorted = zip(*sorted(zip(*peakData)))
+    peakData_sorted = list(zip(*sorted(zip(*peakData))))
     
     masses = peakData_sorted[0]
     abunds = peakData_sorted[1]
@@ -583,6 +583,8 @@ def sortMassIn_sortWindow(peakData, window = 200):
         for idx, mass in enumerate(masses):
             found = False
             lowidx = 0 if idx < (window / 2) else idx - (window / 2)
+            lowidx = int(lowidx)
+            window = int(window)
             highidx = window + lowidx
             if idx % window == 0: log.debug('at %d of %d', idx, len(masses))
             for bin_low, bin_high in zip(bins_low[lowidx:highidx], bins_high[lowidx:highidx]):
@@ -606,7 +608,7 @@ def sortMassIn_sortWindow(peakData, window = 200):
 def sortMassIn_sortNarrowWindow(peakData, window = 200):
     log.debug('sortMassIn_sortNarrowWindow, window size %d', window)
     
-    peakData_sorted = zip(*sorted(zip(*peakData)))
+    peakData_sorted = list(zip(*sorted(zip(*peakData))))
     
     masses = peakData_sorted[0]
     abunds = peakData_sorted[1]
@@ -622,11 +624,11 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
         
         #--
         bin_width = [bin_high - bin_low for bin_low, bin_high in zip(peakData_sorted[3][lowidx:highidx], peakData_sorted[4][lowidx:highidx])]
-        sorted_peakdata_plus = zip(*sorted(zip(bin_width, peakData_sorted[0][lowidx:highidx],
+        sorted_peakdata_plus = list(zip(*sorted(zip(bin_width, peakData_sorted[0][lowidx:highidx],
                                                peakData_sorted[1][lowidx:highidx],
                                                peakData_sorted[2][lowidx:highidx],
                                                peakData_sorted[3][lowidx:highidx],
-                                               peakData_sorted[4][lowidx:highidx])))
+                                               peakData_sorted[4][lowidx:highidx]))))
         sorted_peakdata = sorted_peakdata_plus[1:]
         #--
         
@@ -744,7 +746,7 @@ def formatPeaks(binData):
 
 def bins2Peaks(binsData, peakData):
     log.debug('bins2Peaks get all the peaks with given bin, into simple list pair, mass and intentisty')
-    bins_filtered = binsData.keys()
+    bins_filtered = list(binsData.keys())
     masses = peakData[0]
     abunds = peakData[1]
     resols = peakData[2]
@@ -753,21 +755,21 @@ def bins2Peaks(binsData, peakData):
     bins = peakData[5]
     
     filteredRowdata = [(row[0], row[1]) for row in zip(*peakData) if row[5] in bins_filtered]
-    result = zip(*filteredRowdata)
+    result = list(zip(*filteredRowdata))
     return result
     
 def reorder4lipidxplorer(filtered_bins):
 
      log.debug('reorder4lipidxplorer so it goes ms+, msms+,ms-, msms-')
-     filtered_bins1 = collections.OrderedDict(sorted(filtered_bins.items(), key=lambda t: t[0]))
+     filtered_bins1 = collections.OrderedDict(sorted(list(filtered_bins.items()), key=lambda t: t[0]))
      return filtered_bins1
      
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        print("A filename must be provided")
-        raise SystemExit
+    # if len(sys.argv) == 1:
+    #     print("A filename must be provided")
+    #     raise SystemExit
     
-    filename = " ".join(sys.argv[1:])
+    # filename =  # ".join(sys.argv[1:])
     
-    for file in sys.argv[1:]:
-        main(file)
+    # for file in sys.argv[1:]:
+    main(r'resources\20140310_PCbheart_22-5p_01.raw')
