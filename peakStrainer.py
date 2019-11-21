@@ -159,7 +159,7 @@ def isElbowIIT(rawfile, end, scanNum, filterLine):
     return ion_injection_time > average + max((stdev*3), (math.sqrt(next_ion_injection_time)*3)) # max used because sometimes the deviation is too small
 
 
-def ThermoRawfile2Scans(file_path):
+def ThermoRawfile2Scans(file_path, dropElbowIIT = False):
     if True:
         return ThermoRawfile2Scans_RawQuant(file_path)
     # NOTE: for testing use ThermoRawfile2Scans_sample instead
