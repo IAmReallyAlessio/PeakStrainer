@@ -16,7 +16,7 @@ class mySimStitcherFrame(SimStitcherFrame):
 #         doCompare = self.m_checkBox1.GetValue()
 #         simStitcher(filepath, doCompare)
         wildcard = "mzXML (*.mzXML)|*.mzxml;*MZXML"
-        dlg = wx.FileDialog(self, message="Select your files",defaultDir=os.getcwd(),defaultFile="*.mzXML", wildcard=wildcard, style=wx.OPEN|wx.MULTIPLE)
+        dlg = wx.FileDialog(self, message="Select your files",defaultDir=os.getcwd(),defaultFile="*.mzXML", wildcard=wildcard, style=wx.FD_OPEN|wx.FD_MULTIPLE)
 
         if dlg.ShowModal() == wx.ID_OK:
             self.path, file = os.path.split(dlg.GetPath())
