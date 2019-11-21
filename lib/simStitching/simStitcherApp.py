@@ -3,7 +3,7 @@ Created on 26.05.2017
 
 @author: mirandaa
 '''
-from simStitcherGUI import SimStitcherFrame
+from .simStitcherGUI import SimStitcherFrame
 import wx
 from lib.simStitching.simStitcher import simStitcher
 import os
@@ -39,7 +39,7 @@ class mySimStitcherFrame(SimStitcherFrame):
         self.m_textCtrl4.Enable(self.m_radioBtn41.GetValue())
 
     def checkCut( self, event ):
-        print 'checkCut' + str(self.m_checkBox11.GetValue())
+        print('checkCut' + str(self.m_checkBox11.GetValue()))
         if self.m_checkBox11.GetValue():
             pass
         else:
@@ -103,7 +103,7 @@ class mySimStitcherFrame(SimStitcherFrame):
                 self.m_gauge1.SetValue(self.m_gauge1.GetValue() + gaugeStep)
                 ststus = True
             except Exception as e:
-                print e
+                print(e)
                 dlg = wx.MessageDialog(self, 'There was a problem processing the file {}'.format(onefile), 'Warning', wx.OK | wx.ICON_WARNING)
                 dlg.ShowModal()
                 dlg.Destroy()

@@ -87,41 +87,41 @@ def main():
     if args.prefilter: preFiltered_filterlines = {k: preliminaryFilter(v,
                                                                        int(args.prefilter[0]),
                                                                        int(args.prefilter[1]),
-                                                                       float(args.prefilter[2])) for k, v in filterLines.iteritems()}
+                                                                       float(args.prefilter[2])) for k, v in filterLines.items()}
     if  args.preliminaryReductionFilter: preFiltered_filterlines = {k: preliminaryReductionFilter(v,
                                                                                                   float(args.preliminaryReductionFilter[0]),
-                                                                                                  int(args.preliminaryReductionFilter[1])) for k, v in filterLines.iteritems()}
+                                                                                                  int(args.preliminaryReductionFilter[1])) for k, v in filterLines.items()}
     if not args.prefilter and not args.preliminaryReductionFilter: 
-        preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.iteritems()}
+        preFiltered_filterlines = {k: preliminaryFilter(v) for k, v in filterLines.items()}
     if args.generateCSV: filterlinePeaks_csv(preFiltered_filterlines,'preliminaryFilter.csv')    
     
     ''' create bins for peaks '''
     if args.binsDecimal:filterlines_withBins = {k: generateBins_decimalPlaces(v,
-                                                                              int(args.binsDecimal[0])) for k, v in filterLines.iteritems()}
+                                                                              int(args.binsDecimal[0])) for k, v in filterLines.items()}
     if args.binsResolution:filterlines_withBins = {k: generateBins_resolution(v,
-                                                                              int(args.binsResolution[0])) for k, v in filterLines.iteritems()}
+                                                                              int(args.binsResolution[0])) for k, v in filterLines.items()}
     if args.binsTheoResolution:filterlines_withBins = {k: generateBins_theoreticalResolution(v,
-                                                                                             int(args.binsTheoResolution[0])) for k, v in preFiltered_filterlines.iteritems()}
+                                                                                             int(args.binsTheoResolution[0])) for k, v in preFiltered_filterlines.items()}
     if not args.binsDecimal and not args.binsResolution and not args.binsTheoResolution:
-        filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.iteritems()}
+        filterlines_withBins = {k: generateBins_decimalPlaces(v) for k, v in filterLines.items()}
     if args.generateCSV: filterlinePeaks_csv(filterlines_withBins,'generateBins_decimalPlaces.csv')
     
     ''' put each mass in a bin '''
     if args.inWindowBin:filterlines_inBins = {k: sortMassIn_sortWindow(v,
-                                                                       int(args.inWindowBin[0])) for k, v in filterlines_withBins.iteritems()}
-    if args.inFirstBin:filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
-    if args.inNarrowBin:filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.iteritems()}
+                                                                       int(args.inWindowBin[0])) for k, v in filterlines_withBins.items()}
+    if args.inFirstBin:filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.items()}
+    if args.inNarrowBin:filterlines_inBins = {k: sortMassIn_NarrowestBin(v) for k, v in filterlines_withBins.items()}
     if not args.inWindowBin and not args.inFirstBin and not args.inNarrowBin:
-        filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.iteritems()}
+        filterlines_inBins = {k: sortMassIn_FirstBin(v) for k, v in filterlines_withBins.items()}
     if args.generateCSV: filterlinePeaks_csv(filterlines_inBins,'sortMassIn_FirstBin.csv')
     
-    filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.iteritems()}
+    filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.items()}
     if args.generateCSV: filterlineBins_csv(filterlines_binData,'aggregateBinData.csv')
     
-    filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.iteritems()}
+    filterlines_filtered = {k: filterBins(v) for k, v in filterlines_binData.items()}
     if args.generateCSV: filterlineBins_csv(filterlines_filtered,'filterBins.csv')
     
-    filtered_peaks = {k: formatPeaks(v) for k, v in filterlines_filtered.iteritems()}
+    filtered_peaks = {k: formatPeaks(v) for k, v in filterlines_filtered.items()}
     
     newfilename = os.path.abspath(args.output_path) + os.path.basename(filename)[:-4]+ '.mzXML'
     log.info('Writing results to %s', newfilename)

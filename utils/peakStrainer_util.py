@@ -126,7 +126,7 @@ def getMZXMLEncondedScans(filePath):
         object = (scanNo, filterLine, encodedPeaks, retTime)
         rawscans.append(object)
 
-    return zip(*rawscans)
+    return list(zip(*rawscans))
 
 def write2templateMzXML(newfilename, scanPeaks):
     namespaces = {'xmlns': 'http://sashimi.sourceforge.net/schema_revision/mzXML_3.0'}

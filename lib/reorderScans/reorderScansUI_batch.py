@@ -26,7 +26,7 @@ class MyFrame1 ( wx.Frame ):
 
 		bSizer8 = wx.BoxSizer( wx.VERTICAL )
 
-		self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, u"Reorder Scans", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, "Reorder Scans", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText1.Wrap( -1 )
 
 		self.m_staticText1.SetFont( wx.Font( 14, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, "Arial Black" ) )
@@ -46,12 +46,12 @@ class MyFrame1 ( wx.Frame ):
 
 		bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
 
-		self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, u"Select MZxml Folder:", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, "Select MZxml Folder:", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText2.Wrap( -1 )
 
 		bSizer2.Add( self.m_staticText2, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
-		self.m_dirPicker1 = wx.DirPickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a folder", wx.DefaultPosition, wx.DefaultSize, wx.DIRP_DEFAULT_STYLE )
+		self.m_dirPicker1 = wx.DirPickerCtrl( self, wx.ID_ANY, wx.EmptyString, "Select a folder", wx.DefaultPosition, wx.DefaultSize, wx.DIRP_DEFAULT_STYLE )
 		bSizer2.Add( self.m_dirPicker1, 1, wx.ALL|wx.EXPAND, 5 )
 
 
@@ -73,14 +73,14 @@ class MyFrame1 ( wx.Frame ):
 
 		bSizer5 = wx.BoxSizer( wx.VERTICAL )
 
-		self.m_button1 = wx.Button( self, wx.ID_ANY, u"add", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_button1 = wx.Button( self, wx.ID_ANY, "add", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer5.Add( self.m_button1, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
 
-		self.m_button2 = wx.Button( self, wx.ID_ANY, u"remove", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_button2 = wx.Button( self, wx.ID_ANY, "remove", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer5.Add( self.m_button2, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
 
-		self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, u"SIM", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_checkBox1.SetToolTip( u"Include SIM" )
+		self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, "SIM", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_checkBox1.SetToolTip( "Include SIM" )
 
 		bSizer5.Add( self.m_checkBox1, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
 
@@ -99,7 +99,7 @@ class MyFrame1 ( wx.Frame ):
 
 		bSizer6 = wx.BoxSizer( wx.VERTICAL )
 
-		self.m_button3 = wx.Button( self, wx.ID_ANY, u"Finish", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_button3 = wx.Button( self, wx.ID_ANY, "Finish", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer6.Add( self.m_button3, 0, wx.ALL|wx.ALIGN_RIGHT, 5 )
 
 

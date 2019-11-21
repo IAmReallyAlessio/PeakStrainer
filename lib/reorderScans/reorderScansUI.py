@@ -26,7 +26,7 @@ class MyFrame1 ( wx.Frame ):
 
 		bSizer8 = wx.BoxSizer( wx.VERTICAL )
 
-		self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, u"Reorder Scans", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, "Reorder Scans", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText1.Wrap( -1 )
 
 		self.m_staticText1.SetFont( wx.Font( 14, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, "Arial Black" ) )
@@ -46,12 +46,12 @@ class MyFrame1 ( wx.Frame ):
 
 		bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
 
-		self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, u"Select MZxml File:", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, "Select MZxml File:", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText2.Wrap( -1 )
 
 		bSizer2.Add( self.m_staticText2, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
-		self.m_filePicker1 = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.DefaultSize, wx.FLP_DEFAULT_STYLE )
+		self.m_filePicker1 = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, "Select a file", "*.*", wx.DefaultPosition, wx.DefaultSize, wx.FLP_DEFAULT_STYLE )
 		bSizer2.Add( self.m_filePicker1, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
 
@@ -70,10 +70,10 @@ class MyFrame1 ( wx.Frame ):
 		self.m_searchCtrl2.ShowCancelButton( False )
 		bSizer3.Add( self.m_searchCtrl2, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
-		self.m_button_sub = wx.Button( self, wx.ID_ANY, u"sub", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_button_sub = wx.Button( self, wx.ID_ANY, "sub", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer3.Add( self.m_button_sub, 0, wx.ALL, 5 )
 
-		self.m_button_clear = wx.Button( self, wx.ID_ANY, u"clear", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_button_clear = wx.Button( self, wx.ID_ANY, "clear", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer3.Add( self.m_button_clear, 0, wx.ALL, 5 )
 
 
@@ -89,10 +89,10 @@ class MyFrame1 ( wx.Frame ):
 
 		bSizer5 = wx.BoxSizer( wx.VERTICAL )
 
-		self.m_button1 = wx.Button( self, wx.ID_ANY, u"add all", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_button1 = wx.Button( self, wx.ID_ANY, "add all", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer5.Add( self.m_button1, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
 
-		self.m_button2 = wx.Button( self, wx.ID_ANY, u"remove", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_button2 = wx.Button( self, wx.ID_ANY, "remove", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer5.Add( self.m_button2, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
 
 
@@ -127,7 +127,7 @@ class MyFrame1 ( wx.Frame ):
 
 		bSizer10.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
-		self.m_button3 = wx.Button( self, wx.ID_ANY, u"Finish", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_button3 = wx.Button( self, wx.ID_ANY, "Finish", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer10.Add( self.m_button3, 0, wx.ALL|wx.ALIGN_RIGHT, 5 )
 
 

@@ -3,7 +3,7 @@ Created on 28.04.2017
 
 @author: mirandaa
 '''
-from reorderScansUI import MyFrame1
+from .reorderScansUI import MyFrame1
 import wx
 import xml.etree.ElementTree as ET
 
