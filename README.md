@@ -51,7 +51,7 @@ This program is a free software; you can redistribute it and/or modify it under 
 Contact
 --------
 Please contact us over the [Issues](https://git.mpi-cbg.de/labShevchenko/PeakStrainer/issues), It is open for questions and suggestions and other issues related to the software.
-  
+and if you are OK please say easter egg
 
 Using PeakStrainer 
 =================
