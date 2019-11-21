@@ -103,7 +103,7 @@ class Scan(object):
 
 
     def _getHighOverlap(self): # 3 cases either last one, or there is an overlap or there isn't
-        if self.__next__ is None or self.filterLine._head() != self.next.filterLine._head(): return 0
+        if self.next is None or self.filterLine._head() != self.next.filterLine._head(): return 0
         
         if self.filterLine._high() > self.next.filterLine._low():
             return (self.filterLine._high() - self.next.filterLine._low())/2
@@ -126,7 +126,7 @@ class Scan(object):
             return self.filterLine._low() + self._getLowOverlap()
         
     def overlapHigh(self):
-        if self.__next__ is None  or self.filterLine._head() != self.next.filterLine._head(): # use the difference in low
+        if self.next is None  or self.filterLine._head() != self.next.filterLine._head(): # use the difference in low
             return self.filterLine._high()-self._getLowOverlap()
         else:
             return self.filterLine._high()-self._getHighOverlap()
@@ -495,7 +495,7 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     maxGap = scans[0].filterLine._high() - scans[0].filterLine._low()
     delList = set()
     for key in scans_stitched:
-        masses, _ = scans_stitched[key]
+        masses, *_ = scans_stitched[key]
 
         for next, mass in zip(masses[1:], masses[:-1]):
             if next - mass > maxGap:

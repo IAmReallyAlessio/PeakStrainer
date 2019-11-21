@@ -104,7 +104,7 @@ class mySimStitcherFrame(SimStitcherFrame):
                 ststus = True
             except Exception as e:
                 print(e)
-                dlg = wx.MessageDialog(self, 'There was a problem processing the file {}'.format(onefile), 'Warning', wx.OK | wx.ICON_WARNING)
+                dlg = wx.MessageDialog(self, 'There was a problem processing the file {} \n{}'.format(onefile, e), 'Warning', wx.OK | wx.ICON_WARNING)
                 dlg.ShowModal()
                 dlg.Destroy()
                 self.m_gauge1.SetValue(self.m_gauge1.GetValue() - gaugeStep)
