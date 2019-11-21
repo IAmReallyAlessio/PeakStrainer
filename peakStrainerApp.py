@@ -157,7 +157,7 @@ class MyFrame(MyFrame2):
         if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
         if self.m_checkBox9.GetValue():logging.basicConfig(filename=filepath[:-4]+'.log',filemode='w')
         
-        log.debug('Start %f', time.clock())
+        log.debug('Start %f', time.process_time())
         
         self.statusLog('Read and select scans from raw file...')
         dropElbowIIT = self.m_checkBox611.GetValue()
@@ -252,7 +252,7 @@ class MyFrame(MyFrame2):
         filtered_bins_r = reorder4lipidxplorer(filtered_bins)
         write2templateMzXML(newfilename, filtered_bins_r)
         
-        log.debug('finish %f',  time.clock())
+        log.debug('finish %f',  time.process_time())
     
 
 if __name__ == '__main__':
