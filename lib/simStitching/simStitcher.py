@@ -201,7 +201,7 @@ def getMatchingMS(sampleSimPeaks, scans_ms):
         
         
 def toCSVFile(fileBaseName, dictOrList):
-    with file(fileBaseName+'.csv', 'wb') as outfile:
+    with open(fileBaseName+'.csv', 'wb') as outfile:
         if type(dictOrList) is list:
             string = '\n'.join(map(str,dictOrList))
             string = string.replace('(','') 
