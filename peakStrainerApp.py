@@ -6,6 +6,7 @@ Created on 04.05.2017
 from utils.peakStrainerGUI import MyFrame2
 import wx
 import os
+import traceback
 from peakStrainer import *
 
 from lib.reorderScans.reorderScans import main as reorderscansMain
@@ -121,7 +122,8 @@ class MyFrame(MyFrame2):
             except Exception as e:
                 self.m_statuslog.WriteText('\n *** THERE WAS A PROBLEM PROCESSING THE FILE *** \n'+ filepath+ '\n')
                 self.m_statuslog.WriteText(str(e))
-                print(e)
+                self.m_statuslog.WriteText(str(traceback.print_exc()))
+                print(traceback.print_exc())
 
             self.m_statuslog.WriteText('finished filepath '+ filepath+ '\n')
             self.m_statuslog.WriteText('=========================='+ '\n')

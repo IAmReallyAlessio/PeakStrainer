@@ -7,6 +7,7 @@ from .simStitcherGUI import SimStitcherFrame
 import wx
 from lib.simStitching.simStitcher import simStitcher
 import os
+import traceback
 
 class mySimStitcherFrame(SimStitcherFrame):
     def __init__(self,parent):
@@ -104,7 +105,8 @@ class mySimStitcherFrame(SimStitcherFrame):
                 ststus = True
             except Exception as e:
                 print(e)
-                dlg = wx.MessageDialog(self, 'There was a problem processing the file {} \n{}'.format(onefile, e), 'Warning', wx.OK | wx.ICON_WARNING)
+                print(traceback.print_exc())
+                dlg = wx.MessageDialog(self, 'There was a problem processing the file {} \n{} \n{}'.format(onefile, e,traceback.print_exc()), 'Warning', wx.OK | wx.ICON_WARNING)
                 dlg.ShowModal()
                 dlg.Destroy()
                 self.m_gauge1.SetValue(self.m_gauge1.GetValue() - gaugeStep)
