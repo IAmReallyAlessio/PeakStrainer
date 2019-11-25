@@ -201,7 +201,7 @@ def getMatchingMS(sampleSimPeaks, scans_ms):
         
         
 def toCSVFile(fileBaseName, dictOrList):
-    with open(fileBaseName+'.csv', 'wb') as outfile:
+    with open(fileBaseName+'.csv', 'w') as outfile:
         if type(dictOrList) is list:
             string = '\n'.join(map(str,dictOrList))
             string = string.replace('(','') 
@@ -499,22 +499,12 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
 
         for next, mass in zip(masses[1:], masses[:-1]):
             if next - mass > maxGap:
-                log.error("***gap between two sims is larger than sim,  {} it will be removed ***".format(key))
+                log.error("***gap between two sims is larger than sim,  {}  ***".format(key))
                 if callback:
-                    callback("***gap between two sims is larger than sim,  {} it will be removed ***".format(key))
+                    callback("***gap between two sims is larger than sim,  {}  ***".format(key))
                 delList.add(key)
 
-    for key in delList:
-        del scans_stitched[key]
-
-    #---
-    # log.info('writing to :' + outputStitchedFile(filePath))
-    # write2templateMzXML(outputStitchedFile(filePath), scans_stitched)
-    #
-    # log.info('finish stitching')
-    #
-    # if not doCompare: raise SystemExit
-    # #---
+    # no more del all in delList, only notifiy
 
     if not scaleToCenterMass:
         log.info('writing to :'+outputStitchedFile(filePath))
