@@ -72,4 +72,8 @@ The source code is available and is intended to be readable and extensible.
 
 For more about the command line and source code,
 please go to [implementation Notes](Implementation_notes)
+
+changeLog
+----------
+when stitching together if there is a gap in the "lock" scans then the non-lock peaks will be used in that gap.
  
