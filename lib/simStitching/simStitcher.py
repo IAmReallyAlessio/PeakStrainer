@@ -494,13 +494,15 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
                 log.info("***gap between two sims is larger than sim,  {} between  mz: {} and {} ***".format(key, next, mass))
                 if nonLock_key in scans_stitched.keys():
                     log.info("***gap will be filled with peaks from {}  ***".format(nonLock_key))
-                    nonLock_peaks.extend([m,i,c,h for m,i,c,h in  zip(*scans_stitched[nonLock_key]) if m > next and m < mass])
+                    these_noLockPeaks = [t for t in zip(*scans_stitched[nonLock_key]) if t[0] < next and t[0] > mass]
+                    nonLock_peaks.extend(these_noLockPeaks)
                 if callback:
                     callback("***gap between two sims is larger than sim,  {}  ***".format(key))
         if nonLock_peaks:
             #add the originals
-            nonLock_peaks.extend([m,i,c,h for m,i,c,h in  zip(*scans_stitched[key])])
-            scans_stitched[key] = zip(*nonLock_peaks)
+            lists = zip(*nonLock_peaks)
+            for i,l in enumerate(lists):
+                scans_stitched[key][i].extend(l)
     
     names = list(scans_stitched.keys())
     # -- rename
