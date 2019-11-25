@@ -479,6 +479,29 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     log.info('\n'.join(list(scans_stitched.keys())))
     log.debug('\n'.join(map(str,list(scans_stitched.items()))))
     if loglevel>2: toCSVFile(csvPath+'scans_stitched', scans_stitched)
+    
+    log.info('check if stitched scans have gaps and fill if its lock')
+    maxGap = scans[0].filterLine._high() - scans[0].filterLine._low()
+    
+    lock_stitched_scans = [s for s in scans_stitched.keys() if ' lock ' in s.lower()]
+    for key in lock_stitched_scans:
+        masses, *_ = scans_stitched[key]
+        nonLock_key = key.replace(' lock ',' ')
+        nonLock_peaks = []
+
+        for next, mass in zip(masses[1:], masses[:-1]):
+            if next - mass > maxGap:
+                log.info("***gap between two sims is larger than sim,  {} between  mz: {} and {} ***".format(key, next, mass))
+                if nonLock_key in scans_stitched.keys():
+                    log.info("***gap will be filled with peaks from {}  ***".format(nonLock_key))
+                    nonLock_peaks.extend([m,i,c,h for m,i,c,h in  zip(*scans_stitched[nonLock_key]) if m > next and m < mass])
+                if callback:
+                    callback("***gap between two sims is larger than sim,  {}  ***".format(key))
+        if nonLock_peaks:
+            #add the originals
+            nonLock_peaks.extend([m,i,c,h for m,i,c,h in  zip(*scans_stitched[key])])
+            scans_stitched[key] = zip(*nonLock_peaks)
+    
     names = list(scans_stitched.keys())
     # -- rename
     for stitched_Head in names:
@@ -491,21 +514,7 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     log.info('renamed stitched scans:')
     log.info('\n'.join(list(scans_stitched.keys())))
 
-    log.info('check if stitched scans have gaps')
-    maxGap = scans[0].filterLine._high() - scans[0].filterLine._low()
-    delList = set()
-    for key in scans_stitched:
-        masses, *_ = scans_stitched[key]
-
-        for next, mass in zip(masses[1:], masses[:-1]):
-            if next - mass > maxGap:
-                log.error("***gap between two sims is larger than sim,  {}  ***".format(key))
-                if callback:
-                    callback("***gap between two sims is larger than sim,  {}  ***".format(key))
-                delList.add(key)
-
-    # no more del all in delList, only notifiy
-
+   
     if not scaleToCenterMass:
         log.info('writing to :'+outputStitchedFile(filePath))
         #---
