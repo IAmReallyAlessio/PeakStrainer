@@ -76,4 +76,9 @@ please go to [implementation Notes](Implementation_notes)
 changeLog
 ----------
 when stitching together if there is a gap in the "lock" scans then the non-lock peaks will be used in that gap.
+
+Known Issues
+------------
+Peakstriner uses msfilereader that requires a dll from thermo xrawfile_2 this file is searched for in the 'lib' folder in Peakstrainer
+if you run the python standalone, most likely some pyc files are created and thay may conflict with other windows version, so avoid running python on the distributed python standlone
  
