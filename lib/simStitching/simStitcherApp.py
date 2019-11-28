@@ -6,6 +6,7 @@ Created on 26.05.2017
 from simStitcherGUI import SimStitcherFrame
 import wx
 from lib.simStitching.simStitcher import simStitcher
+import os
 
 class mySimStitcherFrame(SimStitcherFrame):
     def __init__(self,parent):
@@ -24,7 +25,7 @@ class mySimStitcherFrame(SimStitcherFrame):
         #         simStitcher(filepath, doCompare)
         wildcard = "mzXML (*.mzXML)|*.mzxml;*MZXML"
         dlg = wx.FileDialog(self, message="Select your files", defaultDir=os.getcwd(), defaultFile="*.mzXML",
-                            wildcard=wildcard, style=wx.OPEN | wx.MULTIPLE)
+                            wildcard=wildcard, style=wx.FD_OPEN | wx.FD_MULTIPLE)
 
         if dlg.ShowModal() == wx.ID_OK:
             self.path, file = os.path.split(dlg.GetPath())
