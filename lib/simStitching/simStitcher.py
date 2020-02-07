@@ -24,6 +24,7 @@ class Scan(object):
         def __init__(self, filterline):
             self.filterline = filterline
             self.match = re.match(r'(.*)\[(\d+\.\d*)-(\d+\.\d*)\]', filterline)
+            self.__low = None
         
         def __str__(self):
             return self.filterline
@@ -34,11 +35,16 @@ class Scan(object):
         def _head(self):
             return self.match.group(1)
         def _low(self):
-            return float(self.match.group(2))
+            self.__low = float(self.match.group(2))
+            return self.__low
         def _high(self):
             return float(self.match.group(3))
         def _center(self):
             return ( float(self.match.group(2)) + float(self.match.group(3)) ) /2
+        def _target(self):
+            m = re.match(r'.* (\d+\.\d+)@', self._head())
+            return float(m.group(1))
+
         def asTuple(self):
             return (self._head(),self._low(),self._high())
         def mode(self):
@@ -178,7 +184,7 @@ def getMatchingMS(sampleSimPeaks, scans_ms):
         probalemMSfilterline = sample.filterLine._head().replace('SIM', 'Full') #dirty hack
         scan_ms = [scan for scan in scans_ms if scan.filterLine._head() == probalemMSfilterline]
         if not scan_ms:
-            log.error('no MS found for sample : {}'.format(sample))
+            log.warning(f'{probalemMSfilterline} not found to merge with {sample.filterLine._head()}')
             continue
         
         masses, intenses = scan_ms[0].allPeaks()
@@ -368,6 +374,13 @@ def getSelectedMatchingSim(matchingSim):
 
     return selected
 
+def velosAdapt(scan):
+    target = scan.filterLine._target()
+    high = scan.filterLine._high()
+    delta = abs(high - target)
+    scan.filterLine.__low = target - delta
+    return scan
+
 
 def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , daltons = 5 ,csvPath1 = None, loglevel = 3):
     '''
@@ -397,13 +410,18 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     log.debug('\n'.join(map(str,scans_mzxml_sim)))
     if loglevel>2: toCSVFile(csvPath+'scans_mzxml_sim',scans_mzxml_sim )
     
-    scans =[Scan(*scan_xml) for scan_xml in scans_mzxml_sim]
+    scans_og =[Scan(*scan_xml) for scan_xml in scans_mzxml_sim]
     
+    log.warning('adapting values to Velos format')
+    scans = [velosAdapt(s) for s in scans_og]
+   
+
     log.info('get sorted filterlines') # where low is a number instead of a text
     scans.sort(key=lambda scan: scan.filterLine.asTuple())
     
     log.debug('\n'.join(map(str,scans)))
     if loglevel>2: toCSVFile(csvPath+'scans', scans)
+   
     
     scans[0].next = scans[1] #previous is None
     for idx, scan in enumerate(scans):
@@ -412,7 +430,7 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
         scans[idx].next = scans[idx+1]
     scans[-1].previous = scans[-2] #next is None
 
-    
+
     
     #-- build stitched scans
     scans_stitched = {}
@@ -448,7 +466,7 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     maxGap = scans[0].filterLine._high() - scans[0].filterLine._low()
     delList =set()
     for key in scans_stitched:
-        masses, _ = scans_stitched[key]
+        masses, *_ = scans_stitched[key]
         
         for next, mass in zip(masses[1:], masses[:-1]):
            if next - mass > maxGap:
