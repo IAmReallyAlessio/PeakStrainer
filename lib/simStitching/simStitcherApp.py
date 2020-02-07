@@ -58,7 +58,7 @@ class mySimStitcherFrame(SimStitcherFrame):
             self.m_checkBox11.SetValue(True)
             self.checkCut(event)
         else:
-            self.m_checkBox12.setvalue(False)
+            self.m_checkBox12.SetValue(False)
             self.checkAdapt(event)
 
     def checkAdapt(self, event):
