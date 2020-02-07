@@ -169,7 +169,7 @@ def write2templateMzXML(newfilename, scanPeaks):
     
     
     for idx, scan in enumerate(scanPeaks):
-        (masses, intens) = scanPeaks[scan]
+        masses, intens , *_ = scanPeaks[scan]
         newScan = copy.deepcopy(scanTemplete)
         newScan.attrib['filterLine'] = scan
         newScan.attrib['peaksCount'] = str(len(masses))
