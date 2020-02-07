@@ -112,7 +112,7 @@ class mySimStitcherFrame(SimStitcherFrame):
                 dlg.Destroy()
                 self.m_gauge1.SetValue(self.m_gauge1.GetValue() - gaugeStep)
 
-        raise SystemExit
+        return
 
 
 def main():
