@@ -57,7 +57,7 @@ class Scan(object):
         self.next = None
         self.centreCorrectionFactor = None # correction factor for the center peak
 
-        
+       
     def __str__(self):
         return 'Scan Num {}, {}, peak Count = {}, low ={}, high = {}'.format(self.scanNo,self.filterLine, len(self.masses), self.overlapLow(), self.overlapHigh())
     
@@ -94,7 +94,7 @@ class Scan(object):
 
 
     def _getHighOverlap(self): # 3 cases either last one, or there is an overlap or there isn't
-        if self.__next__ is None or self.filterLine._head() != self.next.filterLine._head(): return 0
+        if self.next is None or self.filterLine._head() != self.next.filterLine._head(): return 0
         
         if self.filterLine._high() > self.next.filterLine._low():
             return (self.filterLine._high() - self.next.filterLine._low())/2
@@ -117,7 +117,7 @@ class Scan(object):
             return self.filterLine._low() + self._getLowOverlap()
         
     def overlapHigh(self):
-        if self.__next__ is None  or self.filterLine._head() != self.next.filterLine._head(): # use the difference in low
+        if self.next is None  or self.filterLine._head() != self.next.filterLine._head(): # use the difference in low
             return self.filterLine._high()-self._getLowOverlap()
         else:
             return self.filterLine._high()-self._getHighOverlap()
@@ -390,10 +390,10 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     log.debug('\n'.join(map(str,scans_mzxml)))
     
     log.info('drop first scan because invalid')
-    scans_mzxml = scans_mzxml[1:]
+    # scans_mzxml = scans_mzxml[1:]
         
     log.info('get Sim scans')
-    scans_mzxml_sim= [scan for scan in scans_mzxml if ' sim ' in scan[1].lower()]
+    scans_mzxml_sim= [scan for scan in scans_mzxml if 'cid' in scan[1].lower()]
     log.debug('\n'.join(map(str,scans_mzxml_sim)))
     if loglevel>2: toCSVFile(csvPath+'scans_mzxml_sim',scans_mzxml_sim )
     
@@ -411,6 +411,8 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
         scans[idx].previous = scans[idx-1]
         scans[idx].next = scans[idx+1]
     scans[-1].previous = scans[-2] #next is None
+
+    
     
     #-- build stitched scans
     scans_stitched = {}
