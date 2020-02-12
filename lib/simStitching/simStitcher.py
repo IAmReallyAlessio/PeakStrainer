@@ -23,8 +23,7 @@ class Scan(object):
         
         def __init__(self, filterline):
             self.filterline = filterline
-            self.match = re.match(r'(.*)\[(\d+\.\d*)-(\d+\.\d*)\]', filterline)
-            self.__low = None
+            self.match = re.match(r'(.*) (\d+\.\d+)@(.*)\[(\d+\.\d*)-(\d+\.\d*)\]', filterline)
         
         def __str__(self):
             return self.filterline
@@ -35,15 +34,14 @@ class Scan(object):
         def _head(self):
             return self.match.group(1)
         def _low(self):
-            self.__low = float(self.match.group(2))
-            return self.__low
+            low = self._target() - abs(self._high() - self._target())
+            return low
         def _high(self):
-            return float(self.match.group(3))
+            return float(self.match.group(5))
         def _center(self):
-            return ( float(self.match.group(2)) + float(self.match.group(3)) ) /2
+            return ( float(self.match.group(4)) + float(self.match.group(5)) ) /2
         def _target(self):
-            m = re.match(r'.* (\d+\.\d+)@', self._head())
-            return float(m.group(1))
+            return float(self.match.group(2))
 
         def asTuple(self):
             return (self._head(),self._low(),self._high())
@@ -118,7 +116,7 @@ class Scan(object):
     
     def overlapLow(self):
         if self.previous is None or self.filterLine._head() != self.previous.filterLine._head(): # use the difference in high
-            return self.filterLine._low()+ self._getHighOverlap()
+            return self.filterLine._low() + self._getHighOverlap()
         else:
             return self.filterLine._low() + self._getLowOverlap()
         
@@ -198,7 +196,7 @@ def getMatchingMS(sampleSimPeaks, scans_ms):
         
         
 def toCSVFile(fileBaseName, dictOrList):
-    with file(fileBaseName+'.csv', 'wb') as outfile:
+    with open(fileBaseName+'.csv', 'w') as outfile:
         if type(dictOrList) is list:
             string = '\n'.join(map(str,dictOrList))
             string = string.replace('(','') 
@@ -374,13 +372,6 @@ def getSelectedMatchingSim(matchingSim):
 
     return selected
 
-def velosAdapt(scan):
-    target = scan.filterLine._target()
-    high = scan.filterLine._high()
-    delta = abs(high - target)
-    scan.filterLine.__low = target - delta
-    return scan
-
 
 def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , daltons = 5 ,csvPath1 = None, loglevel = 3):
     '''
@@ -410,11 +401,7 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     log.debug('\n'.join(map(str,scans_mzxml_sim)))
     if loglevel>2: toCSVFile(csvPath+'scans_mzxml_sim',scans_mzxml_sim )
     
-    scans_og =[Scan(*scan_xml) for scan_xml in scans_mzxml_sim]
-    
-    log.warning('adapting values to Velos format')
-    scans = [velosAdapt(s) for s in scans_og]
-   
+    scans =[Scan(*scan_xml) for scan_xml in scans_mzxml_sim]
 
     log.info('get sorted filterlines') # where low is a number instead of a text
     scans.sort(key=lambda scan: scan.filterLine.asTuple())
@@ -434,8 +421,10 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     
     #-- build stitched scans
     scans_stitched = {}
+    HEAD_ADD = ' 999.99@cid0.00 '
     for scan in scans:
         head = scan.filterLine._head()
+        head += HEAD_ADD
         masses, intens = scan.nonOverlap_andNoEdgePeaks(daltons)
         totIonCounts = [scan.totalIonCount()] * len(masses)
         heads = [scan.filterLine] * len(masses)
@@ -453,8 +442,8 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
     names = list(scans_stitched.keys())
     # -- rename
     for stitched_Head in names:
-        min_head = min([scan.filterLine._low() for scan in scans if scan.filterLine._head() == stitched_Head])
-        max_head = max([scan.filterLine._high() for scan in scans if scan.filterLine._head() == stitched_Head])
+        min_head = min([scan.filterLine._low() for scan in scans if scan.filterLine._head()+HEAD_ADD == stitched_Head])
+        max_head = max([scan.filterLine._high() for scan in scans if scan.filterLine._head()+HEAD_ADD == stitched_Head])
         rename = stitched_Head +'['+str(min_head)+'-'+ str(max_head)+']'
         scans_stitched[rename] = scans_stitched[stitched_Head]
         del scans_stitched[stitched_Head]
