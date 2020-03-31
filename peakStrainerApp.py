@@ -12,6 +12,8 @@ from peakStrainer import *
 from lib.reorderScans.reorderScans import main as reorderscansMain
 from lib.simStitching.simStitcherApp import  main as simStitcherMain
 
+import pandas as pd
+
 
 def main():
     app = wx.App(False)

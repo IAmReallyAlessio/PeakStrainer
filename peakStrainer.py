@@ -827,7 +827,7 @@ def sortMassIn_sortNarrowWindow(peakData, window = 200):
 '''
 aggregate bins
 '''
-def aggregateBinData(peakData):
+def aggregateBinData(peakData, max_count = None):
     log.debug('aggregateBinData count %d, count, sumZmass, sumAbund, sum_Sig2Noise', len(peakData))
     masses = peakData[0]
     abunds = peakData[1]
@@ -848,7 +848,13 @@ def aggregateBinData(peakData):
         else:
             sig2noise = 0
         sum_Sig2Noise += sig2noise
+        if max_count and count > max_count > :
+            log.info(f'set upper bount to count {max_count}')
+            count = max_count
+
         binsData[bin] = count, sumZmass, sumAbund , sum_Sig2Noise
+    
+
 
     log.debug('bin count %d ', len(binsData))
     return binsData
