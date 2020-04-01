@@ -166,6 +166,10 @@ class MyFrame(MyFrame2):
         self.statusLog('Read and select scans from raw file...')
         dropElbowIIT = self.m_checkBox611.GetValue()
         scans = ThermoRawfile2Scans(filepath, dropElbowIIT)
+        # get the maximum number of scans
+        df = pd.DataFrame(scans)
+        max_count = df.iloc[:,1].value_counts().max()
+
         if self.m_checkBox8.GetValue(): ThermoRawfile2Scans_csv(scans, self.getCSVpath_file(rawfilename)+'-raw.csv')
                 
         # scans = filterScanBy_first(scans)
@@ -231,7 +235,7 @@ class MyFrame(MyFrame2):
         if self.m_checkBox8.GetValue(): filterlinePeaks_csv(filterlines_inBins,self.getCSVpath_file(rawfilename)+'-sortMassIn.csv')
         
         self.statusLog('Generate aggregate bin data ...')
-        filterlines_binData = {k: aggregateBinData(v) for k, v in filterlines_inBins.items()}
+        filterlines_binData = {k: aggregateBinData(v, max_count) for k, v in filterlines_inBins.items()}
         if self.m_checkBox8.GetValue(): filterlineBins_csv(filterlines_binData,self.getCSVpath_file(rawfilename)+'-aggregateBinData.csv')
         
         self.statusLog('Filter out bins ...')

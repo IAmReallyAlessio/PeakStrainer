@@ -1,5 +1,5 @@
 *.csv
-*.pyc
+**.pyc
 *.log
 /.pydevproject
 /.project
