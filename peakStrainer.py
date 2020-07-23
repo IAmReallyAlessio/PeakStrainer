@@ -848,7 +848,7 @@ def aggregateBinData(peakData, max_count = None):
         else:
             sig2noise = 0
         sum_Sig2Noise += sig2noise
-        if max_count and count > max_count > :
+        if max_count and count > max_count :
             log.info(f'set upper bount to count {max_count}')
             count = max_count
 
