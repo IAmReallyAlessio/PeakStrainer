@@ -239,11 +239,14 @@ def ThermoRawfile2Scans_RawQuant(file_path):
     MSrawscans = []
     for scanNum in range(start, end+1):
         data = raw.GetCentroidStream(scanNum, None)
+        if data.Length == 0:
+            log.debug(f'scan {scanNum} {raw.GetScanEventForScanNumber(scanNum).ToString()} has no masses')
+            continue
         peak_datas = get_out(raw, scanNum )
         filterLine = raw.GetScanEventForScanNumber(scanNum).ToString()
         retTime =  raw.RetentionTimeFromScanNumber(scanNum)*60
         row = (scanNum, filterLine, peak_datas, retTime, file_path)
-        MSrawscans.append(row)
+        MSrawscans.append(row) 
 
     log.info('Scan Count is %d', len(MSrawscans))
     #Note: to reshape into lists use
