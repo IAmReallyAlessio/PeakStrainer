@@ -29,7 +29,7 @@ class MyFrame2 ( wx.Frame ):
 
 		bSizer30 = wx.BoxSizer( wx.VERTICAL )
 
-		self.m_staticText1 = wx.StaticText( self.m_panel1, wx.ID_ANY, "PeakStrainer Development", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText1 = wx.StaticText( self.m_panel1, wx.ID_ANY, "PeakStrainer Development UH LX", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText1.Wrap( -1 )
 
 		self.m_staticText1.SetFont( wx.Font( 14, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, "Arial" ) )

@@ -14,6 +14,7 @@ from lib.simStitching.simStitcherApp import  main as simStitcherMain
 
 import pandas as pd
 
+from uh_lx_ps import stems_and_tails, joined_mzmls
 
 def main():
     app = wx.App(False)
@@ -28,14 +29,11 @@ class MyFrame(MyFrame2):
         
    # Virtual event handlers, overide them in your derived class
     def clickedBrowse( self, event ):
-        wildcard = "Thermo raw (*.raw)|*.raw;*RAW"
-        dlg = wx.FileDialog(self, message="Select your files",defaultDir=os.getcwd(),defaultFile="*.raw", wildcard=wildcard, style=wx.FD_OPEN|wx.FD_MULTIPLE)
+        dlg = wx.DirDialog (self, "Choose input directory", "",
+                    wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
 
         if dlg.ShowModal() == wx.ID_OK:
-                self.path, file = os.path.split(dlg.GetPath())
-                self.fileNames = dlg.GetFilenames()
-                 
-                self.m_textCtrl1.SetValue(str(self.path).replace('\\\\', '\\')+' '+ str(len(self.fileNames))+' files')
+                self.path = dlg.GetPath()
                 # ----
                 self.m_buttonFinish.Enable(True)
     
@@ -113,14 +111,18 @@ class MyFrame(MyFrame2):
     #===========================================================================
     
     def run_all(self):
-        self.path
-        self.fileNames
         
-        for onefile in self.fileNames:
-            filepath = str(self.path+'\\'+onefile)
-            self.m_statuslog.WriteText('Starting filepath '+ filepath + '\n')
+        centroid_path = self.path
+
+        stems,tails, suffix = stems_and_tails(centroid_path)
+
+        scans = joined_mzmls(centroid_path, stems,tails, suffix)
+
+        
+        for scan, stem in zip(scans, stems):
+            self.m_statuslog.WriteText(f'Starting filepath {stem}')
             try:
-                self.run_once(filepath, onefile)
+                self.run_once(filepath, none, scan =scan)
             except Exception as e:
                 self.m_statuslog.WriteText('\n *** THERE WAS A PROBLEM PROCESSING THE FILE *** \n'+ filepath+ '\n')
                 self.m_statuslog.WriteText(str(e))
@@ -155,7 +157,7 @@ class MyFrame(MyFrame2):
         return self.m_dirPicker1.GetPath()+ '\\'+Base_fileName
     
     
-    def run_once(self, filepath, rawfilename):
+    def run_once(self, filepath, rawfilename, scan_tuple_list = None):
         
         log.setLevel(self.getLoglevel())
         if log.level == logging.DEBUG:log.addHandler(logging.StreamHandler()) # log to console
@@ -165,7 +167,10 @@ class MyFrame(MyFrame2):
         
         self.statusLog('Read and select scans from raw file...')
         dropElbowIIT = self.m_checkBox611.GetValue()
-        scans = ThermoRawfile2Scans(filepath, dropElbowIIT)
+        if scan_tuple_list:
+            scans = scan_tuple_list
+        else:
+            scans = ThermoRawfile2Scans(filepath, dropElbowIIT)
         # get the maximum number of scans
         df = pd.DataFrame(scans)
         max_count = df.iloc[:,1].value_counts().max()
