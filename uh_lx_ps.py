@@ -14,6 +14,7 @@ def stems_and_tails(path):
 
 def joined_mzmls(centroid_path, stems,tails, suffix):
     joined_mzmls = []
+    new_paths = []
     for stem in stems:
         joined_mzml = []
         for tail in tails:
@@ -21,7 +22,8 @@ def joined_mzmls(centroid_path, stems,tails, suffix):
             MSrawscans = mzML2Scans(str(p))
             joined_mzml.extend(MSrawscans)
         joined_mzmls.append(joined_mzml)
-    return joined_mzmls
+        new_paths.append(Path(centroid_path) / (stem + suffix))
+    return joined_mzmls, new_paths
 
 if __name__ == "__main__":
     centroid_path = r'C:\Users\mirandaa\Downloads\centroid'

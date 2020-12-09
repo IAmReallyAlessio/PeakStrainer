@@ -116,23 +116,23 @@ class MyFrame(MyFrame2):
 
         stems,tails, suffix = stems_and_tails(centroid_path)
 
-        scans = joined_mzmls(centroid_path, stems,tails, suffix)
+        scans, new_paths = joined_mzmls(centroid_path, stems,tails, suffix)
 
         
-        for scan, stem in zip(scans, stems):
-            self.m_statuslog.WriteText(f'Starting filepath {stem}')
+        for scan, newpath  in zip(scans, new_paths):
+            self.m_statuslog.WriteText(f'Starting filepath {str(newpath)}')
             try:
-                self.run_once(filepath, none, scan =scan)
+                self.run_once(str(newpath),newpath.name , scan_tuple_list =scan)
             except Exception as e:
                 self.m_statuslog.WriteText('\n *** THERE WAS A PROBLEM PROCESSING THE FILE *** \n'+ filepath+ '\n')
                 self.m_statuslog.WriteText(str(e))
                 self.m_statuslog.WriteText(str(traceback.print_exc()))
                 print(traceback.print_exc())
 
-            self.m_statuslog.WriteText('finished filepath '+ filepath+ '\n')
+            self.m_statuslog.WriteText('finished filepath '+ str(newpath) + '\n')
             self.m_statuslog.WriteText('=========================='+ '\n')
         
-        self.m_statuslog.WriteText('finished All '+ str(len(self.fileNames))+ ' files \n')
+        self.m_statuslog.WriteText('finished All '+ str(len(scans))+ ' files \n')
         self.m_buttonFinish.Enable(False)
         
         if self.m_checkBox2.GetValue(): reorderscansMain(self.path)
