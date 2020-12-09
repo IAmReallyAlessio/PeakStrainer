@@ -309,7 +309,7 @@ def mzML2Scans(file_path):
                 log.error('scanList for single scan is more than 1 for: {}'.format(id))
 
             count = len(spectrum['m/z array'])
-            peak_datas = (spectrum['m/z array'], spectrum['intensity array'], [None]*count,[None]*count,[None]*count,[None]*count)
+            peak_datas = (spectrum['m/z array'], spectrum['intensity array'], spectrum['resolution array'],spectrum['baseline array'],spectrum['signal to noise array'],[None]*count)
             filterLine = spectrum['scanList']['scan'][0]['filter string']
             retTime =  spectrum['scanList']['scan'][0]['scan start time']*60
             row = (scanNum, filterLine, peak_datas, retTime, file_path)
