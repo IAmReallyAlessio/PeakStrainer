@@ -547,7 +547,7 @@ def generateBins_theoreticalResolution(peakData, decimal_places = 4):
         # 5408000.0, 2096000.0
     select_abunds, select_masses, select_resols = list(zip(*sort_mass))
     log.debug('Selecting only 90% highest intensity, as per Kai S.')
-    side_len = len(select_masses) / 10
+    side_len = int(len(select_masses) / 10)
     popt, pconv = curve_fit(func, select_masses[side_len:], select_resols[side_len:])
     
     log.info('function a*(x**-b) uses values: mass, %f, %f ', popt[0], popt[1])
