@@ -39,6 +39,11 @@ Quick Start
  - click finish to process with default settings
  
  After processing *.mzXML files will be created in the same directory as the *.raw files
+
+ SimSittcher and Spectra reorder
+---------------------------------
+can be found in the developmet version of peakstrainer [single File Installer](https://cloud.mpi-cbg.de/index.php/s/InlQPjd91QOTcNW),  
+or from the dev branch of this repo
  
 Disclaimer
 -----------
