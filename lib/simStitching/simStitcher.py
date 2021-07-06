@@ -27,6 +27,8 @@ class Scan(object):
         def __init__(self, filterline):
             self.filterline = filterline
             self.match = re.match(r'(.*)\[(\d+\.\d*)-(\d+\.\d*)\]', filterline)
+            if not self.match:
+                raise ValueError('Can not process: {filterline}')
         
         def __str__(self):
             return self.filterline
@@ -443,6 +445,8 @@ def simStitcher(filePath, scaleToCenterMass = True, adaptByRegresion = False , d
         
     log.info('get Sim scans')
     scans_mzxml_sim= [scan for scan in scans_mzxml if ' sim ' in scan[1].lower()]
+    log.info('avoid  msx scans')
+    scans_mzxml_sim= [scan for scan in scans_mzxml_sim if ' msx ' not in scan[1].lower()]
     log.debug('\n'.join(map(str,scans_mzxml_sim)))
     if loglevel>2: toCSVFile(csvPath+'scans_mzxml_sim',scans_mzxml_sim )
     
