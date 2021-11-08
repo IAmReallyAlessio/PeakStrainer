@@ -46,12 +46,19 @@ def test_writer(reader):
         writer.close()
 
 
+def cleanup(*args):
+    for a in args:
+        Path(a).unlink()
+        print(f"deleted {a}")
+
+
 def main():
     p = Path(r"lib\pair_spectra\tests\20211018_Peakstrainer_pairwise")
     p = next(p.glob("*.mzml"))
     reader = MSFileLoader(str(p))
     print_reader(reader)
     test_writer(reader)
+    cleanup("out.mzML", "out.mzML-idx.json")
 
 
 if __name__ == "__main__":
