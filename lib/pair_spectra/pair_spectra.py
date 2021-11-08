@@ -85,7 +85,7 @@ def get_MS2_filterlines(path):
         for b in r:
             # filterlines.append(b.precursor.annotations["filter string"])
             # scan_ids.append(b.precursor.scan_id)
-            for p in b.producs:
+            for p in b.products:
                 filterlines.append(p.annotations["filter string"])
                 scan_ids.append(p.scan_id)
     return scan_ids, filterlines
@@ -101,13 +101,13 @@ def path_filterline2df(filterline, path):
                 df["path"] = path.stem  # TODO  make them categoriacal?
                 df["scan_id"] = b.precursor.scan_id
                 dfs.append(df)
-                for p in b.products:
-                    if p.annotations["filter string"] == filterline:
-                        a = p.arrays
-                        df = pd.DataFrame({"mz": a.mz, "intensitiy": a.intensity})
-                        df["path"] = path.stem  # TODO  make them categoriacal?
-                        df["scan_id"] = b.precursor.scan_id
-                        dfs.append(df)
+            for p in b.products:
+                if p.annotations["filter string"] == filterline:
+                    a = p.arrays
+                    df = pd.DataFrame({"mz": a.mz, "intensitiy": a.intensity})
+                    df["path"] = path.stem  # TODO  make them categoriacal?
+                    df["scan_id"] = b.precursor.scan_id
+                    dfs.append(df)
     return dfs
 
 
@@ -198,6 +198,6 @@ def pair_filter(path):
 
 
 if __name__ == "__main__":
-    main()
-    # pair_filter(r"lib\pair_spectra\tests\20211018_Peakstrainer_pairwise")
+    # main()
+    pair_filter(r"lib\pair_spectra\tests\20211018_Peakstrainer_pairwise")
 
