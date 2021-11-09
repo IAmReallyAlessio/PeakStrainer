@@ -1,7 +1,9 @@
+from os import stat
 from pathlib import Path
 from ms_deisotope import MSFileLoader
 from ms_deisotope.output.mzml import MzMLSerializer
 import pandas as pd
+from time import time
 
 # from https://github.com/mobiusklein/ms_deisotope/tree/master/ms_deisotope/test
 FILTER_NAME_VERSION = "pair_filter_spectra_0.1.0"
@@ -131,6 +133,7 @@ def filterline_pair(filterline, path1, path2, cutoff=0.01):
 
 
 def filter_pair(path1, path2):
+    st = time()
 
     # get ms1 scans
     _, ms1_filterlines = get_MS1_filterlines(path1)
@@ -140,9 +143,13 @@ def filter_pair(path1, path2):
     # split ms1 scans
     _, ms2_filterlines = get_MS2_filterlines(path1)
     mzi_ms2_reader_pair = []
+    print("ms1")
+    print(time() - st)
     for filterline in ms2_filterlines:
         mzi_reader_pair = filterline_pair(filterline, path1, path2)
         mzi_ms2_reader_pair.append(mzi_reader_pair)
+        print("ms2" + filterline)
+        print(time() - st)
 
     # Write out content
     reader1 = MSFileLoader(str(path1))
@@ -150,40 +157,51 @@ def filter_pair(path1, path2):
         writer = MzMLSerializer(fh, n_spectra=1)
 
         writer.copy_metadata_from(reader1)
-        writer.software_list.append(FILTER_NAME_VERSION)
+        # writer.software_list.append(FILTER_NAME_VERSION)
 
         bunch = next(reader1)
         mzi_ms1_reader1 = mzi_ms1_reader_pair[0]
         bunch.precursor.arrays = [*mzi_ms1_reader1]
         bunch.precursor.pick_peaks()
+        print("ms1 put")
+        print(time() - st)
 
         for product in bunch.products:
-            idx = ms2_filterlines.index(product)
-            mzi_ms2_reader1, _ = mzi_ms2_reader_pair[idx]
-            product.arrays = [*mzi_ms2_reader1]
+            # idx = ms2_filterlines.index(product)
+            # mzi_ms2_reader1, _ = mzi_ms2_reader_pair[idx]
+            # product.arrays = [*mzi_ms2_reader1]
+            a = product.arrays
+            product.arrays = [a.mz[:2], a.intensity[:2]]
             product.pick_peaks()
+            print("ms2 put")
+            print(time() - st)
 
         writer.save(bunch, deconvoluted=False)
 
         writer.close()
-
+    print("==========next file")
     reader2 = MSFileLoader(str(path2))
     with open(path2.stem + "-f.mzML", "wb") as fh:
         writer = MzMLSerializer(fh, n_spectra=1)
 
         writer.copy_metadata_from(reader2)
-        writer.software_list.append(FILTER_NAME_VERSION)
+        # writer.software_list.append(FILTER_NAME_VERSION)
 
         bunch = next(reader2)
         mzi_ms1_reader2 = mzi_ms1_reader_pair[1]
         bunch.precursor.arrays = [*mzi_ms1_reader2]
         bunch.precursor.pick_peaks()
-
+        print("ms1 put")
+        print(time() - st)
         for product in bunch.products:
-            idx = ms2_filterlines.index(product)
-            _, mzi_ms2_reader2 = mzi_ms2_reader_pair[idx]
-            product.arrays = [*mzi_ms2_reader2]
+            # idx = ms2_filterlines.index(product)
+            # _, mzi_ms2_reader2 = mzi_ms2_reader_pair[idx]
+            # product.arrays = [*mzi_ms2_reader2]
+            a = product.arrays
+            product.arrays = [a.mz[:2], a.intensity[:2]]
             product.pick_peaks()
+            print("ms2 put")
+            print(time() - st)
 
         writer.save(bunch, deconvoluted=False)
 
@@ -191,13 +209,26 @@ def filter_pair(path1, path2):
 
 
 def pair_filter(path):
+    st = time()
     pairs = get_file_pairs(path)
     for pair in pairs:
         filter_pair(*pair)
-        break
+        print("one pair")
+        print(time() - st)
 
 
 if __name__ == "__main__":
     # main()
+    import cProfile
+    import pstats
+
+    pr = cProfile.Profile()
+    pr.enable()
     pair_filter(r"lib\pair_spectra\tests\20211018_Peakstrainer_pairwise")
+    pr.disable()
+
+    stats = pstats.Stats(pr)
+    stats.sort_stats(pstats.SortKey.TIME)
+    stats.print_stats()
+    stats.dump_stats(filename="profile_pair_spectra.prof")
 
