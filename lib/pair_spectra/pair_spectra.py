@@ -143,13 +143,9 @@ def filter_pair(path1, path2):
     # split ms1 scans
     _, ms2_filterlines = get_MS2_filterlines(path1)
     mzi_ms2_reader_pair = []
-    print("ms1")
-    print(time() - st)
     for filterline in ms2_filterlines:
         mzi_reader_pair = filterline_pair(filterline, path1, path2)
         mzi_ms2_reader_pair.append(mzi_reader_pair)
-        print("ms2" + filterline)
-        print(time() - st)
 
     # Write out content
     reader1 = MSFileLoader(str(path1))
@@ -163,8 +159,6 @@ def filter_pair(path1, path2):
         mzi_ms1_reader1 = mzi_ms1_reader_pair[0]
         bunch.precursor.arrays = [*mzi_ms1_reader1]
         bunch.precursor.pick_peaks()
-        print("ms1 put")
-        print(time() - st)
 
         for product in bunch.products:
             # idx = ms2_filterlines.index(product)
@@ -179,7 +173,6 @@ def filter_pair(path1, path2):
         writer.save(bunch, deconvoluted=False)
 
         writer.close()
-    print("==========next file")
     reader2 = MSFileLoader(str(path2))
     with open(path2.stem + "-f.mzML", "wb") as fh:
         writer = MzMLSerializer(fh, n_spectra=1)
@@ -191,8 +184,6 @@ def filter_pair(path1, path2):
         mzi_ms1_reader2 = mzi_ms1_reader_pair[1]
         bunch.precursor.arrays = [*mzi_ms1_reader2]
         bunch.precursor.pick_peaks()
-        print("ms1 put")
-        print(time() - st)
         for product in bunch.products:
             # idx = ms2_filterlines.index(product)
             # _, mzi_ms2_reader2 = mzi_ms2_reader_pair[idx]
@@ -209,26 +200,16 @@ def filter_pair(path1, path2):
 
 
 def pair_filter(path):
-    st = time()
     pairs = get_file_pairs(path)
     for pair in pairs:
         filter_pair(*pair)
-        print("one pair")
-        print(time() - st)
 
 
 if __name__ == "__main__":
-    # main()
-    import cProfile
-    import pstats
+    import sys
 
-    pr = cProfile.Profile()
-    pr.enable()
-    pair_filter(r"lib\pair_spectra\tests\20211018_Peakstrainer_pairwise")
-    pr.disable()
-
-    stats = pstats.Stats(pr)
-    stats.sort_stats(pstats.SortKey.TIME)
-    stats.print_stats()
-    stats.dump_stats(filename="profile_pair_spectra.prof")
+    # r"lib\pair_spectra\tests\20211018_Peakstrainer_pairwise"
+    if len(sys.argv) == 1:
+        print("please privide folder location of paired spectra")
+    pair_filter(sys.argv[1:])
 
