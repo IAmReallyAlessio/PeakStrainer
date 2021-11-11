@@ -1,4 +1,3 @@
-from os import stat
 from pathlib import Path
 from ms_deisotope import MSFileLoader
 from ms_deisotope.output.mzml import MzMLSerializer
@@ -113,6 +112,24 @@ def path_filterline2df(filterline, path):
     return dfs
 
 
+def path2dfs(path):
+    dfs = []
+    with MSFileLoader(str(path)) as r:
+        for b in r:
+            a = b.precursor.arrays
+            df = pd.DataFrame({"mz": a.mz, "intensitiy": a.intensity})
+            df["path"] = path.stem  # TODO  make them categoriacal?
+            df["scan_id"] = b.precursor.scan_id
+            dfs.append(df)
+            for p in b.products:
+                a = p.arrays
+                df = pd.DataFrame({"mz": a.mz, "intensitiy": a.intensity})
+                df["path"] = path.stem  # TODO  make them categoriacal?
+                df["scan_id"] = b.precursor.scan_id
+                dfs.append(df)
+    return dfs
+
+
 def filterline_pair(filterline, path1, path2, cutoff=0.01):
     # TODO # https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
     # https://codereview.stackexchange.com/questions/28207/finding-the-closest-point-to-a-list-of-points
@@ -133,7 +150,6 @@ def filterline_pair(filterline, path1, path2, cutoff=0.01):
 
 
 def filter_pair(path1, path2):
-    st = time()
 
     # get ms1 scans
     _, ms1_filterlines = get_MS1_filterlines(path1)
@@ -144,7 +160,7 @@ def filter_pair(path1, path2):
     _, ms2_filterlines = get_MS2_filterlines(path1)
     mzi_ms2_reader_pair = []
     for filterline in ms2_filterlines:
-        mzi_reader_pair = filterline_pair(filterline, path1, path2)
+        mzi_reader_pair = filterline_pair(filterline, path1, path2, 0.005)
         mzi_ms2_reader_pair.append(mzi_reader_pair)
 
     # Write out content
@@ -167,8 +183,6 @@ def filter_pair(path1, path2):
             a = product.arrays
             product.arrays = [a.mz[:2], a.intensity[:2]]
             product.pick_peaks()
-            print("ms2 put")
-            print(time() - st)
 
         writer.save(bunch, deconvoluted=False)
 
@@ -191,8 +205,6 @@ def filter_pair(path1, path2):
             a = product.arrays
             product.arrays = [a.mz[:2], a.intensity[:2]]
             product.pick_peaks()
-            print("ms2 put")
-            print(time() - st)
 
         writer.save(bunch, deconvoluted=False)
 
@@ -208,8 +220,8 @@ def pair_filter(path):
 if __name__ == "__main__":
     import sys
 
-    # r"lib\pair_spectra\tests\20211018_Peakstrainer_pairwise"
-    if len(sys.argv) == 1:
-        print("please privide folder location of paired spectra")
-    pair_filter(sys.argv[1:])
+    pair_filter(r"lib\pair_spectra\tests\20211018_Peakstrainer_pairwise")
+    # if len(sys.argv) == 1:
+    #     print("please privide folder location of paired spectra")
+    # pair_filter(sys.argv[1:])
 
