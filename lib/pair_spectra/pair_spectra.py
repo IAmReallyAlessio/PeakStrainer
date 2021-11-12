@@ -66,77 +66,34 @@ def main():
     print("TODO find_closest_with_iterator(reader1, reader2)")
 
 
-def get_MS1_filterlines(path):
-    filterlines = []
-    scan_ids = []
-    with MSFileLoader(str(path)) as r:
-        for b in r:
-            filterlines.append(b.precursor.annotations["filter string"])
-            scan_ids.append(b.precursor.scan_id)
-            # for p in b.producs:
-            #     filterlines.append(p.precursor.title)
-            #     scan_ids.append(p.precursor.scan_id)
-    return scan_ids, filterlines
-
-
-def get_MS2_filterlines(path):
-    filterlines = []
-    scan_ids = []
-    with MSFileLoader(str(path)) as r:
-        for b in r:
-            # filterlines.append(b.precursor.annotations["filter string"])
-            # scan_ids.append(b.precursor.scan_id)
-            for p in b.products:
-                filterlines.append(p.annotations["filter string"])
-                scan_ids.append(p.scan_id)
-    return scan_ids, filterlines
-
-
-def path_filterline2df(filterline, path):
-    dfs = []
-    with MSFileLoader(str(path)) as r:
-        for b in r:
-            if b.precursor.annotations["filter string"] == filterline:
-                a = b.precursor.arrays
-                df = pd.DataFrame({"mz": a.mz, "intensitiy": a.intensity})
-                df["path"] = path.stem  # TODO  make them categoriacal?
-                df["scan_id"] = b.precursor.scan_id
-                dfs.append(df)
-            for p in b.products:
-                if p.annotations["filter string"] == filterline:
-                    a = p.arrays
-                    df = pd.DataFrame({"mz": a.mz, "intensitiy": a.intensity})
-                    df["path"] = path.stem  # TODO  make them categoriacal?
-                    df["scan_id"] = b.precursor.scan_id
-                    dfs.append(df)
-    return dfs
-
-
-def path2dfs(path):
+def path2df(path):
     dfs = []
     with MSFileLoader(str(path)) as r:
         for b in r:
             a = b.precursor.arrays
             df = pd.DataFrame({"mz": a.mz, "intensitiy": a.intensity})
-            df["path"] = path.stem  # TODO  make them categoriacal?
             df["scan_id"] = b.precursor.scan_id
+            df["filter_string"] = b.precursor.annotations["filter string"]
             dfs.append(df)
             for p in b.products:
                 a = p.arrays
                 df = pd.DataFrame({"mz": a.mz, "intensitiy": a.intensity})
-                df["path"] = path.stem  # TODO  make them categoriacal?
-                df["scan_id"] = b.precursor.scan_id
+                df["scan_id"] = p.scan_id  # TODO  make them categoriacal?
+                df["filter_string"] = p.annotations["filter string"]
+                # df.set_index(['scan_id',"filter_string"], append=True, inplace=True)
                 dfs.append(df)
-    return dfs
+    df = pd.concat(dfs)
+    df["path_stem"] = path.stem
+    df.set_index(["path_stem", "scan_id", "filter_string"], append=True, inplace=True)
+    df.attrs = {"path": path}
+    return df
 
 
-def filterline_pair(filterline, path1, path2, cutoff=0.01):
+def filterline_pair(filterline, df1, df2, cutoff=0.01):
     # TODO # https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
     # https://codereview.stackexchange.com/questions/28207/finding-the-closest-point-to-a-list-of-points
     # a.flat[np.abs(a - a0).argmin()]
-    dfs = path_filterline2df(filterline, path1)
-    dfs.extend(path_filterline2df(filterline, path2))
-    df = pd.concat(dfs)
+    df = pd.concat([df1, df2])
 
     df.sort_values("mz", inplace=True)
     mask = (-df.mz.diff(-1) < cutoff) & (df.mz.diff() < cutoff)
@@ -151,43 +108,48 @@ def filterline_pair(filterline, path1, path2, cutoff=0.01):
 
 def filter_pair(path1, path2):
 
-    # get ms1 scans
-    _, ms1_filterlines = get_MS1_filterlines(path1)
-    assert len(ms1_filterlines) == 1
-    # filter ms1 scans
-    mzi_ms1_reader_pair = filterline_pair(ms1_filterlines[0], path1, path2)
-    # split ms1 scans
-    _, ms2_filterlines = get_MS2_filterlines(path1)
-    mzi_ms2_reader_pair = []
-    for filterline in ms2_filterlines:
-        mzi_reader_pair = filterline_pair(filterline, path1, path2, 0.005)
-        mzi_ms2_reader_pair.append(mzi_reader_pair)
+    df1 = path2df(path1)
+    df2 = path2df(path2)
+
+    df = pd.concat([df1, df2])
+
+    cutoff = 0.01
+    groups = []
+    for filter_line, group_df in df.groupby(level=3):
+        group_df.sort_values("mz", inplace=True)
+        group_df.sort_values("mz", inplace=True)
+        mzdiff = group_df.mz.diff()
+        filtered_group_df = group_df.loc[
+            (mzdiff < cutoff) | (mzdiff.shift(-1) < cutoff)
+        ]
+        groups.append(filtered_group_df)
+
+    filtered_df = pd.concat(groups)
 
     # Write out content
     reader1 = MSFileLoader(str(path1))
+    key_part = (slice(None), path1.stem, slice(None))
     with open(path1.stem + "-f.mzML", "wb") as fh:
         writer = MzMLSerializer(fh, n_spectra=1)
 
         writer.copy_metadata_from(reader1)
         # writer.software_list.append(FILTER_NAME_VERSION)
-
         bunch = next(reader1)
-        mzi_ms1_reader1 = mzi_ms1_reader_pair[0]
-        bunch.precursor.arrays = [*mzi_ms1_reader1]
+        key = (*key_part, bunch.precursor.annotations["filter string"])
+        bunch.precursor.arrays = filtered_df.loc[key, :].to_numpy().T.tolist()
         bunch.precursor.pick_peaks()
 
         for product in bunch.products:
-            # idx = ms2_filterlines.index(product)
-            # mzi_ms2_reader1, _ = mzi_ms2_reader_pair[idx]
-            # product.arrays = [*mzi_ms2_reader1]
-            a = product.arrays
-            product.arrays = [a.mz[:2], a.intensity[:2]]
+            key = (*key_part, product.annotations["filter string"])
+            product.arrays = filtered_df.loc[key, :].to_numpy().T.tolist()
             product.pick_peaks()
 
         writer.save(bunch, deconvoluted=False)
 
         writer.close()
+
     reader2 = MSFileLoader(str(path2))
+    key_part = (slice(None), path2.stem, slice(None))
     with open(path2.stem + "-f.mzML", "wb") as fh:
         writer = MzMLSerializer(fh, n_spectra=1)
 
@@ -195,15 +157,13 @@ def filter_pair(path1, path2):
         # writer.software_list.append(FILTER_NAME_VERSION)
 
         bunch = next(reader2)
-        mzi_ms1_reader2 = mzi_ms1_reader_pair[1]
-        bunch.precursor.arrays = [*mzi_ms1_reader2]
+        key = (*key_part, bunch.precursor.annotations["filter string"])
+        bunch.precursor.arrays = filtered_df.loc[key, :].to_numpy().T.tolist()
         bunch.precursor.pick_peaks()
+
         for product in bunch.products:
-            # idx = ms2_filterlines.index(product)
-            # _, mzi_ms2_reader2 = mzi_ms2_reader_pair[idx]
-            # product.arrays = [*mzi_ms2_reader2]
-            a = product.arrays
-            product.arrays = [a.mz[:2], a.intensity[:2]]
+            key = (*key_part, product.annotations["filter string"])
+            product.arrays = filtered_df.loc[key, :].to_numpy().T.tolist()
             product.pick_peaks()
 
         writer.save(bunch, deconvoluted=False)
@@ -219,9 +179,12 @@ def pair_filter(path):
 
 if __name__ == "__main__":
     import sys
+    import time
 
-    pair_filter(r"lib\pair_spectra\tests\20211018_Peakstrainer_pairwise")
-    # if len(sys.argv) == 1:
-    #     print("please privide folder location of paired spectra")
-    # pair_filter(sys.argv[1:])
+    st = time.time()
+    if len(sys.argv) != 1:
+        pair_filter(sys.argv[1:])
+    else:
+        pair_filter(r"lib\pair_spectra\tests\20211018_Peakstrainer_pairwise")
+    print(st - time.time())
 
