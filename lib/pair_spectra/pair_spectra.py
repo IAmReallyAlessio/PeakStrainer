@@ -2,7 +2,6 @@ from pathlib import Path
 from ms_deisotope import MSFileLoader
 from ms_deisotope.output.mzml import MzMLSerializer
 import pandas as pd
-from time import time
 
 # from https://github.com/mobiusklein/ms_deisotope/tree/master/ms_deisotope/test
 FILTER_NAME_VERSION = "pair_filter_spectra_0.1.0"
@@ -15,55 +14,10 @@ def get_file_pairs(path):
     return pairs
 
 
-def print_reader(reader):
-    for bunch in reader:
-        print(bunch.precursor.title)
-        print(bunch.precursor.annotations["filter string"])
-        bunch.precursor.pick_peaks()
-        print(bunch.precursor.peak_set)
-        for p in bunch.products:
-            print(p.title)
-            print(p.annotations["filter string"])
-            p.pick_peaks()
-            print(p.peak_set)
-            break
-        break
-    reader.reset()
-    print("done")
-
-
-def test_writer(reader):
-    # https://mobiusklein.github.io/ms_deisotope/docs/_build/html/output/mzml.html
-    with open("out.mzML", "wb") as fh:
-        writer = MzMLSerializer(fh, n_spectra=len(reader))
-
-        writer.copy_metadata_from(reader)
-        bunch = next(reader)
-        bunch.precursor.arrays = [
-            bunch.precursor.arrays.mz[:100],
-            bunch.precursor.arrays.intensity[:100],
-        ]
-        bunch.precursor.pick_peaks()
-        bunch.products = None
-        writer.save(bunch, deconvoluted=False)
-
-        writer.close()
-
-
-def cleanup(*args):
-    for a in args:
-        Path(a).unlink()
-        print(f"deleted {a}")
-
-
-def main():
-    p = Path(r"lib\pair_spectra\tests\20211018_Peakstrainer_pairwise")
-    p = next(p.glob("*.mzml"))
-    reader = MSFileLoader(str(p))
-    print_reader(reader)
-    test_writer(reader)
-    cleanup("out.mzML", "out.mzML-idx.json")
-    print("TODO find_closest_with_iterator(reader1, reader2)")
+def cleanup():
+    files = Path.glob("*mzML-idx.json")  # used to create the mzML file
+    for a in files:
+        a.unlink()  # deletes file
 
 
 def path2df(path):
@@ -89,21 +43,22 @@ def path2df(path):
     return df
 
 
-def filterline_pair(filterline, df1, df2, cutoff=0.01):
-    # TODO # https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
-    # https://codereview.stackexchange.com/questions/28207/finding-the-closest-point-to-a-list-of-points
-    # a.flat[np.abs(a - a0).argmin()]
-    df = pd.concat([df1, df2])
+# # decpricated use filter_pair
+# def filterline_pair(filterline, df1, df2, cutoff=0.01):
+#     # TODO # https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
+#     # https://codereview.stackexchange.com/questions/28207/finding-the-closest-point-to-a-list-of-points
+#     # a.flat[np.abs(a - a0).argmin()]
+#     df = pd.concat([df1, df2])
 
-    df.sort_values("mz", inplace=True)
-    mask = (-df.mz.diff(-1) < cutoff) & (df.mz.diff() < cutoff)
-    p1_mask = df.path == path1.stem
-    p2_mask = df.path == path2.stem
+#     df.sort_values("mz", inplace=True)
+#     mask = (-df.mz.diff(-1) < cutoff) & (df.mz.diff() < cutoff)
+#     p1_mask = df.path == path1.stem
+#     p2_mask = df.path == path2.stem
 
-    mz_i_reader1 = df.loc[mask & p1_mask, ["mz", "intensitiy"]].T.to_numpy()
-    mz_i_reader2 = df.loc[mask & p2_mask, ["mz", "intensitiy"]].T.to_numpy()
+#     mz_i_reader1 = df.loc[mask & p1_mask, ["mz", "intensitiy"]].T.to_numpy()
+#     mz_i_reader2 = df.loc[mask & p2_mask, ["mz", "intensitiy"]].T.to_numpy()
 
-    return mz_i_reader1, mz_i_reader2
+#     return mz_i_reader1, mz_i_reader2
 
 
 def filter_pair(path1, path2):
@@ -179,12 +134,9 @@ def pair_filter(path):
 
 if __name__ == "__main__":
     import sys
-    import time
 
-    st = time.time()
     if len(sys.argv) != 1:
         pair_filter(sys.argv[1:])
     else:
         pair_filter(r"lib\pair_spectra\tests\20211018_Peakstrainer_pairwise")
-    print(st - time.time())
 
